@@ -1,0 +1,110 @@
+title: "Language Modelling — The Complete Guide"
+description: "From Tokens to Frontier: Understanding, Building, and Deploying Large Language Models. A comprehensive learning path for ML practitioners."
+baseurl: "/language-modelling"
+url: "https://karam-nus.github.io"
+
+markdown: kramdown
+highlighter: rouge
+
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: "highlight"
+    span:
+      line_numbers: false
+    block:
+      line_numbers: false
+
+plugins:
+  - jekyll-relative-links
+
+relative_links:
+  enabled: true
+  collections: false
+
+include:
+  - README.md
+
+navigation:
+  - title: "Home"
+    url: "/"
+  - title: "01 — Introduction"
+    url: "/01_introduction"
+  - title: "02 — Embeddings"
+    url: "/02_embeddings"
+  - title: "03 — The Transformer"
+    url: "/03_the_transformer"
+  - title: "04 — SDPA & Multi-Head Attention"
+    url: "/04_attention_sdpa_and_mha"
+  - title: "05 — GQA, MQA & MLA"
+    url: "/05_attention_gqa_mqa_mla"
+  - title: "06 — Decoder-Only Models"
+    url: "/06_decoder_only_models"
+  - title: "07 — Encoder & Seq2Seq"
+    url: "/07_encoder_and_seq2seq_models"
+  - title: "08 — Multimodal Models"
+    url: "/08_multimodal_models"
+  - title: "09 — Pre-Training"
+    url: "/09_pretraining_at_scale"
+  - title: "10 — Mid-Training"
+    url: "/10_mid_training"
+  - title: "11 — Fine-Tuning & Adaptation"
+    url: "/11_finetuning_and_adaptation"
+  - title: "12 — Alignment & RLHF"
+    url: "/12_alignment_rlhf_and_beyond"
+  - title: "13 — Inference & Sampling"
+    url: "/13_inference_and_sampling"
+  - title: "14 — KV-Cache Mechanics"
+    url: "/14_kv_cache_mechanics"
+  - title: "15 — KV-Cache Optimization"
+    url: "/15_kv_cache_optimization"
+  - title: "16 — Data Types & Precision"
+    url: "/16_data_types_and_precision"
+  - title: "17 — Quantization Fundamentals"
+    url: "/17_quantization_fundamentals"
+  - title: "18 — Quantization Techniques"
+    url: "/18_quantization_techniques"
+  - title: "19 — Quantization Benchmarks"
+    url: "/19_quantization_benchmarks"
+  - title: "20 — GPU Architecture"
+    url: "/20_gpu_architecture"
+  - title: "21 — CUDA & Kernels"
+    url: "/21_cuda_and_kernel_development"
+  - title: "22 — Distributed Training"
+    url: "/22_distributed_training"
+  - title: "23 — ASICs & Accelerators"
+    url: "/23_asics_and_accelerators"
+  - title: "24 — Hugging Face Ecosystem"
+    url: "/24_huggingface_ecosystem"
+  - title: "25 — Transformers Library"
+    url: "/25_transformers_library"
+  - title: "26 — Evaluation & Benchmarks"
+    url: "/26_evaluation_and_benchmarks"
+  - title: "27 — Serving & Deployment"
+    url: "/27_serving_and_deployment"
+  - title: "28 — Scaling Laws"
+    url: "/28_scaling_laws"
+  - title: "29 — Mixture of Experts"
+    url: "/29_mixture_of_experts"
+  - title: "30 — SSMs & Alternatives"
+    url: "/30_ssms_and_alternatives"
+  - title: "31 — Reasoning Models"
+    url: "/31_reasoning_models"
+  - title: "32 — RAG"
+    url: "/32_rag"
+  - title: "33 — Agents & Tool Use"
+    url: "/33_agents_and_tool_use"
+  - title: "34 — The Frontier"
+    url: "/34_frontier"
+  - title: "Appendix A — History"
+    url: "/appendix_a_history"
+  - title: "Appendix B — Tokenization"
+    url: "/appendix_b_tokenization"
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"

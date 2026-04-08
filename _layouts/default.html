@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if page.title %}{{ page.title }} — {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+</head>
+<body>
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle navigation">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <div class="layout" id="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="{{ '/' | relative_url }}" class="logo">
+          <span class="logo-icon">🧠</span>
+          <span class="logo-text">LM Guide</span>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        {% for item in site.navigation %}
+          <a href="{{ item.url | relative_url }}"
+             class="nav-item{% if page.url == item.url or page.url == item.url | append: '/' %} active{% elsif page.url contains item.url and item.url != '/' %} active{% endif %}">
+            {{ item.title }}
+          </a>
+        {% endfor %}
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="https://github.com/karam-nus/language-modelling" target="_blank" rel="noopener" class="github-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+          </svg>
+          View on GitHub
+        </a>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <main class="main-content">
+      <article class="content">
+        {{ content }}
+      </article>
+
+      <footer class="content-footer">
+        <div class="footer-inner">
+          <a href="https://github.com/karam-nus/language-modelling" target="_blank" rel="noopener">GitHub</a>
+          <span class="footer-sep">·</span>
+          <span>{{ site.title }}</span>
+          <span class="footer-sep">·</span>
+          <span>Last updated April 2026</span>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    (function() {
+      var toggle = document.getElementById('sidebarToggle');
+      var sidebar = document.getElementById('sidebar');
+      var overlay = document.getElementById('sidebarOverlay');
+
+      function openSidebar() {
+        sidebar.classList.add('open');
+        overlay.classList.add('visible');
+        toggle.classList.add('active');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+        toggle.classList.remove('active');
+      }
+
+      toggle.addEventListener('click', function() {
+        if (sidebar.classList.contains('open')) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+      });
+
+      overlay.addEventListener('click', closeSidebar);
+
+      var activeLink = document.querySelector('.nav-item.active');
+      if (activeLink) {
+        activeLink.scrollIntoView({ block: 'nearest' });
+      }
+    })();
+  </script>
+</body>
+</html>
