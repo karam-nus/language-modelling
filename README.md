@@ -143,5 +143,3 @@ Before diving in, you should be comfortable with:
 ---
 
 *Last updated: April 2026*
-# language-modelling
-LM 101
