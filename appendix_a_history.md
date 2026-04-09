@@ -1,3 +1,7 @@
+---
+title: "Appendix A — A Brief History of Language Modelling"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Appendix A — A Brief History of Language Modelling

@@ -1,3 +1,7 @@
+---
+title: "Chapter 9 — Pre-Training at Scale"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 9 — Pre-Training at Scale

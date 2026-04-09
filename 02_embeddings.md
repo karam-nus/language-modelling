@@ -1,3 +1,7 @@
+---
+title: "Chapter 2 — Embeddings & Representations"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 2 — Embeddings & Representations

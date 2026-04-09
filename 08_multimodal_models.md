@@ -1,3 +1,7 @@
+---
+title: "Chapter 8 — Multimodal Models"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 8 — Multimodal Models

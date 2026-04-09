@@ -1,3 +1,7 @@
+---
+title: "Chapter 4 — Attention Deep Dive: SDPA & Multi-Head Attention"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 4 — Attention Deep Dive: SDPA & Multi-Head Attention

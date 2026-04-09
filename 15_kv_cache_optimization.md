@@ -1,3 +1,7 @@
+---
+title: "Chapter 15 — KV-Cache Optimization Strategies"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 15 — KV-Cache Optimization Strategies

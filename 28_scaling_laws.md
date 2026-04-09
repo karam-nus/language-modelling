@@ -1,3 +1,7 @@
+---
+title: "Chapter 28 — Scaling Laws & Emergent Abilities"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 28 — Scaling Laws & Emergent Abilities

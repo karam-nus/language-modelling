@@ -1,3 +1,7 @@
+---
+title: "Chapter 21 — CUDA & Kernel Development"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 21 — CUDA & Kernel Development

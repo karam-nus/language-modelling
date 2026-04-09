@@ -1,3 +1,7 @@
+---
+title: "Chapter 10 — Mid-Training & Continued Pre-Training"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 10 — Mid-Training & Continued Pre-Training

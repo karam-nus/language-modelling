@@ -1,3 +1,7 @@
+---
+title: "Chapter 6 — Decoder-Only Models"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 6 — Decoder-Only Models

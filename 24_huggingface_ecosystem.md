@@ -1,3 +1,7 @@
+---
+title: "Chapter 24 — The Hugging Face Ecosystem"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 24 — The Hugging Face Ecosystem

@@ -1,3 +1,7 @@
+---
+title: "Chapter 25 — The transformers Library Internals"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 25 — The transformers Library Internals

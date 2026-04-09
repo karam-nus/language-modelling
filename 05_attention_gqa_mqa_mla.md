@@ -1,3 +1,7 @@
+---
+title: "Chapter 5 — Attention Variants: GQA, MQA & MLA"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 5 — Attention Variants: GQA, MQA & MLA

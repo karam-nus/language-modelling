@@ -1,3 +1,7 @@
+---
+title: "Chapter 23 — ASICs & Accelerators"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 23 — ASICs & Accelerators

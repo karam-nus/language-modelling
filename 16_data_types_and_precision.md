@@ -1,3 +1,7 @@
+---
+title: "Chapter 16 — Data Types & Numerical Precision"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 16 — Data Types & Numerical Precision

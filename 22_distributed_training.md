@@ -1,3 +1,7 @@
+---
+title: "Chapter 22 — Distributed Training"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 22 — Distributed Training

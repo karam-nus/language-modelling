@@ -1,3 +1,7 @@
+---
+title: "Chapter 3 — The Transformer"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 3 — The Transformer

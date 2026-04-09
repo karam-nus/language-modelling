@@ -1,3 +1,7 @@
+---
+title: "Chapter 11 — Fine-Tuning & Adaptation"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 11 — Fine-Tuning & Adaptation
