@@ -231,7 +231,7 @@ ALiBi has strong length extrapolation properties — models trained on short seq
 | **RoPE** | Q, K in attention | Yes (rotation angle) | Good (with scaling) | LLaMA, Mistral, Qwen, Gemma |
 | **ALiBi** | Attention scores | Yes (linear bias) | Strong | BLOOM, MPT |
 
-Modern models overwhelmingly use **RoPE** due to its balance of performance, relative position awareness, and extensibility (the base frequency can be scaled for longer contexts — discussed in [Chapter 10](./10_mid_training.md)).
+Modern models overwhelmingly use **RoPE** due to its balance of performance, relative position awareness, and extensibility (the base frequency can be scaled for longer contexts — discussed in [Chapter 12](./12_mid_training.md)).
 
 ## Tying Embeddings
 

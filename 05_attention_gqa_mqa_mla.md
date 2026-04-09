@@ -10,7 +10,7 @@ title: "Chapter 5 — Attention Variants: GQA, MQA & MLA"
 
 ## The KV Bottleneck
 
-In standard Multi-Head Attention (MHA), every head has its own Q, K, and V projections. During autoregressive generation, we cache K and V for every head at every layer for every past token. This **KV-cache** grows linearly with sequence length and is often the dominant memory cost at inference time (see [Chapter 14](./14_kv_cache_mechanics.md) for the full deep dive).
+In standard Multi-Head Attention (MHA), every head has its own Q, K, and V projections. During autoregressive generation, we cache K and V for every head at every layer for every past token. This **KV-cache** grows linearly with sequence length and is often the dominant memory cost at inference time (see [Chapter 17](./17_kv_cache_mechanics.md) for the full deep dive).
 
 For LLaMA-3-8B (MHA, 32 heads, d_k=128, 32 layers, FP16):
 

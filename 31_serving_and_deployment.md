@@ -1,10 +1,10 @@
 ---
-title: "Chapter 27 — Serving & Deployment"
+title: "Chapter 31 — Serving & Deployment"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 27 — Serving & Deployment
+# Chapter 31 — Serving & Deployment
 
 > *"Training a great model is half the battle. Serving it efficiently — low latency, high throughput, at reasonable cost — is the other half."*
 
@@ -44,7 +44,7 @@ title: "Chapter 27 — Serving & Deployment"
 
 ## vLLM
 
-The most popular open-source LLM serving engine. Key innovations from [Chapter 15](./15_kv_cache_optimization.md):
+The most popular open-source LLM serving engine. Key innovations from [Chapter 18](./18_kv_cache_optimization.md):
 
 - **PagedAttention**: Non-contiguous KV-cache with virtual memory → no fragmentation
 - **Continuous batching**: New requests join mid-batch instead of waiting
@@ -223,7 +223,7 @@ Key metrics:
 
 From infrastructure, we now move to the **science of scale**. The next chapter explores **scaling laws** — the mathematical relationships between compute, data, parameters, and performance.
 
-[← Previous: Chapter 26 — Evaluation & Benchmarks](./26_evaluation_and_benchmarks.md) · **Next: [Chapter 28 — Scaling Laws & Emergent Abilities →](./28_scaling_laws.md)**
+[← Previous: Chapter 30 — Evaluation & Benchmarks](./30_evaluation_and_benchmarks.md) · **Next: [Chapter 32 — Scaling Laws & Emergent Abilities →](./32_scaling_laws.md)**
 
 ---
 

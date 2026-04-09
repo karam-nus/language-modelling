@@ -1,10 +1,10 @@
 ---
-title: "Chapter 23 — ASICs & Accelerators"
+title: "Chapter 27 — ASICs & Accelerators"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 23 — ASICs & Accelerators
+# Chapter 27 — ASICs & Accelerators
 
 > *"NVIDIA dominates, but the AI hardware landscape is diversifying. Specialized silicon — TPUs, LPUs, and custom accelerators — are reshaping what's possible."*
 
@@ -215,7 +215,7 @@ Increasingly relevant for local inference and research:
 
 With hardware and systems covered, we move to the **software ecosystem**. The next chapter introduces the **Hugging Face ecosystem** — the libraries, hubs, and tools that connect models to practitioners.
 
-[← Previous: Chapter 22 — Distributed Training](./22_distributed_training.md) · **Next: [Chapter 24 — The Hugging Face Ecosystem →](./24_huggingface_ecosystem.md)**
+[← Previous: Chapter 26 — Distributed Training](./26_distributed_training.md) · **Next: [Chapter 28 — The Hugging Face Ecosystem →](./28_huggingface_ecosystem.md)**
 
 ---
 

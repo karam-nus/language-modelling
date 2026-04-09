@@ -1,10 +1,10 @@
 ---
-title: "Chapter 26 — Evaluation & Benchmarks"
+title: "Chapter 30 — Evaluation & Benchmarks"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 26 — Evaluation & Benchmarks
+# Chapter 30 — Evaluation & Benchmarks
 
 > *"If you can't measure it, you can't improve it. But if you measure the wrong thing, you optimize for the wrong outcome."*
 
@@ -184,7 +184,7 @@ For your own fine-tuned models:
 
 Evaluating models is one thing — serving them at scale is another. The next chapter covers **serving and deployment** with vLLM, TGI, and other inference frameworks.
 
-[← Previous: Chapter 25 — The transformers Library Internals](./25_transformers_library.md) · **Next: [Chapter 27 — Serving & Deployment →](./27_serving_and_deployment.md)**
+[← Previous: Chapter 29 — Transformers Library Deep Dive](./29_transformers_library.md) · **Next: [Chapter 31 — Serving & Deployment →](./31_serving_and_deployment.md)**
 
 ---
 

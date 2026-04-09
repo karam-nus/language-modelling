@@ -1,10 +1,10 @@
 ---
-title: "Chapter 13 — Inference & Sampling Strategies"
+title: "Chapter 16 — Inference & Sampling Strategies"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 13 — Inference & Sampling Strategies
+# Chapter 16 — Inference & Sampling Strategies
 
 > *"Training teaches the model what's probable. Sampling strategies decide what gets generated — the same model can be creative or precise depending on how you decode."*
 
@@ -232,7 +232,7 @@ creative_config = GenerationConfig(
 
 Every decode step reads the full KV-cache from memory. As sequences get longer, this becomes the dominant bottleneck. The next chapter dives deep into **KV-cache mechanics** — how it works, how much memory it uses, and why it matters.
 
-[← Previous: Chapter 12 — Alignment: RLHF & Beyond](./12_alignment_rlhf_and_beyond.md) · **Next: [Chapter 14 — KV-Cache Mechanics →](./14_kv_cache_mechanics.md)**
+[← Previous: Chapter 15 — Alignment: RLHF & Beyond](./15_alignment_rlhf_and_beyond.md) · **Next: [Chapter 17 — KV-Cache — Mechanics & Memory →](./17_kv_cache_mechanics.md)**
 
 ---
 

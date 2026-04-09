@@ -1,10 +1,10 @@
 ---
-title: "Chapter 29 — Mixture of Experts (MoE)"
+title: "Chapter 33 — Mixture of Experts (MoE)"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 29 — Mixture of Experts (MoE)
+# Chapter 33 — Mixture of Experts (MoE)
 
 > *"Why activate all 600 billion parameters for every token when only 100 billion are needed? MoE models are sparse — they think with a fraction of their brain."*
 
@@ -192,7 +192,7 @@ This design gives better expert utilization and reduces the load balancing probl
 
 An important practical point: **MoE does not affect the KV-cache**. Attention layers are shared (not sparse) — only the FFN is replaced by experts. This means:
 - KV-cache size is identical to a dense model with the same attention dimensions
-- Memory calculations from [Chapter 14](./14_kv_cache_mechanics.md) apply directly
+- Memory calculations from [Chapter 17](./17_kv_cache_mechanics.md) apply directly
 - The total model memory = attention params + **all** expert params (even though only K are active)
 
 This creates a unique memory profile: MoE models need lots of memory for weights but have the same KV-cache footprint as their "active parameter" equivalent.
@@ -210,7 +210,7 @@ This creates a unique memory profile: MoE models need lots of memory for weights
 
 MoE shows that not all model architectures need to be dense transformers. The next chapter explores more radical departures — **State Space Models (SSMs)** and other alternatives to attention-based architectures.
 
-[← Previous: Chapter 28 — Scaling Laws & Emergent Abilities](./28_scaling_laws.md) · **Next: [Chapter 30 — Beyond Transformers — SSMs & Alternatives →](./30_ssms_and_alternatives.md)**
+[← Previous: Chapter 32 — Scaling Laws & Emergent Abilities](./32_scaling_laws.md) · **Next: [Chapter 34 — SSMs & Beyond Transformers →](./34_ssms_and_alternatives.md)**
 
 ---
 

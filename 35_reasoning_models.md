@@ -1,10 +1,10 @@
 ---
-title: "Chapter 31 — Reasoning Models"
+title: "Chapter 35 — Reasoning Models"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 31 — Reasoning Models
+# Chapter 35 — Reasoning Models
 
 > *"Chain-of-thought doesn't teach the model new facts — it teaches the model to use the facts it already knows, step by step."*
 
@@ -256,7 +256,7 @@ def generate_with_budget(model, prompt, thinking_budget="medium"):
 
 Reasoning helps models think better with their internal knowledge. But what if the model's knowledge is outdated or insufficient? The next chapter covers **Retrieval-Augmented Generation (RAG)** — grounding model outputs in external, up-to-date information.
 
-[← Previous: Chapter 30 — Beyond Transformers — SSMs & Alternatives](./30_ssms_and_alternatives.md) · **Next: [Chapter 32 — Retrieval-Augmented Generation (RAG) →](./32_rag.md)**
+[← Previous: Chapter 34 — SSMs & Beyond Transformers](./34_ssms_and_alternatives.md) · **Next: [Chapter 36 — Retrieval-Augmented Generation →](./36_rag.md)**
 
 ---
 

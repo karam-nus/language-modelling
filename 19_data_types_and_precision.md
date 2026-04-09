@@ -1,10 +1,10 @@
 ---
-title: "Chapter 16 — Data Types & Numerical Precision"
+title: "Chapter 19 — Data Types & Numerical Precision"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 16 — Data Types & Numerical Precision
+# Chapter 19 — Data Types & Numerical Precision
 
 > *"The choice of data type determines how much memory your model consumes, how fast it runs, and how accurate its computations are — it's the most fundamental optimization lever."*
 
@@ -161,7 +161,7 @@ print(f"BF16: {big.bfloat16()}")  # 99840.0 (representable)
 
 Understanding data types is the foundation for quantization — the process of reducing model precision from FP16/BF16 to INT8/INT4 for cheaper, faster inference. The next chapter covers **quantization fundamentals**.
 
-[← Previous: Chapter 15 — KV-Cache Optimization](./15_kv_cache_optimization.md) · **Next: [Chapter 17 — Quantization Fundamentals →](./17_quantization_fundamentals.md)**
+[← Previous: Chapter 18 — KV-Cache — Optimization](./18_kv_cache_optimization.md) · **Next: [Chapter 20 — Quantization Fundamentals →](./20_quantization_fundamentals.md)**
 
 ---
 

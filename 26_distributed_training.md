@@ -1,10 +1,10 @@
 ---
-title: "Chapter 22 — Distributed Training"
+title: "Chapter 26 — Distributed Training"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 22 — Distributed Training
+# Chapter 26 — Distributed Training
 
 > *"No single GPU can train a frontier model. The art of distributed training is splitting computation across thousands of GPUs while minimizing communication overhead."*
 
@@ -245,7 +245,7 @@ model, optimizer, dataloader = accelerator.prepare(model, optimizer, dataloader)
 
 Not all accelerators are NVIDIA GPUs. The next chapter surveys **ASICs and alternative accelerators** — TPUs, Gaudi, Groq LPUs, and more.
 
-[← Previous: Chapter 21 — CUDA & Kernel Development](./21_cuda_and_kernel_development.md) · **Next: [Chapter 23 — ASICs & Accelerators →](./23_asics_and_accelerators.md)**
+[← Previous: Chapter 25 — CUDA & Kernel Development](./25_cuda_and_kernel_development.md) · **Next: [Chapter 27 — ASICs & Accelerators →](./27_asics_and_accelerators.md)**
 
 ---
 

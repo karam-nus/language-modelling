@@ -1,10 +1,10 @@
 ---
-title: "Chapter 19 — Quantization Benchmarks & Selection Guide"
+title: "Chapter 22 — Quantization Benchmarks & Selection Guide"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 19 — Quantization Benchmarks & Selection Guide
+# Chapter 22 — Quantization Benchmarks & Selection Guide
 
 > *"The best quantization method depends on your constraints — there is no single winner. This chapter helps you choose."*
 
@@ -187,7 +187,7 @@ print(f"Perplexity: {ppl:.2f}")
 
 With quantization covered comprehensively, the next part of the guide shifts to the hardware that runs these models. The next chapter covers **GPU architecture** — SMs, Tensor Cores, memory hierarchy, and the roofline model.
 
-[← Previous: Chapter 18 — Quantization Techniques](./18_quantization_techniques.md) · **Next: [Chapter 20 — GPU Architecture →](./20_gpu_architecture.md)**
+[← Previous: Chapter 21 — Quantization Techniques](./21_quantization_techniques.md) · **Next: [Chapter 23 — Knowledge Distillation & QAD →](./23_knowledge_distillation.md)**
 
 ---
 

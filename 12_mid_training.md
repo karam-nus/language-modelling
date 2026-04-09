@@ -1,10 +1,10 @@
 ---
-title: "Chapter 10 — Mid-Training & Continued Pre-Training"
+title: "Chapter 12 — Mid-Training & Continued Pre-Training"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 10 — Mid-Training & Continued Pre-Training
+# Chapter 12 — Mid-Training & Continued Pre-Training
 
 > *"Mid-training is the bridge between raw pre-training and task-specific fine-tuning — where models gain long-context ability, domain expertise, and code fluency."*
 
@@ -87,7 +87,7 @@ LLaMA-3.1 increased RoPE base frequency from 500,000 to 8,000,000 and trained on
 </div>
 </div>
 
-The attention matrix goes from [B, H, 8K, 8K] to [B, H, 128K, 128K] — that's 256× more computation. This is why Flash Attention ([Ch 4](./04_attention_sdpa_and_mha.md)) and efficient KV-cache strategies ([Ch 14–15](./14_kv_cache_mechanics.md)) are essential.
+The attention matrix goes from [B, H, 8K, 8K] to [B, H, 128K, 128K] — that's 256× more computation. This is why Flash Attention ([Ch 4](./04_attention_sdpa_and_mha.md)) and efficient KV-cache strategies ([Ch 17–18](./17_kv_cache_mechanics.md)) are essential.
 
 ## Domain Adaptation
 
@@ -227,7 +227,7 @@ This is how Copilot-style code completion works — the model sees code before a
 
 After mid-training produces a capable base model, **supervised fine-tuning** teaches it to follow instructions and behave as a helpful assistant.
 
-[← Previous: Chapter 9 — Pre-Training at Scale](./09_pretraining_at_scale.md) · **Next: [Chapter 11 — Fine-Tuning & Adaptation →](./11_finetuning_and_adaptation.md)**
+[← Previous: Chapter 11 — Optimizers & Loss Functions](./11_optimizers_and_loss_functions.md) · **Next: [Chapter 13 — Fine-Tuning & Adaptation →](./13_finetuning_and_adaptation.md)**
 
 ---
 

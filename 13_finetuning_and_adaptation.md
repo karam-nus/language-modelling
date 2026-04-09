@@ -1,10 +1,10 @@
 ---
-title: "Chapter 11 — Fine-Tuning & Adaptation"
+title: "Chapter 13 — Fine-Tuning & Adaptation"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 11 — Fine-Tuning & Adaptation
+# Chapter 13 — Fine-Tuning & Adaptation
 
 > *"Fine-tuning is where a model goes from 'knows a lot' to 'does what you want' — the difference between a base model and an assistant."*
 
@@ -268,9 +268,9 @@ merged_model.save_pretrained("./llama-sft-merged")
 
 ## What's Next
 
-SFT makes models follow instructions, but it doesn't make them **safe**, **truthful**, or **aligned** with human preferences. The next chapter covers **RLHF, DPO**, and other alignment techniques.
+SFT trains models to follow instructions, but there's much more to parameter-efficient adaptation. The next chapter covers **LoRA, QLoRA, DoRA**, and the full landscape of PEFT methods — with detailed math and tensor shapes.
 
-[← Previous: Chapter 10 — Mid-Training](./10_mid_training.md) · **Next: [Chapter 12 — Alignment: RLHF & Beyond →](./12_alignment_rlhf_and_beyond.md)**
+[← Previous: Chapter 12 — Mid-Training & Continued Pre-Training](./12_mid_training.md) · **Next: [Chapter 14 — PEFT: LoRA, QLoRA & Variants →](./14_peft_lora_and_variants.md)**
 
 ---
 

@@ -203,7 +203,7 @@ As of early 2026:
 
 Architecture innovations help, but there's another way to improve LLM output quality: **spend more compute at inference time**. The next chapter covers **reasoning models** — from chain-of-thought prompting to o1-style test-time compute scaling.
 
-[← Previous: Chapter 29 — Mixture of Experts (MoE)](./29_mixture_of_experts.md) · **Next: [Chapter 31 — Reasoning Models →](./31_reasoning_models.md)**
+[← Previous: Chapter 33 — Mixture of Experts](./33_mixture_of_experts.md) · **Next: [Chapter 35 — Reasoning Models →](./35_reasoning_models.md)**
 
 ---
 
