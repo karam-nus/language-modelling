@@ -134,6 +134,10 @@ $$PE_{(pos, 2i)} = \sin\!\left(\frac{pos}{10000^{2i/d_{model}}}\right), \quad PE
 
 Each position gets a unique d_model-dimensional pattern. The beauty: relative positions are captured as linear transformations, and the model can extrapolate to unseen lengths (in theory).
 
+The heatmap below shows positions (rows) vs dimensions (columns). High-frequency oscillations in the early dimensions uniquely identify close positions; low-frequency oscillations in later dimensions encode long-range order.
+
+![Sinusoidal positional encoding heatmap — rows are positions, columns are dimensions]({{ '/assets/images/sinusoidal_pe.svg' | relative_url }})
+
 ```python
 import torch
 import math
@@ -168,53 +172,251 @@ hidden = token_embedding(input_ids) + pos_emb  # [B, T, d_model]
 
 ### RoPE — Rotary Position Embedding (LLaMA, Mistral, Qwen)
 
-**RoPE** (Su et al., 2021) is the dominant positional encoding in modern LLMs. Instead of adding positional information to embeddings, RoPE **rotates** the query and key vectors in attention by an angle proportional to their position. The rotation ensures that the dot product between any two positions depends only on their **relative distance**.
+**RoPE** (Su et al., 2021) is the dominant positional encoding in modern LLMs. Instead of adding a position vector to the embedding, RoPE **rotates** the query and key vectors inside each attention head by an angle proportional to the token's position. Because both Q and K are rotated the same way, the dot-product attention score naturally captures only the **relative distance** between positions — not absolute positions.
 
-For a pair of adjacent dimensions (2i, 2i+1), RoPE applies a 2D rotation:
+#### Core Idea: Rotation in 2D Subspaces
+
+RoPE partitions each d_head-dimensional query/key vector into d_head/2 consecutive **pairs** of dimensions. For each pair (2i, 2i+1), it applies a 2D rotation matrix parameterised by the position index *m* and a base frequency $\theta_i$:
 
 $$\begin{pmatrix} q_{2i}' \\ q_{2i+1}' \end{pmatrix} = \begin{pmatrix} \cos(m\theta_i) & -\sin(m\theta_i) \\ \sin(m\theta_i) & \cos(m\theta_i) \end{pmatrix} \begin{pmatrix} q_{2i} \\ q_{2i+1} \end{pmatrix}$$
 
-Where *m* is the position index and $\theta_i = 10000^{-2i/d}$.
+Where the **base frequency** for pair *i* is:
+
+$$\theta_i = \frac{1}{10000^{2i/d_{head}}}$$
+
+This means each pair of dimensions rotates at a different angular speed — high-index pairs rotate slowly (long-range), low-index pairs rotate quickly (short-range).
+
+#### Why Relative Position Falls Out Naturally
+
+When two rotated vectors $q'$ (at position $m$) and $k'$ (at position $n$) are dot-producted in attention, the rotation angles cancel to leave only $(m - n)$:
+
+$$q'^{\top} k' = \text{Re}\!\left[\sum_{i=0}^{d/2-1} q_{[i]} k_{[i]}^{*} e^{j(m-n)\theta_i}\right]$$
+
+The model never needs to learn absolute positions — relative offsets are **built into the geometry**.
+
+#### Angle Rotation Visualization
+
+The diagram below shows how the same query vector for position *m=1* (vs *m=0*) rotates by different amounts across three frequency bands. Low-frequency pairs barely move; high-frequency pairs rotate nearly 90° per step.
+
+![RoPE angle rotation across frequency bands]({{ '/assets/images/rope_rotation.svg' | relative_url }})
+
+#### Tensor Shapes
 
 <div class="diagram">
-<div class="diagram-title">RoPE — Rotation in 2D Subspaces</div>
-<div class="diagram-grid cols-3">
-  <div class="diagram-card accent">
-    <div class="card-title">Low Frequency</div>
-    <div class="card-desc">First dimensions rotate slowly → captures long-range position</div>
+<div class="diagram-title">RoPE Tensor Shapes Inside Attention</div>
+<div class="tensor-flow">
+  <div class="tensor-flow-row">
+    <span style="color:var(--text-muted);font-size:0.75rem;min-width:200px;">Q or K (after linear proj)</span>
+    <div class="tensor-shape">
+      <span class="ts-bracket">[</span>
+      <span class="ts-dim batch">B</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim heads">H</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim seq">T</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim feature">d_head</span>
+      <span class="ts-bracket">]</span>
+    </div>
   </div>
-  <div class="diagram-card purple">
-    <div class="card-title">Mid Frequency</div>
-    <div class="card-desc">Middle dimensions → medium-range dependencies</div>
+  <div class="tensor-flow-row">
+    <span style="color:var(--text-muted);font-size:0.75rem;min-width:200px;">Precomputed cos/sin cache</span>
+    <div class="tensor-shape">
+      <span class="ts-bracket">[</span>
+      <span class="ts-dim seq">T</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim feature">d_head/2</span>
+      <span class="ts-bracket">]</span>
+    </div>
+    <span style="color:var(--text-muted);font-size:0.6875rem;margin-left:0.5rem;">one cos &amp; one sin table</span>
   </div>
-  <div class="diagram-card orange">
-    <div class="card-title">High Frequency</div>
-    <div class="card-desc">Last dimensions rotate fast → fine-grained local position</div>
+  <div class="tensor-flow-row">
+    <span style="color:var(--text-muted);font-size:0.75rem;min-width:200px;">Q or K after RoPE</span>
+    <div class="tensor-shape">
+      <span class="ts-bracket">[</span>
+      <span class="ts-dim batch">B</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim heads">H</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim seq">T</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim feature">d_head</span>
+      <span class="ts-bracket">]</span>
+    </div>
+    <span style="color:var(--text-muted);font-size:0.6875rem;margin-left:0.5rem;">same shape, values rotated</span>
+  </div>
+</div>
+</div>
+
+RoPE does **not** change the shape of Q or K — it only rotates the values in-place.
+
+```python
+import torch
+
+def rope_frequencies(d_head: int, max_len: int = 8192, base: float = 10000.0):
+    """Precompute cosine and sine tables for RoPE.
+    Returns cos, sin each of shape [max_len, d_head/2].
+    """
+    # θᵢ = 1 / base^(2i/d_head)  for i = 0, 1, ..., d_head/2 - 1
+    i = torch.arange(0, d_head, 2).float()          # [d_head/2]
+    theta = 1.0 / (base ** (i / d_head))             # [d_head/2]
+
+    positions = torch.arange(max_len).float()         # [max_len]
+    angles = torch.outer(positions, theta)            # [max_len, d_head/2]
+    return torch.cos(angles), torch.sin(angles)       # each [max_len, d_head/2]
+
+
+def apply_rope(x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor) -> torch.Tensor:
+    """Apply RoPE to Q or K.
+    x:   [B, H, T, d_head]
+    cos: [T, d_head/2]
+    sin: [T, d_head/2]
+    Returns rotated tensor of same shape [B, H, T, d_head].
+    """
+    T, d_half = x.shape[2], x.shape[-1] // 2
+    x1 = x[..., :d_half]                              # [B, H, T, d_head/2]
+    x2 = x[..., d_half:]                              # [B, H, T, d_head/2]
+
+    # Broadcast cos/sin from [T, d_half] → [1, 1, T, d_half]
+    c = cos[:T].unsqueeze(0).unsqueeze(0)
+    s = sin[:T].unsqueeze(0).unsqueeze(0)
+
+    # Apply 2D rotation: [x1·cos − x2·sin, x2·cos + x1·sin]
+    rotated = torch.cat([x1 * c - x2 * s, x2 * c + x1 * s], dim=-1)
+    return rotated                                      # [B, H, T, d_head]
+
+
+# Usage inside attention
+d_head = 128
+cos_cache, sin_cache = rope_frequencies(d_head, max_len=8192)
+
+# q, k: [B, H, T, d_head]
+q_rot = apply_rope(q, cos_cache, sin_cache)
+k_rot = apply_rope(k, cos_cache, sin_cache)
+# Then compute attention scores: q_rot @ k_rot.transpose(-1, -2) / sqrt(d_head)
+```
+
+#### RoPE Frequency Scaling (YaRN, LongRoPE, LLaMA-3 RoPE scaling)
+
+The base frequency can be **scaled** to extend the context window beyond what the model was trained on. If a model was trained at 8K context with `base=10000`, multiplying the base (e.g., to `base=500000`) slows down all rotation frequencies, letting the model handle much longer sequences. LLaMA-3 uses `base=500000` and LLaMA-3.1 extends context to 128K this way.
+
+---
+
+### M-RoPE — Multimodal Rotary Position Embedding
+
+**M-RoPE** (used in Qwen-VL2, LLaMA-3.2 Vision, and similar multimodal LLMs) extends RoPE to handle inputs that have **multiple spatial or temporal dimensions** — images, video frames, or interleaved text+image sequences.
+
+#### The Problem with 1D RoPE for Images
+
+A standard 1D RoPE assigns each token a single scalar position: token 0, 1, 2, 3... For text this is natural. But an image patch at row *h*, column *w* has **two** spatial coordinates. Flattening patches into a 1D sequence loses the 2D structure — the model can't tell whether two adjacent patches are horizontally or vertically adjacent.
+
+#### M-RoPE: Separate Frequency Bands per Axis
+
+M-RoPE assigns different **frequency bands** (subsets of the d_head dimensions) to encode each axis independently:
+
+| Modality | Axes | Dim allocation |
+|----------|------|---------------|
+| **Text** | position | all d_head dims ← 1D pos |
+| **Image** | height, width | d_head/2 dims ← h · θ, d_head/2 dims ← w · θ |
+| **Video** | time, height, width | d_head/3 dims each ← t · θ, h · θ, w · θ |
+
+Each token's RoPE rotation is computed from its (t, h, w) coordinates rather than a single scalar index:
+
+$$q' = R(t \cdot \theta_{\text{time}}) \cdot R(h \cdot \theta_{\text{height}}) \cdot R(w \cdot \theta_{\text{width}}) \cdot q$$
+
+For text tokens, the same position value is used for all three axes (t = h = w = seq_pos), so M-RoPE degrades gracefully to standard 1D RoPE.
+
+![M-RoPE positional grid for text, image, and video]({{ '/assets/images/mrope_grid.svg' | relative_url }})
+
+#### M-RoPE Tensor Shapes
+
+<div class="diagram">
+<div class="diagram-title">M-RoPE Tensor Shapes — Image Tokens</div>
+<div class="tensor-flow">
+  <div class="tensor-flow-row">
+    <span style="color:var(--text-muted);font-size:0.75rem;min-width:220px;">Image patch grid (H×W patches)</span>
+    <div class="tensor-shape">
+      <span class="ts-bracket">[</span>
+      <span class="ts-dim batch">B</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim seq">H·W</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim feature">d_model</span>
+      <span class="ts-bracket">]</span>
+    </div>
+  </div>
+  <div class="tensor-flow-row">
+    <span style="color:var(--text-muted);font-size:0.75rem;min-width:220px;">Position indices (h_ids, w_ids)</span>
+    <div class="tensor-shape">
+      <span class="ts-bracket">[</span>
+      <span class="ts-dim batch">B</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim seq">H·W</span>
+      <span class="ts-bracket">]</span>
+    </div>
+    <span style="color:var(--text-muted);font-size:0.6875rem;margin-left:0.5rem;">one per spatial axis</span>
+  </div>
+  <div class="tensor-flow-row">
+    <span style="color:var(--text-muted);font-size:0.75rem;min-width:220px;">RoPE angle tensor (2-axis)</span>
+    <div class="tensor-shape">
+      <span class="ts-bracket">[</span>
+      <span class="ts-dim seq">H·W</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim feature">d_head/2</span>
+      <span class="ts-bracket">]</span>
+    </div>
+    <span style="color:var(--text-muted);font-size:0.6875rem;margin-left:0.5rem;">half dims ← h, half ← w</span>
+  </div>
+  <div class="tensor-flow-row">
+    <span style="color:var(--text-muted);font-size:0.75rem;min-width:220px;">Q or K after M-RoPE</span>
+    <div class="tensor-shape">
+      <span class="ts-bracket">[</span>
+      <span class="ts-dim batch">B</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim heads">H</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim seq">H·W</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim feature">d_head</span>
+      <span class="ts-bracket">]</span>
+    </div>
   </div>
 </div>
 </div>
 
 ```python
-def rope_frequencies(d_head, max_len=8192, base=10000):
-    """Precompute RoPE frequency tensor."""
-    freqs = 1.0 / (base ** (torch.arange(0, d_head, 2).float() / d_head))
-    positions = torch.arange(max_len).float()
-    angles = torch.outer(positions, freqs)  # [max_len, d_head/2]
+def mrope_image_frequencies(
+    h_ids: torch.Tensor,    # [N] — row index of each patch
+    w_ids: torch.Tensor,    # [N] — col index of each patch
+    d_head: int,
+    base: float = 10000.0
+):
+    """Compute M-RoPE angles for image patches.
+    Returns cos, sin each of shape [N, d_head/2].
+    Half the d_head dims encode height, half encode width.
+    """
+    d_half = d_head // 2
+    d_quarter = d_half // 2                          # dims per spatial axis
+
+    i = torch.arange(0, d_quarter * 2, 2).float()
+    theta = 1.0 / (base ** (i / d_head))             # [d_quarter] base freqs
+
+    h_angles = torch.outer(h_ids.float(), theta)     # [N, d_quarter]
+    w_angles = torch.outer(w_ids.float(), theta)     # [N, d_quarter]
+
+    # Interleave: first d_half dims ← height, second d_half dims ← width
+    angles = torch.cat([h_angles, w_angles], dim=-1) # [N, d_half]
     return torch.cos(angles), torch.sin(angles)
 
-def apply_rope(x, cos, sin):
-    """Apply RoPE to queries or keys. x: [B, H, T, d_head]"""
-    d_half = x.shape[-1] // 2
-    x1, x2 = x[..., :d_half], x[..., d_half:]
-    cos_t = cos[:x.shape[-2]].unsqueeze(0).unsqueeze(0)  # [1, 1, T, d_half]
-    sin_t = sin[:x.shape[-2]].unsqueeze(0).unsqueeze(0)
-    return torch.cat([x1 * cos_t - x2 * sin_t, x2 * cos_t + x1 * sin_t], dim=-1)
 
-cos, sin = rope_frequencies(d_head=128)
-# Apply to Q and K before attention: q_rot = apply_rope(q, cos, sin)
+# Example: 14×14 image (196 patches)
+H, W = 14, 14
+h_ids = torch.arange(H).repeat_interleave(W)        # [196]
+w_ids = torch.arange(W).repeat(H)                   # [196]
+
+cos_2d, sin_2d = mrope_image_frequencies(h_ids, w_ids, d_head=128)
+# cos_2d, sin_2d: [196, 64] — applied to Q and K patches
 ```
-
-RoPE is applied **inside attention** (to Q and K only), not added to the embeddings. This is a key difference from sinusoidal and learned positional encodings.
 
 ### ALiBi — Attention with Linear Biases
 
@@ -228,10 +430,11 @@ ALiBi has strong length extrapolation properties — models trained on short seq
 |--------|------------|-------------------|---------------------|---------|
 | **Sinusoidal** | Embedding output | Implicit (via rotation) | Moderate | Original Transformer |
 | **Learned** | Embedding output | No | None (fixed max_len) | GPT-2, BERT |
-| **RoPE** | Q, K in attention | Yes (rotation angle) | Good (with scaling) | LLaMA, Mistral, Qwen, Gemma |
+| **RoPE** | Q, K in attention | Yes (rotation angle) | Good (with base scaling) | LLaMA, Mistral, Qwen, Gemma |
+| **M-RoPE** | Q, K in attention | Yes (per axis) | Inherits from RoPE | Qwen-VL2, LLaMA-3.2 Vision |
 | **ALiBi** | Attention scores | Yes (linear bias) | Strong | BLOOM, MPT |
 
-Modern models overwhelmingly use **RoPE** due to its balance of performance, relative position awareness, and extensibility (the base frequency can be scaled for longer contexts — discussed in [Chapter 12](./12_mid_training.md)).
+Modern models overwhelmingly use **RoPE** (or M-RoPE for multimodal) due to its balance of performance, relative position awareness, and extensibility. The base frequency can be scaled for longer contexts — discussed further in [Chapter 12](./12_mid_training.md).
 
 ## Tying Embeddings
 

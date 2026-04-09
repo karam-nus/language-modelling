@@ -8,6 +8,97 @@ title: "Appendix B — Tokenization Deep Dive"
 
 > *"The tokenizer is the first and last thing that touches your text. Get it wrong, and no amount of model scaling will help."*
 
+## What Exactly Is a Tokenizer?
+
+Before diving into algorithms, it is worth being precise about what a tokenizer *is* — because it is often confused with the model itself.
+
+**A tokenizer is not a neural network.** It is a stateless, deterministic text-preprocessing component that converts raw strings into integer IDs and back. At inference time it runs on the CPU, takes microseconds, and involves no learnable parameters, no matrix multiplications, and no gradients.
+
+<div class="diagram">
+<div class="diagram-title">Tokenizer vs. Model — Two Completely Separate Objects</div>
+<div class="flow">
+  <div class="flow-node wide">Raw text: "The answer is 42."</div>
+  <div class="flow-arrow accent"></div>
+  <div class="flow-node orange wide">Tokenizer (CPU, deterministic)<br><small>vocabulary lookup + merge rules → integer IDs</small></div>
+  <div class="flow-arrow accent"></div>
+  <div class="flow-node accent wide">Token IDs: [791, 4320, 374, 220, 2983, 13]</div>
+  <div class="flow-arrow accent"></div>
+  <div class="flow-node purple wide">Language Model (GPU, learned)<br><small>Transformer forward pass → logit distributions</small></div>
+  <div class="flow-arrow accent"></div>
+  <div class="flow-node green wide">Next-token logits: [B, T, vocab_size]</div>
+  <div class="flow-arrow accent"></div>
+  <div class="flow-node orange wide">Tokenizer decode (CPU)<br><small>integer IDs → string</small></div>
+  <div class="flow-arrow accent"></div>
+  <div class="flow-node wide">Generated text: " The answer is 42."</div>
+</div>
+</div>
+
+### What a Tokenizer Consists Of
+
+A tokenizer object contains exactly **two things**:
+
+1. **Vocabulary** (`vocab`): a dictionary mapping subword strings → integer IDs.  
+   e.g., `{"the": 1, "Ġthe": 791, "Ġanswer": 4320, ...}` (size: 32K–256K entries)
+
+2. **Merge rules** (for BPE): an ordered list of character-pair merges learned during training.  
+   e.g., `[("Ġ", "t") → "Ġt", ("Ġt", "he") → "Ġthe", ...]`
+
+There are **no weights, no layers, no activations**. The tokenizer is typically serialized as a single JSON or `.model` file (a few MB). In HuggingFace it's a `PreTrainedTokenizer` or `PreTrainedTokenizerFast` object — not a `nn.Module`.
+
+```python
+from transformers import AutoTokenizer
+import torch.nn as nn
+
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
+
+# Tokenizer is NOT an nn.Module — it has no parameters()
+print(type(tokenizer))                         # PreTrainedTokenizerFast
+print(isinstance(tokenizer, nn.Module))        # False
+print(f"Vocab size: {tokenizer.vocab_size}")   # 128256
+
+# What it contains:
+print(f"Vocab sample: {list(tokenizer.vocab.items())[:3]}")
+# [('!', 0), ('"', 1), ('#', 2)]
+
+# Encoding: text → integer IDs  (CPU, ~microseconds)
+ids = tokenizer.encode("The answer is 42.")
+print(ids)   # [791, 4320, 374, 220, 2983, 13]
+
+# Decoding: integer IDs → text  (deterministic round-trip)
+print(tokenizer.decode(ids))   # "The answer is 42."
+```
+
+### How Does the Model Use the Token IDs?
+
+The token IDs are the *input* to the language model's embedding layer — an `nn.Embedding` table of shape `[vocab_size, d_model]`. The model looks up each ID as a row index:
+
+```python
+import torch.nn as nn
+
+# Inside the Transformer
+embedding = nn.Embedding(vocab_size=128256, embedding_dim=4096)
+
+# token_ids: [B, T]  (integers from tokenizer)
+# embeddings: [B, T, 4096]  (first layer of the neural network)
+embeddings = embedding(token_ids)
+```
+
+So the "connection" between tokenizer and model is simply a shared vocabulary size: the tokenizer produces integers in `[0, vocab_size)`, and the model's embedding table has exactly `vocab_size` rows.
+
+### SentencePiece, tiktoken, and Tokenizer Libraries
+
+Different models use different tokenizer *implementations* (though the concepts are the same):
+
+| Library | Used By | Format | Key feature |
+|---------|---------|--------|-------------|
+| **SentencePiece** | LLaMA-1/2, T5, Gemma | `.model` binary | Treats text as raw bytes, language-agnostic |
+| **tiktoken** | GPT-3/4, LLaMA-3 | `.tiktoken` | Rust-based, very fast |
+| **HuggingFace tokenizers** | BERT, RoBERTa, most HF models | `tokenizer.json` | Rust backend, universal format |
+
+All three implement the same BPE or Unigram algorithm — just in different languages/formats.
+
+---
+
 ## Why Tokenization Matters
 
 The tokenizer determines:
