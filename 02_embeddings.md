@@ -258,7 +258,7 @@ def rope_frequencies(d_head: int, max_len: int = 8192, base: float = 10000.0):
     Returns cos, sin each of shape [max_len, d_head/2].
     """
     # θᵢ = 1 / base^(2i/d_head)  for i = 0, 1, ..., d_head/2 - 1
-    i = torch.arange(0, d_head, 2).float()          # [d_head/2]
+    i = torch.arange(0, d_head, 2).float()          # step 2 → d_head/2 elements
     theta = 1.0 / (base ** (i / d_head))             # [d_head/2]
 
     positions = torch.arange(max_len).float()         # [max_len]
@@ -405,6 +405,7 @@ def mrope_image_frequencies(
     w_angles = torch.outer(w_ids.float(), theta)     # [N, d_quarter]
 
     # Interleave: first d_half dims ← height, second d_half dims ← width
+    # [N, d_quarter] + [N, d_quarter] → [N, d_quarter*2] = [N, d_half]
     angles = torch.cat([h_angles, w_angles], dim=-1) # [N, d_half]
     return torch.cos(angles), torch.sin(angles)
 

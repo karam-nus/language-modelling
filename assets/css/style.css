@@ -40,6 +40,10 @@
   --radius-lg:      10px;
 
   --transition:     150ms ease;
+
+  /* GitHub Dark code theme */
+  --gh-bg-code:     #0d1117;
+  --gh-border-code: #21262d;
 }
 
 /* --- Reset & Base --- */
@@ -416,8 +420,8 @@ body {
 }
 
 .content pre {
-  background: #0d1117;
-  border: 1px solid #21262d;
+  background: var(--gh-bg-code);
+  border: 1px solid var(--gh-border-code);
   border-radius: var(--radius);
   padding: 1.25rem 1.375rem;
   overflow-x: auto;
@@ -443,7 +447,7 @@ body {
 }
 
 /* --- GitHub Dark syntax highlighting (Rouge) --- */
-.highlight { background: #0d1117; border-radius: var(--radius); }
+.highlight { background: var(--gh-bg-code); border-radius: var(--radius); }
 
 .highlight .c, .highlight .cd, .highlight .cm,
 .highlight .c1, .highlight .cs { color: #8b949e; font-style: italic; }
@@ -496,9 +500,9 @@ body {
   background: transparent;
 }
 
-.highlight .rouge-gutter {
+.content .highlight .rouge-gutter {
   width: 3em;
-  padding-right: 0.75rem !important;
+  padding-right: 0.75rem;
   text-align: right;
   user-select: none;
   -webkit-user-select: none;
@@ -514,9 +518,9 @@ body {
   line-height: inherit;
 }
 
-.highlight .rouge-code {
-  padding-left: 0.75rem !important;
-  border-left: 1px solid #21262d;
+.content .highlight .rouge-code {
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--gh-border-code);
 }
 
 .highlight .rouge-code pre {
@@ -1162,14 +1166,11 @@ body {
 
   .main-content { margin-left: 0; }
 
-  /* On mobile toggle stays at left: 1rem regardless */
-  .sidebar-toggle { left: 1rem !important; }
-
   .content { padding: 4.5rem 1.25rem 3rem; }
   .content-footer { padding: 1rem 1.25rem; }
   .content h1 { font-size: 1.5rem; }
   .content h2 { font-size: 1.125rem; }
-  .content pre { font-size: 0.75rem; padding: 1rem; background: #0d1117; }
+  .content pre { font-size: 0.75rem; padding: 1rem; background: var(--gh-bg-code); }
 
   .diagram-grid.cols-3,
   .diagram-grid.cols-4 {
