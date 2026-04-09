@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 340" width="700" height="340" style="background:#111111;">
+  <defs>
+    <marker id="ah1" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="ah2" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#a855f7"/>
+    </marker>
+    <marker id="ah3" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#f97316"/>
+    </marker>
+    <marker id="ahg" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#4a5568"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="350" y="22" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#6b7280" letter-spacing="1">ROPE — 2D ROTATION PER DIMENSION PAIR</text>
+
+  <!-- ── Panel 1: Low-frequency pair (i=0) ── -->
+  <g transform="translate(90,170)">
+    <!-- circle -->
+    <circle cx="0" cy="0" r="90" fill="none" stroke="#1e1e1e" stroke-width="1"/>
+    <!-- axes -->
+    <line x1="-95" y1="0" x2="95" y2="0" stroke="#2a2a2a" stroke-width="1"/>
+    <line x1="0" y1="-95" x2="0" y2="95" stroke="#2a2a2a" stroke-width="1"/>
+    <!-- arc for pos=1 angle -->
+    <path d="M 18 0 A 18 18 0 0 0 16.2 -7.2" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="3,2"/>
+    <!-- pos=0 vector (angle=0°) -->
+    <line x1="0" y1="0" x2="88" y2="0" stroke="#4a5568" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#ahg)"/>
+    <!-- pos=1 (tiny rotation for low freq) -->
+    <line x1="0" y1="0" x2="87.5" y2="-8.7" stroke="#3b82f6" stroke-width="2.5" marker-end="url(#ah1)"/>
+    <!-- pos=3 -->
+    <line x1="0" y1="0" x2="86.1" y2="-21.5" stroke="#3b82f6" stroke-width="1.8" marker-end="url(#ah1)" opacity="0.6"/>
+    <!-- pos=8 -->
+    <line x1="0" y1="0" x2="82.2" y2="-36.7" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#ah1)" opacity="0.4"/>
+    <!-- labels -->
+    <text x="93" y="4" font-family="monospace" font-size="9" fill="#3b82f6">pos=1</text>
+    <text x="89" y="-22" font-family="monospace" font-size="9" fill="#3b82f6" opacity="0.7">pos=3</text>
+    <text x="84" y="-38" font-family="monospace" font-size="9" fill="#3b82f6" opacity="0.5">pos=8</text>
+    <text x="89" y="14" font-family="monospace" font-size="9" fill="#555">pos=0</text>
+    <!-- θ label -->
+    <text x="22" y="-10" font-family="serif" font-size="12" fill="#3b82f6">θ₀</text>
+    <!-- caption -->
+    <text x="0" y="115" text-anchor="middle" font-family="monospace" font-size="10" fill="#8b949e">dim pair i=0</text>
+    <text x="0" y="128" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">θ₀ = 10000⁻⁰ = 1.0</text>
+    <text x="0" y="140" text-anchor="middle" font-family="monospace" font-size="9" fill="#3b82f6">slow rotation</text>
+  </g>
+
+  <!-- ── Panel 2: Mid-frequency pair (i=d/4) ── -->
+  <g transform="translate(350,170)">
+    <circle cx="0" cy="0" r="90" fill="none" stroke="#1e1e1e" stroke-width="1"/>
+    <line x1="-95" y1="0" x2="95" y2="0" stroke="#2a2a2a" stroke-width="1"/>
+    <line x1="0" y1="-95" x2="0" y2="95" stroke="#2a2a2a" stroke-width="1"/>
+    <!-- pos=0 -->
+    <line x1="0" y1="0" x2="88" y2="0" stroke="#4a5568" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#ahg)"/>
+    <!-- pos=1 -->
+    <line x1="0" y1="0" x2="74.7" y2="-48.2" stroke="#a855f7" stroke-width="2.5" marker-end="url(#ah2)"/>
+    <!-- pos=2 -->
+    <line x1="0" y1="0" x2="35.6" y2="-80.2" stroke="#a855f7" stroke-width="1.8" marker-end="url(#ah2)" opacity="0.6"/>
+    <!-- pos=3 -->
+    <line x1="0" y1="0" x2="-15.6" y2="-88.6" stroke="#a855f7" stroke-width="1.5" marker-end="url(#ah2)" opacity="0.4"/>
+    <!-- arc -->
+    <path d="M 22 0 A 22 22 0 0 0 18.7 -12.0" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="3,2"/>
+    <text x="26" y="-14" font-family="serif" font-size="12" fill="#a855f7">θᵢ</text>
+    <text x="82" y="14" font-family="monospace" font-size="9" fill="#555">pos=0</text>
+    <text x="79" y="-49" font-family="monospace" font-size="9" fill="#a855f7">pos=1</text>
+    <text x="39" y="-82" font-family="monospace" font-size="9" fill="#a855f7" opacity="0.7">pos=2</text>
+    <text x="0" y="115" text-anchor="middle" font-family="monospace" font-size="10" fill="#8b949e">dim pair i=d/4</text>
+    <text x="0" y="128" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">θᵢ = 10000⁻⁰·⁵ ≈ 0.01</text>
+    <text x="0" y="140" text-anchor="middle" font-family="monospace" font-size="9" fill="#a855f7">medium rotation</text>
+  </g>
+
+  <!-- ── Panel 3: High-frequency pair (i=d/2-1) ── -->
+  <g transform="translate(610,170)">
+    <circle cx="0" cy="0" r="90" fill="none" stroke="#1e1e1e" stroke-width="1"/>
+    <line x1="-95" y1="0" x2="95" y2="0" stroke="#2a2a2a" stroke-width="1"/>
+    <line x1="0" y1="-95" x2="0" y2="95" stroke="#2a2a2a" stroke-width="1"/>
+    <!-- pos=0 -->
+    <line x1="0" y1="0" x2="88" y2="0" stroke="#4a5568" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#ahg)"/>
+    <!-- pos=1 near 90°-->
+    <line x1="0" y1="0" x2="0" y2="-88" stroke="#f97316" stroke-width="2.5" marker-end="url(#ah3)"/>
+    <!-- pos=2 near 180° -->
+    <line x1="0" y1="0" x2="-86" y2="-14" stroke="#f97316" stroke-width="1.8" marker-end="url(#ah3)" opacity="0.6"/>
+    <!-- pos=3 near 270°-->
+    <line x1="0" y1="0" x2="-14" y2="87" stroke="#f97316" stroke-width="1.5" marker-end="url(#ah3)" opacity="0.4"/>
+    <!-- arc -->
+    <path d="M 24 0 A 24 24 0 0 0 0.4 -24" fill="none" stroke="#f97316" stroke-width="1.5" stroke-dasharray="3,2"/>
+    <text x="28" y="-14" font-family="serif" font-size="12" fill="#f97316">θᵢ</text>
+    <text x="82" y="14" font-family="monospace" font-size="9" fill="#555">pos=0</text>
+    <text x="5" y="-82" font-family="monospace" font-size="9" fill="#f97316">pos=1</text>
+    <text x="-86" y="-18" font-family="monospace" font-size="9" fill="#f97316" opacity="0.7">pos=2</text>
+    <text x="0" y="115" text-anchor="middle" font-family="monospace" font-size="10" fill="#8b949e">dim pair i=d/2−1</text>
+    <text x="0" y="128" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">θᵢ = 10000⁻¹ = 0.0001</text>
+    <text x="0" y="140" text-anchor="middle" font-family="monospace" font-size="9" fill="#f97316">fast rotation</text>
+  </g>
+
+  <!-- Formula bar -->
+  <rect x="140" y="295" width="420" height="32" rx="4" fill="#1a1a1a" stroke="#2a2a2a"/>
+  <text x="350" y="314" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#8b949e">θᵢ = 10000^(−2i/d)   |   rotation angle = pos × θᵢ</text>
+</svg>
