@@ -1,3 +1,7 @@
+---
+title: "Chapter 12 — Alignment: RLHF & Beyond"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 12 — Alignment: RLHF & Beyond

@@ -1,3 +1,7 @@
+---
+title: "Chapter 19 — Quantization Benchmarks & Selection Guide"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 19 — Quantization Benchmarks & Selection Guide

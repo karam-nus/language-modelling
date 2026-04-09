@@ -1,3 +1,7 @@
+---
+title: "Chapter 30 — Beyond Transformers — SSMs & Alternatives"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 30 — Beyond Transformers — SSMs & Alternatives

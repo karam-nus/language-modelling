@@ -1,3 +1,7 @@
+---
+title: "Chapter 31 — Reasoning Models"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 31 — Reasoning Models

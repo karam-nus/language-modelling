@@ -1,3 +1,7 @@
+---
+title: "Chapter 14 — KV-Cache: Mechanics & Memory"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 14 — KV-Cache: Mechanics & Memory

@@ -1,3 +1,7 @@
+---
+title: "Chapter 20 — GPU Architecture for ML"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 20 — GPU Architecture for ML

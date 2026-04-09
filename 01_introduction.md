@@ -1,3 +1,7 @@
+---
+title: "Chapter 1 — Introduction to Language Modelling"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 1 — Introduction to Language Modelling

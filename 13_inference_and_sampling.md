@@ -1,3 +1,7 @@
+---
+title: "Chapter 13 — Inference & Sampling Strategies"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 13 — Inference & Sampling Strategies

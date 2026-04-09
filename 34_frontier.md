@@ -1,3 +1,7 @@
+---
+title: "Chapter 34 — The Frontier — Open Problems & What's Next"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 34 — The Frontier — Open Problems & What's Next

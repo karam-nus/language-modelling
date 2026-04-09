@@ -1,3 +1,7 @@
+---
+title: "Chapter 18 — Quantization Techniques: The Full Landscape"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 18 — Quantization Techniques: The Full Landscape

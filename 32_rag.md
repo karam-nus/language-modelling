@@ -1,3 +1,7 @@
+---
+title: "Chapter 32 — Retrieval-Augmented Generation (RAG)"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 32 — Retrieval-Augmented Generation (RAG)

@@ -1,3 +1,7 @@
+---
+title: "Chapter 33 — Agents & Tool Use"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 33 — Agents & Tool Use

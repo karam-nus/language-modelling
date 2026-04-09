@@ -1,3 +1,7 @@
+---
+title: "Appendix B — Tokenization Deep Dive"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Appendix B — Tokenization Deep Dive

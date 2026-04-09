@@ -1,3 +1,7 @@
+---
+title: "Chapter 7 — Encoder & Encoder-Decoder Models"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 7 — Encoder & Encoder-Decoder Models

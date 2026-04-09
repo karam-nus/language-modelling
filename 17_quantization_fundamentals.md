@@ -1,3 +1,7 @@
+---
+title: "Chapter 17 — Quantization Fundamentals"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 17 — Quantization Fundamentals

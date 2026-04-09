@@ -1,3 +1,7 @@
+---
+title: "Chapter 26 — Evaluation & Benchmarks"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 26 — Evaluation & Benchmarks

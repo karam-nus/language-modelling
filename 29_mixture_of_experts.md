@@ -1,3 +1,7 @@
+---
+title: "Chapter 29 — Mixture of Experts (MoE)"
+---
+
 [← Back to Table of Contents](./README.md)
 
 # Chapter 29 — Mixture of Experts (MoE)

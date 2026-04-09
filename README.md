@@ -1,3 +1,8 @@
+---
+title: "Language Modelling — The Complete Guide"
+permalink: /
+---
+
 # 🧠 Language Modelling — The Complete Guide
 
 > **From Tokens to Frontier**: Understanding, building, and deploying large language models. A comprehensive learning path for ML practitioners navigating the generative AI landscape.
