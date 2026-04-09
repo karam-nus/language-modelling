@@ -1,10 +1,10 @@
 ---
-title: "Chapter 9 — Pre-Training at Scale"
+title: "Chapter 10 — Pre-Training at Scale"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 9 — Pre-Training at Scale
+# Chapter 10 — Pre-Training at Scale
 
 > *"The remarkable thing about LLMs isn't the architecture — it's that next-token prediction on internet-scale data produces intelligence."*
 
@@ -228,9 +228,9 @@ where $N$ = parameters, $D$ = tokens, and the factor 6 accounts for forward (2N 
 
 ## What's Next
 
-Pre-training produces a raw "base model" — capable but not aligned to human instructions or specialized domains. The next chapter covers **mid-training**: the intermediate stage where models gain long-context ability and domain specialization before fine-tuning.
+Pre-training produces a raw "base model" — capable but not aligned to human instructions or specialised domains. Before exploring the training stages further, the next chapter covers the **optimisers and loss functions** that drive all LLM training runs.
 
-[← Previous: Chapter 8 — Multimodal Models](./08_multimodal_models.md) · **Next: [Chapter 10 — Mid-Training →](./10_mid_training.md)**
+[← Previous: Chapter 9 — Data for LLMs](./09_data_for_llms.md) · **Next: [Chapter 11 — Optimizers & Loss Functions →](./11_optimizers_and_loss_functions.md)**
 
 ---
 

@@ -1,10 +1,10 @@
 ---
-title: "Chapter 12 — Alignment: RLHF & Beyond"
+title: "Chapter 15 — Alignment: RLHF & Beyond"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 12 — Alignment: RLHF & Beyond
+# Chapter 15 — Alignment: RLHF & Beyond
 
 > *"Alignment is the difference between a model that can answer any question and one that should — it's about making AI helpful, harmless, and honest."*
 
@@ -212,7 +212,7 @@ The alignment tax is real but small — and the safety and usability gains far o
 
 With training complete (pre-training → mid-training → SFT → alignment), we now move to **inference** — how models generate text token by token, and the sampling strategies that control output quality.
 
-[← Previous: Chapter 11 — Fine-Tuning & Adaptation](./11_finetuning_and_adaptation.md) · **Next: [Chapter 13 — Inference & Sampling →](./13_inference_and_sampling.md)**
+[← Previous: Chapter 14 — PEFT: LoRA, QLoRA & Variants](./14_peft_lora_and_variants.md) · **Next: [Chapter 16 — Inference & Sampling →](./16_inference_and_sampling.md)**
 
 ---
 

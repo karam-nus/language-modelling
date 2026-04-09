@@ -1,10 +1,10 @@
 ---
-title: "Chapter 32 — Retrieval-Augmented Generation (RAG)"
+title: "Chapter 36 — Retrieval-Augmented Generation (RAG)"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 32 — Retrieval-Augmented Generation (RAG)
+# Chapter 36 — Retrieval-Augmented Generation (RAG)
 
 > *"RAG doesn't make the model smarter — it gives the model a library card. The model still has to know how to read."*
 
@@ -208,7 +208,7 @@ Frameworks like **RAGAS** and **DeepEval** automate these evaluations.
 
 RAG retrieves static knowledge. But what if the model needs to **take actions** — search the web, run code, query databases? The next chapter covers **agents and tool use**.
 
-[← Previous: Chapter 31 — Reasoning Models](./31_reasoning_models.md) · **Next: [Chapter 33 — Agents & Tool Use →](./33_agents_and_tool_use.md)**
+[← Previous: Chapter 35 — Reasoning Models](./35_reasoning_models.md) · **Next: [Chapter 37 — Agents & Tool Use →](./37_agents_and_tool_use.md)**
 
 ---
 

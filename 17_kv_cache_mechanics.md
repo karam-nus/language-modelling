@@ -1,10 +1,10 @@
 ---
-title: "Chapter 14 — KV-Cache: Mechanics & Memory"
+title: "Chapter 17 — KV-Cache: Mechanics & Memory"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 14 — KV-Cache: Mechanics & Memory
+# Chapter 17 — KV-Cache: Mechanics & Memory
 
 > *"The KV-cache is the single most important optimization in LLM inference — without it, generating each token would require recomputing attention over the entire sequence from scratch."*
 
@@ -136,7 +136,7 @@ where: L = layers, G = KV heads, d_k = head dimension, T = sequence length, B = 
 | Mistral 7B (GQA) | 32 | 8 | 128 | 2×32×8×128×2 | 128 KB | 1 GB | 16 GB |
 | LLaMA-3.1 405B | 126 | 8 | 128 | 2×126×8×128×2 | 504 KB | 3.9 GB | 63 GB |
 
-> **Key insight**: The KV-cache for LLaMA-3.1 405B at 128K context exceeds 63 GB **per request** in FP16. This is why KV-cache optimization ([Chapter 15](./15_kv_cache_optimization.md)) is critical.
+> **Key insight**: The KV-cache for LLaMA-3.1 405B at 128K context exceeds 63 GB **per request** in FP16. This is why KV-cache optimization ([Chapter 18](./18_kv_cache_optimization.md)) is critical.
 
 ## GQA/MQA Impact on KV-Cache
 
@@ -248,17 +248,17 @@ At long context lengths, KV-cache can exceed the model weights:
 | 128K | 16 GB | 16 GB | 50% |
 | 512K | 16 GB | 64 GB | 80% |
 
-At 128K context, the KV-cache equals the model size. At 512K, it's 4× the model. This is why context extension ([Chapter 10](./10_mid_training.md)) and KV-cache optimization ([Chapter 15](./15_kv_cache_optimization.md)) go hand in hand.
+At 128K context, the KV-cache equals the model size. At 512K, it's 4× the model. This is why context extension ([Chapter 12](./12_mid_training.md)) and KV-cache optimization ([Chapter 18](./18_kv_cache_optimization.md)) go hand in hand.
 
 ## Batching and KV-Cache
 
-When serving multiple requests, each request has its own KV-cache of potentially different length. Managing memory across a dynamic batch is non-trivial — this is the core problem that **PagedAttention** and other optimizations solve (see [Chapter 15](./15_kv_cache_optimization.md)).
+When serving multiple requests, each request has its own KV-cache of potentially different length. Managing memory across a dynamic batch is non-trivial — this is the core problem that **PagedAttention** and other optimizations solve (see [Chapter 18](./18_kv_cache_optimization.md)).
 
 ## What's Next
 
 The KV-cache memory problem is the central challenge of LLM serving. The next chapter covers the full landscape of **KV-cache optimization** — from PagedAttention to quantized KV-cache to token eviction strategies.
 
-[← Previous: Chapter 13 — Inference & Sampling](./13_inference_and_sampling.md) · **Next: [Chapter 15 — KV-Cache Optimization →](./15_kv_cache_optimization.md)**
+[← Previous: Chapter 16 — Inference & Sampling](./16_inference_and_sampling.md) · **Next: [Chapter 18 — KV-Cache — Optimization →](./18_kv_cache_optimization.md)**
 
 ---
 

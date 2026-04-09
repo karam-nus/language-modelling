@@ -1,10 +1,10 @@
 ---
-title: "Chapter 18 — Quantization Techniques: The Full Landscape"
+title: "Chapter 21 — Quantization Techniques: The Full Landscape"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 18 — Quantization Techniques: The Full Landscape
+# Chapter 21 — Quantization Techniques: The Full Landscape
 
 > *"Every quantization method is a different answer to the same question: how do you preserve accuracy while dramatically reducing precision?"*
 
@@ -281,7 +281,7 @@ Efficient implementations (GPTQ, AWQ kernels) fuse unpacking + dequantization + 
 
 With all techniques covered, the next chapter provides **benchmarks and a selection guide** — empirical comparisons of quality, speed, and memory across methods, plus a decision flowchart for choosing the right approach.
 
-[← Previous: Chapter 17 — Quantization Fundamentals](./17_quantization_fundamentals.md) · **Next: [Chapter 19 — Quantization Benchmarks →](./19_quantization_benchmarks.md)**
+[← Previous: Chapter 20 — Quantization Fundamentals](./20_quantization_fundamentals.md) · **Next: [Chapter 22 — Quantization Benchmarks →](./22_quantization_benchmarks.md)**
 
 ---
 

@@ -1,10 +1,10 @@
 ---
-title: "Chapter 33 — Agents & Tool Use"
+title: "Chapter 37 — Agents & Tool Use"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 33 — Agents & Tool Use
+# Chapter 37 — Agents & Tool Use
 
 > *"A language model that can only generate text is a brain in a jar. An agent is a brain with hands."*
 
@@ -195,7 +195,7 @@ Frameworks: **LangGraph**, **CrewAI**, **AutoGen**, **Semantic Kernel**, **OpenA
 
 We've now covered the full stack: from tokenization to training, inference, hardware, and applications. The final chapter looks at the **frontier** — where the field is heading and what remains unsolved.
 
-[← Previous: Chapter 32 — Retrieval-Augmented Generation (RAG)](./32_rag.md) · **Next: [Chapter 34 — The Frontier →](./34_frontier.md)**
+[← Previous: Chapter 36 — Retrieval-Augmented Generation](./36_rag.md) · **Next: [Chapter 38 — The Frontier →](./38_frontier.md)**
 
 ---
 

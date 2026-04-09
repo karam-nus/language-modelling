@@ -1,10 +1,10 @@
 ---
-title: "Chapter 20 — GPU Architecture for ML"
+title: "Chapter 24 — GPU Architecture for ML"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 20 — GPU Architecture for ML
+# Chapter 24 — GPU Architecture for ML
 
 > *"Understanding GPU architecture is understanding why certain operations are fast and others aren't — the hardware shapes the software."*
 
@@ -140,7 +140,7 @@ Tensor Cores require specific matrix dimension alignment (multiples of 8 or 16) 
 
 Understanding GPU architecture motivates **CUDA and kernel development** — writing custom operations that exploit the memory hierarchy for maximum performance.
 
-[← Previous: Chapter 19 — Quantization Benchmarks](./19_quantization_benchmarks.md) · **Next: [Chapter 21 — CUDA & Kernel Development →](./21_cuda_and_kernel_development.md)**
+[← Previous: Chapter 23 — Knowledge Distillation & QAD](./23_knowledge_distillation.md) · **Next: [Chapter 25 — CUDA & Kernel Development →](./25_cuda_and_kernel_development.md)**
 
 ---
 

@@ -1,10 +1,10 @@
 ---
-title: "Chapter 17 — Quantization Fundamentals"
+title: "Chapter 20 — Quantization Fundamentals"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 17 — Quantization Fundamentals
+# Chapter 20 — Quantization Fundamentals
 
 > *"Quantization is the art of throwing away precision strategically — keeping what matters and discarding what doesn't."*
 
@@ -214,13 +214,13 @@ LLM activations have massive **outliers** — a few channels with values 100× l
 #   Quantization error of 0.21 — over 20% for typical values!
 ```
 
-This is why methods like SmoothQuant, GPTQ, and AWQ were invented — they're all different strategies for handling outliers. See [Chapter 18](./18_quantization_techniques.md).
+This is why methods like SmoothQuant, GPTQ, and AWQ were invented — they're all different strategies for handling outliers. See [Chapter 21](./21_quantization_techniques.md).
 
 ## What's Next
 
 With the fundamentals in place, the next chapter surveys the full landscape of **quantization techniques** — from GPTQ and AWQ to SmoothQuant and BitNet, with a master comparison table.
 
-[← Previous: Chapter 16 — Data Types & Precision](./16_data_types_and_precision.md) · **Next: [Chapter 18 — Quantization Techniques →](./18_quantization_techniques.md)**
+[← Previous: Chapter 19 — Data Types & Numerical Precision](./19_data_types_and_precision.md) · **Next: [Chapter 21 — Quantization Techniques →](./21_quantization_techniques.md)**
 
 ---
 

@@ -1,10 +1,10 @@
 ---
-title: "Chapter 24 — The Hugging Face Ecosystem"
+title: "Chapter 28 — The Hugging Face Ecosystem"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 24 — The Hugging Face Ecosystem
+# Chapter 28 — The Hugging Face Ecosystem
 
 > *"Hugging Face is the GitHub of machine learning — a platform where models, datasets, and tools converge into a unified ecosystem that accelerates research and deployment."*
 
@@ -238,7 +238,7 @@ for example in dataset:
 
 Now that we understand the tools, the next chapter dives into the `transformers` library itself — its class hierarchy, model internals, and how to extend it.
 
-[← Previous: Chapter 23 — ASICs & Accelerators](./23_asics_and_accelerators.md) · **Next: [Chapter 25 — The transformers Library Internals →](./25_transformers_library.md)**
+[← Previous: Chapter 27 — ASICs & Accelerators](./27_asics_and_accelerators.md) · **Next: [Chapter 29 — Transformers Library Deep Dive →](./29_transformers_library.md)**
 
 ---
 

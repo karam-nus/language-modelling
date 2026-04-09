@@ -212,7 +212,7 @@ model = AutoModelForCausalLM.from_pretrained(
 
 How do we know if a model is actually good? The next chapter covers **evaluation and benchmarks** — the metrics, datasets, and leaderboards used to measure LLM quality.
 
-[← Previous: Chapter 24 — The Hugging Face Ecosystem](./24_huggingface_ecosystem.md) · **Next: [Chapter 26 — Evaluation & Benchmarks →](./26_evaluation_and_benchmarks.md)**
+[← Previous: Chapter 28 — The Hugging Face Ecosystem](./28_huggingface_ecosystem.md) · **Next: [Chapter 30 — Evaluation & Benchmarks →](./30_evaluation_and_benchmarks.md)**
 
 ---
 

@@ -1,10 +1,10 @@
 ---
-title: "Chapter 21 — CUDA & Kernel Development"
+title: "Chapter 25 — CUDA & Kernel Development"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 21 — CUDA & Kernel Development
+# Chapter 25 — CUDA & Kernel Development
 
 > *"If you want to understand why Flash Attention is fast, or why fused kernels matter, you need to understand how GPU programs work at the thread level."*
 
@@ -195,7 +195,7 @@ output = model(input_tensor)
 
 Single-GPU performance has limits. The next chapter covers **distributed training** — how to split work across hundreds or thousands of GPUs using data, tensor, and pipeline parallelism.
 
-[← Previous: Chapter 20 — GPU Architecture](./20_gpu_architecture.md) · **Next: [Chapter 22 — Distributed Training →](./22_distributed_training.md)**
+[← Previous: Chapter 24 — GPU Architecture for ML](./24_gpu_architecture.md) · **Next: [Chapter 26 — Distributed Training →](./26_distributed_training.md)**
 
 ---
 

@@ -1,16 +1,16 @@
 ---
-title: "Chapter 15 — KV-Cache Optimization Strategies"
+title: "Chapter 18 — KV-Cache Optimization Strategies"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 15 — KV-Cache Optimization Strategies
+# Chapter 18 — KV-Cache Optimization Strategies
 
 > *"The art of LLM serving is the art of KV-cache management — fitting more requests, longer contexts, and higher throughput into the same GPU memory."*
 
 ## The Problem Space
 
-The KV-cache is the dominant memory consumer in LLM inference (see [Chapter 14](./14_kv_cache_mechanics.md)). Optimization strategies fall into several categories:
+The KV-cache is the dominant memory consumer in LLM inference (see [Chapter 17](./17_kv_cache_mechanics.md)). Optimization strategies fall into several categories:
 
 <div class="diagram">
 <div class="diagram-title">KV-Cache Optimization Landscape</div>
@@ -300,7 +300,7 @@ docker run --gpus all \
 
 KV-cache precision is just one aspect of numerical representation. The next chapter provides a comprehensive guide to **data types and numerical precision** — the foundation for understanding quantization.
 
-[← Previous: Chapter 14 — KV-Cache Mechanics](./14_kv_cache_mechanics.md) · **Next: [Chapter 16 — Data Types & Precision →](./16_data_types_and_precision.md)**
+[← Previous: Chapter 17 — KV-Cache — Mechanics & Memory](./17_kv_cache_mechanics.md) · **Next: [Chapter 19 — Data Types & Numerical Precision →](./19_data_types_and_precision.md)**
 
 ---
 

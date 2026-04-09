@@ -1,10 +1,10 @@
 ---
-title: "Chapter 34 — The Frontier — Open Problems & What's Next"
+title: "Chapter 38 — The Frontier — Open Problems & What's Next"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 34 — The Frontier — Open Problems & What's Next
+# Chapter 38 — The Frontier — Open Problems & What's Next
 
 > *"The most exciting phrase in science is not 'Eureka!' but 'That's funny...'"* — Isaac Asimov
 
@@ -174,7 +174,7 @@ The field moves fast. The best way to keep up is to **read papers, run experimen
 - [Appendix A — A Brief History of Language Modelling](./appendix_a_history.md)
 - [Appendix B — Tokenization Deep Dive](./appendix_b_tokenization.md)
 
-[← Previous: Chapter 33 — Agents & Tool Use](./33_agents_and_tool_use.md) · [Back to Table of Contents](./README.md)
+[← Previous: Chapter 37 — Agents & Tool Use](./37_agents_and_tool_use.md) · [Back to Table of Contents](./README.md)
 
 ---
 

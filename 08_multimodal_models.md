@@ -224,7 +224,7 @@ Solutions: **token compression** (average pooling, learned resampling), **dynami
 
 With architectures covered — text-only (encoder, decoder, encoder-decoder) and multimodal — we now shift to **how these models are trained**. The next chapter covers pre-training at scale.
 
-[← Previous: Chapter 7 — Encoder & Seq2Seq Models](./07_encoder_and_seq2seq_models.md) · **Next: [Chapter 9 — Pre-Training at Scale →](./09_pretraining_at_scale.md)**
+[← Previous: Chapter 7 — Encoder & Seq2Seq Models](./07_encoder_and_seq2seq_models.md) · **Next: [Chapter 9 — Data for LLMs →](./09_data_for_llms.md)**
 
 ---
 

@@ -211,7 +211,7 @@ def generate_simple(model, input_ids, max_new_tokens, temperature=1.0):
     return input_ids
 ```
 
-Notice: on the first pass (**prefill**), the entire prompt is processed at once. On subsequent passes (**decode**), only the last token is fed in — the KV-cache stores everything else. See [Chapter 14](./14_kv_cache_mechanics.md) for full details.
+Notice: on the first pass (**prefill**), the entire prompt is processed at once. On subsequent passes (**decode**), only the last token is fed in — the KV-cache stores everything else. See [Chapter 17](./17_kv_cache_mechanics.md) for full details.
 
 ## What's Next
 

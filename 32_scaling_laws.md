@@ -1,10 +1,10 @@
 ---
-title: "Chapter 28 — Scaling Laws & Emergent Abilities"
+title: "Chapter 32 — Scaling Laws & Emergent Abilities"
 ---
 
 [← Back to Table of Contents](./README.md)
 
-# Chapter 28 — Scaling Laws & Emergent Abilities
+# Chapter 32 — Scaling Laws & Emergent Abilities
 
 > *"The remarkable thing about scaling laws is how predictable they are. The remarkable thing about emergent abilities is how unpredictable they are."*
 
@@ -181,7 +181,7 @@ print(f"Predicted loss at 70B: {predicted_loss:.2f}")
 
 Scaling laws tell us how big to make a model. But what if we could make a model **effectively bigger** without proportionally increasing compute? The next chapter covers **Mixture of Experts (MoE)** — sparse models that activate only a fraction of their parameters.
 
-[← Previous: Chapter 27 — Serving & Deployment](./27_serving_and_deployment.md) · **Next: [Chapter 29 — Mixture of Experts (MoE) →](./29_mixture_of_experts.md)**
+[← Previous: Chapter 31 — Serving & Deployment](./31_serving_and_deployment.md) · **Next: [Chapter 33 — Mixture of Experts →](./33_mixture_of_experts.md)**
 
 ---
 
