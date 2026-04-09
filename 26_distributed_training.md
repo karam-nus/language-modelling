@@ -25,6 +25,11 @@ The largest models today have hundreds of billions of parameters. A single GPU c
 
 ## The Three Dimensions of Parallelism
 
+<div class="img-caption">
+  <img src="{{ '/assets/images/distributed_training.svg' | relative_url }}" alt="Side-by-side comparison of Data Parallel, Tensor Parallel, and Pipeline Parallel training strategies">
+  <figcaption>Three parallelism strategies — production training combines all three (3D parallelism)</figcaption>
+</div>
+
 <div class="diagram">
 <div class="diagram-title">3D Parallelism</div>
 <div class="diagram-grid cols-3">

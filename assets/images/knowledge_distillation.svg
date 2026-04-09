@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 360" width="780" height="360" style="background:#111111;">
+  <!-- Title -->
+  <text x="390" y="22" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#6b7280" letter-spacing="1">KNOWLEDGE DISTILLATION</text>
+
+  <!-- Teacher model (left) -->
+  <rect x="30" y="38" width="220" height="200" rx="6" fill="#111" stroke="#f97316" stroke-width="1.5"/>
+  <text x="140" y="58" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#f97316">Teacher  (large)</text>
+
+  <rect x="50" y="70" width="180" height="24" rx="3" fill="#1c0e00" stroke="#f97316" stroke-width="1"/>
+  <text x="140" y="86" text-anchor="middle" font-family="monospace" font-size="9" fill="#f97316">GPT-4 / LLaMA-3 70B</text>
+
+  <text x="140" y="110" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">Logits: p(y|x) = softmax(z/T)</text>
+  <text x="140" y="126" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">Rich soft labels, e.g.:</text>
+  <rect x="50" y="133" width="180" height="40" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="140" y="150" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#ccc">cat: 0.72,  feline: 0.12,</text>
+  <text x="140" y="163" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#ccc">dog: 0.07,  pet: 0.04, ...</text>
+
+  <text x="140" y="198" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">Frozen during distillation</text>
+  <text x="140" y="213" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">Generates "soft" targets</text>
+
+  <!-- Arrow from teacher to student -->
+  <line x1="250" y1="138" x2="324" y2="138" stroke="#a855f7" stroke-width="2" stroke-dasharray="5,3"/>
+  <text x="287" y="130" text-anchor="middle" font-family="monospace" font-size="8" fill="#a855f7">soft labels</text>
+  <polygon points="322,134 330,138 322,142" fill="#a855f7"/>
+
+  <!-- Student model (right) -->
+  <rect x="330" y="38" width="220" height="200" rx="6" fill="#111" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="440" y="58" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#3b82f6">Student  (small)</text>
+
+  <rect x="350" y="70" width="180" height="24" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="440" y="86" text-anchor="middle" font-family="monospace" font-size="9" fill="#3b82f6">LLaMA-3 8B / GPT-2</text>
+
+  <text x="440" y="110" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">Logits: q(y|x) = softmax(s/T)</text>
+  <text x="440" y="126" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">Learns from:</text>
+  <rect x="350" y="133" width="180" height="50" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="440" y="150" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">L_distill = KL(p‖q) · T²</text>
+  <text x="440" y="164" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">+ λ · L_CE(hard labels)</text>
+  <text x="440" y="178" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">(Hinton 2015 formula)</text>
+
+  <text x="440" y="210" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">Trainable weights updated</text>
+  <text x="440" y="223" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Learns inter-class similarities</text>
+
+  <!-- Temperature note -->
+  <rect x="560" y="38" width="200" height="200" rx="6" fill="#111" stroke="#22c55e" stroke-width="1.2"/>
+  <text x="660" y="57" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#22c55e">Temperature T</text>
+
+  <text x="660" y="78" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">T=1 (sharp)</text>
+  <rect x="575" y="84" width="170" height="12" rx="2" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <!-- T=1 bars (sharp) -->
+  <rect x="579" y="85" width="40" height="10" rx="1" fill="#3b82f6"/>
+  <rect x="622" y="90" width="10" height="5" rx="1" fill="#3b82f6" opacity="0.3"/>
+  <rect x="635" y="91" width="10" height="4" rx="1" fill="#3b82f6" opacity="0.2"/>
+  <rect x="648" y="92" width="10" height="3" rx="1" fill="#3b82f6" opacity="0.15"/>
+  <rect x="661" y="93" width="10" height="2" rx="1" fill="#3b82f6" opacity="0.1"/>
+
+  <text x="660" y="118" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">T=3 (soft)</text>
+  <rect x="575" y="124" width="170" height="12" rx="2" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <!-- T=3 bars (soft) -->
+  <rect x="579" y="125" width="30" height="10" rx="1" fill="#22c55e" opacity="0.9"/>
+  <rect x="612" y="126" width="18" height="9" rx="1" fill="#22c55e" opacity="0.65"/>
+  <rect x="633" y="127" width="14" height="8" rx="1" fill="#22c55e" opacity="0.5"/>
+  <rect x="650" y="128" width="12" height="7" rx="1" fill="#22c55e" opacity="0.4"/>
+  <rect x="665" y="129" width="10" height="6" rx="1" fill="#22c55e" opacity="0.3"/>
+
+  <text x="660" y="153" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">High T → softer, more info</text>
+  <text x="660" y="166" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">Low T → hard one-hot like</text>
+
+  <text x="660" y="190" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">T=2–4 often optimal</text>
+  <text x="660" y="204" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">Multiply loss by T² to</text>
+  <text x="660" y="216" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">compensate gradient scale</text>
+  <text x="660" y="230" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">(Hinton 2015)</text>
+
+  <!-- Bottom panel: types of distillation -->
+  <rect x="30" y="252" width="730" height="90" rx="6" fill="#111" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="395" y="272" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#6b7280" letter-spacing="0.5">DISTILLATION TYPES</text>
+
+  <!-- Response distillation -->
+  <rect x="40" y="280" width="168" height="52" rx="4" fill="#1c0e00" stroke="#f97316" stroke-width="1"/>
+  <text x="124" y="297" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#f97316">Response Distillation</text>
+  <text x="124" y="311" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">Match output logits/tokens</text>
+  <text x="124" y="323" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">DistilBERT, TinyLLaMA</text>
+
+  <!-- Feature distillation -->
+  <rect x="218" y="280" width="168" height="52" rx="4" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="302" y="297" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Feature Distillation</text>
+  <text x="302" y="311" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">Match hidden states/attn</text>
+  <text x="302" y="323" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">PKD, TinyBERT</text>
+
+  <!-- Seq-level distillation -->
+  <rect x="396" y="280" width="168" height="52" rx="4" fill="#0a1a0a" stroke="#22c55e" stroke-width="1"/>
+  <text x="480" y="297" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">Sequence-Level</text>
+  <text x="480" y="311" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">Teacher generates sequences</text>
+  <text x="480" y="323" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">Student learns on those</text>
+
+  <!-- QAD -->
+  <rect x="574" y="280" width="176" height="52" rx="4" fill="#170b2a" stroke="#a855f7" stroke-width="1"/>
+  <text x="662" y="297" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#a855f7">Quantisation-Aware</text>
+  <text x="662" y="311" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">Distil into quantised student</text>
+  <text x="662" y="323" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">GPTQ+KD, BitNet</text>
+</svg>

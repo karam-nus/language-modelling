@@ -38,6 +38,11 @@ An SFT model follows instructions, but it may also: generate toxic content, make
 
 ## The RLHF Pipeline
 
+<div class="img-caption">
+  <img src="{{ '/assets/images/rlhf_pipeline.svg' | relative_url }}" alt="RLHF three-stage pipeline showing SFT, reward model training, and PPO optimization, plus DPO alternative">
+  <figcaption>RLHF pipeline: Supervised Fine-Tuning → Reward Model → PPO RL, compared with DPO's simpler two-model approach</figcaption>
+</div>
+
 **Reinforcement Learning from Human Feedback** is the classic alignment approach, used in ChatGPT and Claude.
 
 <div class="diagram">

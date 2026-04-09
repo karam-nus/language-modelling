@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 380" width="780" height="380" style="background:#111111;">
+  <defs>
+    <marker id="arrb" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrc" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#06b6d4"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="390" y="22" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#6b7280" letter-spacing="1">CHAIN-OF-THOUGHT & TEST-TIME COMPUTE SCALING</text>
+
+  <!-- Left: Standard vs CoT -->
+  <rect x="18" y="32" width="370" height="220" rx="6" fill="#111" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="203" y="52" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#6b7280" letter-spacing="0.5">STANDARD vs CHAIN-OF-THOUGHT</text>
+
+  <!-- Standard -->
+  <rect x="28" y="62" width="160" height="174" rx="4" fill="#111" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="108" y="79" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">Standard Prompting</text>
+
+  <rect x="36" y="88" width="144" height="36" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="108" y="103" text-anchor="middle" font-family="monospace" font-size="8" fill="#ccc">Q: Roger has 5 balls.</text>
+  <text x="108" y="115" text-anchor="middle" font-family="monospace" font-size="8" fill="#ccc">Buys 2 cans of 3. Total?</text>
+
+  <line x1="108" y1="124" x2="108" y2="138" stroke="#2a2a2a" stroke-width="1.3" marker-end="url(#arrb)"/>
+
+  <rect x="36" y="139" width="144" height="28" rx="3" fill="#1c0e00" stroke="#f97316" stroke-width="1"/>
+  <text x="108" y="157" text-anchor="middle" font-family="monospace" font-size="8" fill="#f97316">A: 11  ✗ (wrong)</text>
+
+  <text x="108" y="195" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">Model jumps directly</text>
+  <text x="108" y="207" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">to answer without</text>
+  <text x="108" y="219" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">intermediate steps</text>
+
+  <!-- CoT -->
+  <rect x="198" y="62" width="182" height="174" rx="4" fill="#111" stroke="#22c55e" stroke-width="1"/>
+  <text x="289" y="79" text-anchor="middle" font-family="monospace" font-size="9" fill="#22c55e">Chain-of-Thought</text>
+
+  <rect x="206" y="88" width="166" height="36" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="289" y="103" text-anchor="middle" font-family="monospace" font-size="8" fill="#ccc">Q: Roger has 5 balls.</text>
+  <text x="289" y="115" text-anchor="middle" font-family="monospace" font-size="8" fill="#ccc">Buys 2 cans of 3. Total?</text>
+
+  <line x1="289" y1="124" x2="289" y2="138" stroke="#22c55e" stroke-width="1.3" marker-end="url(#arrc)"/>
+
+  <rect x="206" y="139" width="166" height="58" rx="3" fill="#071207" stroke="#22c55e" stroke-width="1"/>
+  <text x="289" y="155" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#22c55e">Roger had 5 balls.</text>
+  <text x="289" y="167" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#22c55e">2 cans × 3 = 6 balls.</text>
+  <text x="289" y="179" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#22c55e">5 + 6 = 11.</text>
+  <text x="289" y="191" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#22c55e">A: 11  ✓ (correct)</text>
+
+  <text x="289" y="216" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">Intermediate reasoning</text>
+  <text x="289" y="228" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">reduces errors</text>
+
+  <!-- Right: Test-time compute scaling -->
+  <rect x="406" y="32" width="354" height="220" rx="6" fill="#111" stroke="#a855f7" stroke-width="1.2"/>
+  <text x="583" y="52" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#a855f7">TEST-TIME COMPUTE SCALING</text>
+
+  <!-- Diagram: N candidates + verifier -->
+  <rect x="416" y="62" width="100" height="20" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="466" y="76" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#999">Prompt + Question</text>
+
+  <line x1="466" y1="82" x2="466" y2="97" stroke="#a855f7" stroke-width="1.3" marker-end="url(#arrb)"/>
+
+  <!-- N solution paths -->
+  <rect x="416" y="98" width="100" height="20" rx="3" fill="#170b2a" stroke="#a855f7" stroke-width="1.2"/>
+  <text x="466" y="112" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#a855f7">Generate N solutions</text>
+
+  <!-- Solutions -->
+  <line x1="420" y1="118" x2="420" y2="133" stroke="#a855f7" stroke-width="1"/>
+  <line x1="466" y1="118" x2="466" y2="133" stroke="#a855f7" stroke-width="1"/>
+  <line x1="512" y1="118" x2="512" y2="133" stroke="#a855f7" stroke-width="1"/>
+
+  <rect x="410" y="134" width="20" height="18" rx="2" fill="#170b2a" stroke="#a855f7" stroke-width="0.8"/>
+  <text x="420" y="147" text-anchor="middle" font-family="monospace" font-size="7" fill="#a855f7">s₁</text>
+  <rect x="456" y="134" width="20" height="18" rx="2" fill="#170b2a" stroke="#a855f7" stroke-width="0.8"/>
+  <text x="466" y="147" text-anchor="middle" font-family="monospace" font-size="7" fill="#a855f7">s₂</text>
+  <rect x="502" y="134" width="20" height="18" rx="2" fill="#170b2a" stroke="#a855f7" stroke-width="0.8"/>
+  <text x="512" y="147" text-anchor="middle" font-family="monospace" font-size="7" fill="#a855f7">sₙ</text>
+  <text x="490" y="147" font-family="monospace" font-size="9" fill="#555">·  ·  ·</text>
+
+  <!-- Verifier (PRM or ORM) -->
+  <line x1="466" y1="152" x2="466" y2="168" stroke="#a855f7" stroke-width="1.3" marker-end="url(#arrb)"/>
+  <rect x="416" y="169" width="100" height="22" rx="3" fill="#1a0a2a" stroke="#a855f7" stroke-width="1.2"/>
+  <text x="466" y="184" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#a855f7">Verifier / PRM</text>
+
+  <!-- Best answer -->
+  <line x1="466" y1="191" x2="466" y2="205" stroke="#a855f7" stroke-width="1.3" marker-end="url(#arrb)"/>
+  <rect x="416" y="206" width="100" height="20" rx="3" fill="#071207" stroke="#22c55e" stroke-width="1.2"/>
+  <text x="466" y="220" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">Best answer</text>
+
+  <!-- Description -->
+  <rect x="530" y="62" width="220" height="178" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="640" y="80" text-anchor="middle" font-family="monospace" font-size="9" fill="#6b7280">Strategies</text>
+  <text x="545" y="96" font-family="monospace" font-size="8" fill="#a855f7">Best-of-N:</text>
+  <text x="545" y="109" font-family="monospace" font-size="8" fill="#555">  Sample N, pick highest</text>
+  <text x="545" y="121" font-family="monospace" font-size="8" fill="#555">  verifier score</text>
+  <text x="545" y="136" font-family="monospace" font-size="8" fill="#a855f7">Process Reward Model:</text>
+  <text x="545" y="149" font-family="monospace" font-size="8" fill="#555">  Score each reasoning</text>
+  <text x="545" y="161" font-family="monospace" font-size="8" fill="#555">  step, not just answer</text>
+  <text x="545" y="176" font-family="monospace" font-size="8" fill="#a855f7">MCTS search:</text>
+  <text x="545" y="189" font-family="monospace" font-size="8" fill="#555">  Tree search over token</text>
+  <text x="545" y="201" font-family="monospace" font-size="8" fill="#555">  sequences (o1-style)</text>
+  <text x="545" y="218" font-family="monospace" font-size="7.5" fill="#3b82f6">More compute → better answer</text>
+  <text x="545" y="230" font-family="monospace" font-size="7.5" fill="#3b82f6">even with same model weights</text>
+
+  <!-- Bottom: o1-style scaling -->
+  <rect x="18" y="266" width="742" height="100" rx="6" fill="#111" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="389" y="286" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#6b7280" letter-spacing="0.5">OpenAI o1 — THINKING TOKENS</text>
+
+  <text x="35" y="305" font-family="monospace" font-size="9" fill="#ccc">  o1 is trained with RL to produce an explicit "thinking" chain before answering (not shown to user)</text>
+  <text x="35" y="320" font-family="monospace" font-size="9" fill="#ccc">  Accuracy scales log-linearly with thinking tokens — spending more tokens gives better answers</text>
+  <text x="35" y="335" font-family="monospace" font-size="9" fill="#555">  Training: GRPO / PPO on math/code where correctness is verifiable</text>
+  <text x="35" y="350" font-family="monospace" font-size="9" fill="#555">  Enables "inference-time scaling" as an axis complementary to training-time scaling</text>
+</svg>

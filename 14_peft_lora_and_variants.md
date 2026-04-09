@@ -43,6 +43,11 @@ Full fine-tuning updates all model weights — expensive in memory, time, and st
 
 ## LoRA — Low-Rank Adaptation
 
+<div class="img-caption">
+  <img src="{{ '/assets/images/lora_decomposition.svg' | relative_url }}" alt="LoRA weight decomposition showing frozen W0 plus trainable low-rank BA matrices, with parameter count comparison">
+  <figcaption>LoRA injects trainable rank-<em>r</em> matrices into frozen weights — same inference cost when merged</figcaption>
+</div>
+
 **LoRA** (Hu et al., 2021) is the most widely used PEFT method. It freezes all pre-trained weights and injects trainable low-rank decomposition matrices into targeted layers.
 
 ### Mathematical Foundation

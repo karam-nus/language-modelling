@@ -42,6 +42,11 @@ The KV-cache stores the Key and Value projections from all previous tokens, so e
 
 ## Step-by-Step Visualization
 
+<div class="img-caption">
+  <img src="{{ '/assets/images/kv_cache_generation.svg' | relative_url }}" alt="KV cache generation showing token-by-token generation with cache reuse across steps, plus memory calculation formula">
+  <figcaption>KV cache builds up one token at a time — each new token only runs through the model once, reusing cached K/V</figcaption>
+</div>
+
 <div class="diagram">
 <div class="diagram-title">KV-Cache Growth During Generation</div>
 <div class="flow">

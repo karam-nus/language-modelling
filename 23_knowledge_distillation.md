@@ -38,6 +38,11 @@ Quantisation (Chapters 20–22) reduces memory by lowering numeric precision. Di
 
 ## Knowledge Distillation — Fundamentals
 
+<div class="img-caption">
+  <img src="{{ '/assets/images/knowledge_distillation.svg' | relative_url }}" alt="Knowledge distillation showing teacher-student setup with soft labels, temperature scaling, and four distillation types">
+  <figcaption>Knowledge distillation: a large teacher's soft probability distribution trains a small student more effectively than hard one-hot labels</figcaption>
+</div>
+
 ### The Core Idea (Hinton et al., 2015)
 
 A neural network trained on hard labels (one-hot targets) discards the probability mass it assigns to near-misses. A **teacher model's soft logits** contain rich information about similarity structure:

@@ -74,9 +74,30 @@
         </div>
       </footer>
     </main>
+
+    <aside class="toc-sidebar" id="tocSidebar" aria-label="On this page">
+      <div class="toc-header">
+        <span class="toc-title">On this page</span>
+        <button class="toc-collapse-btn" id="tocCollapseBtn" aria-label="Collapse table of contents">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="9 6 15 12 9 18"></polyline>
+          </svg>
+        </button>
+      </div>
+      <nav class="toc-nav" id="tocNav" aria-label="Page sections"></nav>
+    </aside>
   </div>
 
+  <button class="toc-open-btn" id="tocOpenBtn" aria-label="Open table of contents">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="21" y1="6" x2="3" y2="6"></line>
+      <line x1="21" y1="12" x2="9" y2="12"></line>
+      <line x1="21" y1="18" x2="3" y2="18"></line>
+    </svg>
+  </button>
+
   <script>
+    /* ---- Left sidebar toggle ---- */
     (function() {
       var toggle = document.getElementById('sidebarToggle');
       var sidebar = document.getElementById('sidebar');
@@ -131,6 +152,114 @@
       if (activeLink) {
         activeLink.scrollIntoView({ block: 'nearest' });
       }
+    })();
+
+    /* ---- Right-side page TOC ---- */
+    (function() {
+      var tocSidebar   = document.getElementById('tocSidebar');
+      var tocNav       = document.getElementById('tocNav');
+      var collapseBtn  = document.getElementById('tocCollapseBtn');
+      var openBtn      = document.getElementById('tocOpenBtn');
+      var layout       = document.getElementById('layout');
+
+      var TOC_BREAKPOINT = 1100;
+
+      function isTocSupported() {
+        return window.innerWidth > TOC_BREAKPOINT;
+      }
+
+      /* Build TOC from h2 / h3 headings inside .content */
+      var content  = document.querySelector('.content');
+      var headings = content ? Array.from(content.querySelectorAll('h2, h3')) : [];
+
+      /* Auto-assign IDs if kramdown didn't generate them */
+      headings.forEach(function(h, i) {
+        if (!h.id) {
+          h.id = 'section-' + i;
+        }
+      });
+
+      var tocItems = [];
+
+      if (headings.length > 0) {
+        headings.forEach(function(h) {
+          var a = document.createElement('a');
+          a.href    = '#' + h.id;
+          a.className = 'toc-item toc-' + h.tagName.toLowerCase();
+          a.textContent = h.textContent.replace(/^#+\s*/, '').trim();
+          a.dataset.id  = h.id;
+          tocItems.push(a);
+          tocNav.appendChild(a);
+        });
+      } else {
+        /* No headings — hide TOC entirely */
+        tocSidebar.style.display = 'none';
+        if (openBtn) openBtn.style.display = 'none';
+        return;
+      }
+
+      /* Restore or apply collapsed state */
+      function applyTocState() {
+        if (!isTocSupported()) {
+          tocSidebar.style.display = 'none';
+          openBtn.style.display    = 'none';
+          layout.classList.remove('toc-open');
+          return;
+        }
+        tocSidebar.style.display = '';
+        var isOpen = localStorage.getItem('tocCollapsed') !== 'true';
+        if (isOpen) {
+          layout.classList.add('toc-open');
+          openBtn.style.display = 'none';
+        } else {
+          layout.classList.remove('toc-open');
+          openBtn.style.display = 'flex';
+        }
+      }
+
+      applyTocState();
+      window.addEventListener('resize', applyTocState);
+
+      collapseBtn.addEventListener('click', function() {
+        layout.classList.remove('toc-open');
+        openBtn.style.display = 'flex';
+        localStorage.setItem('tocCollapsed', 'true');
+      });
+
+      openBtn.addEventListener('click', function() {
+        layout.classList.add('toc-open');
+        openBtn.style.display = 'none';
+        localStorage.setItem('tocCollapsed', 'false');
+      });
+
+      /* Scroll-spy: highlight current section */
+      if ('IntersectionObserver' in window) {
+        var activeId = null;
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              activeId = entry.target.id;
+            }
+          });
+          tocItems.forEach(function(item) {
+            item.classList.toggle('active', item.dataset.id === activeId);
+          });
+        }, { rootMargin: '-5% 0px -80% 0px', threshold: 0 });
+
+        headings.forEach(function(h) { observer.observe(h); });
+      }
+
+      /* Smooth scroll on TOC link click */
+      tocItems.forEach(function(a) {
+        a.addEventListener('click', function(e) {
+          e.preventDefault();
+          var target = document.getElementById(a.dataset.id);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            history.replaceState(null, '', '#' + a.dataset.id);
+          }
+        });
+      });
     })();
   </script>
 </body>

@@ -38,6 +38,11 @@ The key insight: MoE gives you the **quality of a large model** with the **infer
 
 ## MoE Architecture
 
+<div class="img-caption">
+  <img src="{{ '/assets/images/moe_routing.svg' | relative_url }}" alt="MoE sparse routing diagram showing token embedding passing through router to activate top-2 of 8 experts, with weighted output combination">
+  <figcaption>MoE routing: only top-k experts activate per token — same FLOP cost as a single dense FFN despite having E expert parameter copies</figcaption>
+</div>
+
 In a standard transformer, each layer has one FFN. In MoE, the FFN is replaced by N experts + a router:
 
 <div class="diagram">

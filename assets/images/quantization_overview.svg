@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 380" width="780" height="380" style="background:#111111;">
+  <!-- Title -->
+  <text x="390" y="22" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#6b7280" letter-spacing="1">QUANTIZATION — SYMMETRIC vs ASYMMETRIC</text>
+
+  <!-- ── Left: Symmetric ── -->
+  <rect x="20" y="32" width="360" height="320" rx="6" fill="#111" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="200" y="53" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10.5" fill="#3b82f6">Symmetric  (INT8)</text>
+
+  <!-- Number line -->
+  <line x1="50" y1="110" x2="350" y2="110" stroke="#2a2a2a" stroke-width="2"/>
+  <!-- Zero -->
+  <line x1="200" y1="100" x2="200" y2="120" stroke="#555" stroke-width="1.5"/>
+  <text x="200" y="133" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">0</text>
+
+  <!-- FP32 range -->
+  <rect x="52" y="70" width="296" height="12" rx="2" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="200" y="80" text-anchor="middle" font-family="monospace" font-size="8" fill="#3b82f6">FP32 range  [−max_val, +max_val]</text>
+
+  <!-- INT8 symmetric range -->
+  <rect x="82" y="88" width="236" height="8" rx="1" fill="#1a1a3a" stroke="#a855f7" stroke-width="1"/>
+  <text x="200" y="97" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#a855f7">INT8  [−127, +127]</text>
+
+  <!-- Tick marks for INT8 range -->
+  <line x1="82" y1="105" x2="82" y2="120" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="82" y="133" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#a855f7">-127</text>
+  <line x1="318" y1="105" x2="318" y2="120" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="318" y="133" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#a855f7">+127</text>
+
+  <!-- Formula -->
+  <text x="200" y="158" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#ccc">scale = max_val / 127</text>
+  <text x="200" y="174" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#ccc">x_quant = round(x / scale)</text>
+  <text x="200" y="190" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#ccc">x_dequant = x_quant × scale</text>
+
+  <!-- Example -->
+  <rect x="40" y="204" width="300" height="90" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="190" y="222" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">Example  (max_val = 0.84)</text>
+  <text x="50" y="240" font-family="monospace" font-size="8.5" fill="#ccc">  scale = 0.84 / 127 ≈ 0.00661</text>
+  <text x="50" y="255" font-family="monospace" font-size="8.5" fill="#3b82f6">  FP32:  0.42  →  INT8:  64</text>
+  <text x="50" y="270" font-family="monospace" font-size="8.5" fill="#3b82f6">  FP32: -0.21  →  INT8: -32</text>
+  <text x="50" y="285" font-family="monospace" font-size="8.5" fill="#555">  Zero-point = 0  (symmetric)</text>
+
+  <!-- Pros/Cons -->
+  <text x="50" y="320" font-family="monospace" font-size="8" fill="#22c55e">✓ Simple, hardware-friendly</text>
+  <text x="50" y="334" font-family="monospace" font-size="8" fill="#f97316">✗ Wastes range for skewed distributions</text>
+
+  <!-- ── Right: Asymmetric ── -->
+  <rect x="400" y="32" width="360" height="320" rx="6" fill="#111" stroke="#f97316" stroke-width="1.2"/>
+  <text x="580" y="53" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10.5" fill="#f97316">Asymmetric  (INT8)</text>
+
+  <!-- Number line -->
+  <line x1="430" y1="110" x2="730" y2="110" stroke="#2a2a2a" stroke-width="2"/>
+
+  <!-- FP32 range (offset) -->
+  <rect x="470" y="70" width="240" height="12" rx="2" fill="#1c0e00" stroke="#f97316" stroke-width="1"/>
+  <text x="590" y="80" text-anchor="middle" font-family="monospace" font-size="8" fill="#f97316">FP32 range  [min_val, max_val]</text>
+  <line x1="470" y1="105" x2="470" y2="120" stroke="#f97316" stroke-width="1.5"/>
+  <text x="470" y="133" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#f97316">min_val</text>
+  <line x1="710" y1="105" x2="710" y2="120" stroke="#f97316" stroke-width="1.5"/>
+  <text x="710" y="133" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#f97316">max_val</text>
+
+  <!-- INT8 full range -->
+  <rect x="432" y="88" width="296" height="8" rx="1" fill="#1a1a3a" stroke="#a855f7" stroke-width="1"/>
+  <text x="580" y="97" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#a855f7">INT8  [0, 255]</text>
+  <line x1="432" y1="105" x2="432" y2="120" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="432" y="133" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#a855f7">0</text>
+  <line x1="728" y1="105" x2="728" y2="120" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="728" y="133" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#a855f7">255</text>
+
+  <!-- zero_point marker -->
+  <line x1="520" y1="100" x2="520" y2="122" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <text x="520" y="134" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#06b6d4">z</text>
+
+  <!-- Formula -->
+  <text x="580" y="158" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#ccc">scale = (max−min) / 255</text>
+  <text x="580" y="174" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#ccc">zero_point = −round(min/scale)</text>
+  <text x="580" y="190" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#ccc">x_quant = round(x/scale) + z</text>
+
+  <!-- Example -->
+  <rect x="418" y="204" width="322" height="90" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="579" y="222" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">Example  (min=−0.2, max=0.8)</text>
+  <text x="428" y="240" font-family="monospace" font-size="8.5" fill="#ccc">  scale = 1.0 / 255 ≈ 0.003922</text>
+  <text x="428" y="255" font-family="monospace" font-size="8.5" fill="#ccc">  zero_point = round(0.2/0.003922) = 51</text>
+  <text x="428" y="270" font-family="monospace" font-size="8.5" fill="#f97316">  FP32: 0.0  →  INT8:  51  (= z)</text>
+  <text x="428" y="285" font-family="monospace" font-size="8.5" fill="#f97316">  FP32: 0.8  →  INT8: 255</text>
+
+  <!-- Pros/Cons -->
+  <text x="418" y="320" font-family="monospace" font-size="8" fill="#22c55e">✓ Fits asymmetric distributions (activations)</text>
+  <text x="418" y="334" font-family="monospace" font-size="8" fill="#f97316">✗ Extra zero_point adds compute overhead</text>
+
+  <!-- Bottom note -->
+  <text x="390" y="363" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">Quantization error (rounding noise) ∝ scale — smaller scale = finer grid = less error</text>
+</svg>

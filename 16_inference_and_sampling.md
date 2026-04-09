@@ -58,6 +58,11 @@ At inference time, a decoder model generates one token at a time. Each step:
 
 ## Greedy Decoding
 
+<div class="img-caption">
+  <img src="{{ '/assets/images/sampling_strategies.svg' | relative_url }}" alt="Four sampling strategy comparison: greedy always picks argmax; temperature scales logits; top-k keeps k most likely; top-p nucleus truncates by cumulative probability">
+  <figcaption>Sampling strategies compared — from deterministic greedy to adaptive nucleus sampling</figcaption>
+</div>
+
 The simplest strategy: always pick the highest-probability token.
 
 ```python

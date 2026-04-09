@@ -20,6 +20,11 @@ Standard LLMs generate token by token, choosing the most likely next token. This
 
 ## Chain-of-Thought (CoT) Prompting
 
+<div class="img-caption">
+  <img src="{{ '/assets/images/chain_of_thought.svg' | relative_url }}" alt="Chain-of-thought prompting comparison versus standard prompting, plus test-time compute scaling with Best-of-N, PRM, and MCTS strategies">
+  <figcaption>CoT makes the model reason step-by-step; test-time compute scaling (o1-style) extends this with search over reasoning paths</figcaption>
+</div>
+
 Wei et al. (2022) showed that adding "Let's think step by step" dramatically improves math and logic:
 
 <div class="diagram">

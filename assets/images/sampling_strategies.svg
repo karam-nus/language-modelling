@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 360" width="780" height="360" style="background:#111111;">
+  <!-- Title -->
+  <text x="390" y="22" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#6b7280" letter-spacing="1">SAMPLING STRATEGIES — GREEDY vs TEMP vs TOP-K vs TOP-P</text>
+
+  <!-- Shared vocabulary bar chart (logits/probs) -->
+  <!-- Vocab: "cat" 0.40, "dog" 0.25, "bird" 0.15, "fish" 0.08, "fox" 0.06, "owl" 0.04, "ant" 0.02 -->
+
+  <!-- Panel 1: Greedy -->
+  <rect x="18" y="32" width="172" height="300" rx="5" fill="#111" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="104" y="51" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3b82f6">Greedy</text>
+  <text x="104" y="64" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">Always pick argmax</text>
+
+  <!-- Bars -->
+  <rect x="30" y="80" width="100" height="16" rx="2" fill="#3b82f6"/>
+  <text x="135" y="92" font-family="monospace" font-size="8.5" fill="#3b82f6">cat  0.40 ✓</text>
+  <rect x="30" y="100" width="62" height="16" rx="2" fill="#1e3a5f" opacity="0.6"/>
+  <text x="135" y="112" font-family="monospace" font-size="8.5" fill="#555">dog  0.25</text>
+  <rect x="30" y="120" width="37" height="16" rx="2" fill="#1e3a5f" opacity="0.4"/>
+  <text x="135" y="132" font-family="monospace" font-size="8.5" fill="#555">bird 0.15</text>
+  <rect x="30" y="140" width="20" height="16" rx="2" fill="#1e3a5f" opacity="0.3"/>
+  <text x="135" y="152" font-family="monospace" font-size="8.5" fill="#555">fish 0.08</text>
+  <rect x="30" y="160" width="15" height="16" rx="2" fill="#1e3a5f" opacity="0.2"/>
+  <text x="135" y="172" font-family="monospace" font-size="8.5" fill="#555">fox  0.06</text>
+  <rect x="30" y="180" width="10" height="16" rx="2" fill="#1e3a5f" opacity="0.15"/>
+  <text x="135" y="192" font-family="monospace" font-size="8.5" fill="#555">owl  0.04</text>
+
+  <text x="104" y="228" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">Always selects "cat"</text>
+  <text x="104" y="243" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">T=0  →  deterministic</text>
+  <rect x="28" y="256" width="144" height="62" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="100" y="272" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#22c55e">✓ Fast, predictable</text>
+  <text x="100" y="285" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#f97316">✗ Repetitive loops</text>
+  <text x="100" y="298" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#f97316">✗ Misses diverse output</text>
+  <text x="100" y="312" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">Use: code, facts</text>
+
+  <!-- Panel 2: Temperature -->
+  <rect x="200" y="32" width="172" height="300" rx="5" fill="#111" stroke="#a855f7" stroke-width="1.2"/>
+  <text x="286" y="51" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#a855f7">Temperature</text>
+  <text x="286" y="64" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">logits ÷ T  then softmax</text>
+
+  <!-- T=0.5 (sharper) -->
+  <rect x="212" y="80" width="130" height="14" rx="2" fill="#a855f7" opacity="0.9"/>
+  <text x="348" y="91" font-family="monospace" font-size="7.5" fill="#a855f7">0.62 T=0.5</text>
+  <rect x="212" y="98" width="62" height="14" rx="2" fill="#7e22ce" opacity="0.6"/>
+  <text x="348" y="109" font-family="monospace" font-size="7.5" fill="#555">0.22</text>
+  <rect x="212" y="116" width="30" height="14" rx="2" fill="#7e22ce" opacity="0.4"/>
+  <text x="348" y="127" font-family="monospace" font-size="7.5" fill="#555">0.09</text>
+  <rect x="212" y="134" width="16" height="14" rx="2" fill="#7e22ce" opacity="0.25"/>
+  <rect x="212" y="152" width="10" height="14" rx="2" fill="#7e22ce" opacity="0.15"/>
+  <rect x="212" y="170" width="6" height="14" rx="2" fill="#7e22ce" opacity="0.1"/>
+
+  <!-- T=1.5 (flatter) -->
+  <rect x="212" y="193" width="74" height="14" rx="2" fill="#06b6d4" opacity="0.7"/>
+  <text x="348" y="204" font-family="monospace" font-size="7.5" fill="#06b6d4">0.27 T=1.5</text>
+  <rect x="212" y="211" width="60" height="14" rx="2" fill="#06b6d4" opacity="0.6"/>
+  <text x="348" y="222" font-family="monospace" font-size="7.5" fill="#555">0.22</text>
+  <rect x="212" y="229" width="50" height="14" rx="2" fill="#06b6d4" opacity="0.5"/>
+  <text x="348" y="240" font-family="monospace" font-size="7.5" fill="#555">0.18</text>
+
+  <rect x="210" y="256" width="152" height="62" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="286" y="272" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#22c55e">✓ Adjustable creativity</text>
+  <text x="286" y="285" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#f97316">✗ High T → incoherent</text>
+  <text x="286" y="298" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">T≈0.7-1.0: chat</text>
+  <text x="286" y="312" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">T≈1.2-1.5: creative</text>
+
+  <!-- Panel 3: Top-k -->
+  <rect x="382" y="32" width="172" height="300" rx="5" fill="#111" stroke="#f97316" stroke-width="1.2"/>
+  <text x="468" y="51" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#f97316">Top-k  (k=3)</text>
+  <text x="468" y="64" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">Keep top-k, zero rest</text>
+
+  <!-- Bars: top 3 kept -->
+  <rect x="394" y="80" width="100" height="16" rx="2" fill="#f97316" opacity="0.9"/>
+  <text x="500" y="92" font-family="monospace" font-size="8.5" fill="#f97316">cat  0.49 ←</text>
+  <rect x="394" y="100" width="62" height="16" rx="2" fill="#f97316" opacity="0.6"/>
+  <text x="500" y="112" font-family="monospace" font-size="8.5" fill="#f97316">dog  0.31 ←</text>
+  <rect x="394" y="120" width="37" height="16" rx="2" fill="#f97316" opacity="0.45"/>
+  <text x="500" y="132" font-family="monospace" font-size="8.5" fill="#f97316">bird 0.18 ←</text>
+  <rect x="394" y="140" width="20" height="16" rx="2" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="0.5"/>
+  <text x="500" y="152" font-family="monospace" font-size="8.5" fill="#3a3a3a">fish 0.00</text>
+  <rect x="394" y="160" width="15" height="16" rx="2" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="0.5"/>
+  <text x="500" y="172" font-family="monospace" font-size="8.5" fill="#3a3a3a">fox  0.00</text>
+  <rect x="394" y="180" width="10" height="16" rx="2" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="0.5"/>
+  <text x="500" y="192" font-family="monospace" font-size="8.5" fill="#3a3a3a">owl  0.00</text>
+
+  <text x="468" y="228" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">Re-normalise, sample</text>
+  <text x="468" y="243" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">from {cat, dog, bird}</text>
+  <rect x="392" y="256" width="152" height="62" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="468" y="272" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#22c55e">✓ Caps tail risk</text>
+  <text x="468" y="285" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#f97316">✗ Fixed k across vocab</text>
+  <text x="468" y="298" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">Use: k=20-50 typical</text>
+  <text x="468" y="312" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">Can be too restrictive</text>
+
+  <!-- Panel 4: Top-p (nucleus) -->
+  <rect x="564" y="32" width="197" height="300" rx="5" fill="#111" stroke="#22c55e" stroke-width="1.2"/>
+  <text x="662" y="51" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#22c55e">Top-p / Nucleus  (p=0.85)</text>
+  <text x="662" y="64" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">Keep cumsum ≤ p</text>
+
+  <!-- Bars with cumsum annotation -->
+  <rect x="576" y="80" width="100" height="16" rx="2" fill="#22c55e" opacity="0.9"/>
+  <text x="682" y="92" font-family="monospace" font-size="8" fill="#22c55e">cat  0.40 Σ=0.40 ←</text>
+  <rect x="576" y="100" width="62" height="16" rx="2" fill="#22c55e" opacity="0.6"/>
+  <text x="682" y="112" font-family="monospace" font-size="8" fill="#22c55e">dog  0.25 Σ=0.65 ←</text>
+  <rect x="576" y="120" width="37" height="16" rx="2" fill="#22c55e" opacity="0.45"/>
+  <text x="682" y="132" font-family="monospace" font-size="8" fill="#22c55e">bird 0.15 Σ=0.80 ←</text>
+  <rect x="576" y="140" width="20" height="16" rx="2" fill="#22c55e" opacity="0.35"/>
+  <text x="682" y="152" font-family="monospace" font-size="8" fill="#22c55e">fish 0.08 Σ=0.88 ←</text>
+  <!-- p=0.85 boundary at fish -->
+  <line x1="574" y1="157" x2="762" y2="157" stroke="#f97316" stroke-width="1" stroke-dasharray="3,2"/>
+  <rect x="576" y="161" width="15" height="16" rx="2" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="0.5"/>
+  <text x="682" y="173" font-family="monospace" font-size="8" fill="#3a3a3a">fox  0.06 Σ=0.94 ✗</text>
+  <rect x="576" y="181" width="10" height="16" rx="2" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="0.5"/>
+  <text x="682" y="193" font-family="monospace" font-size="8" fill="#3a3a3a">owl  0.04 Σ=0.98 ✗</text>
+
+  <text x="662" y="228" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">Dynamic vocabulary size</text>
+  <text x="662" y="243" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">adapts to distribution</text>
+  <rect x="574" y="256" width="176" height="62" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="662" y="272" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#22c55e">✓ Adapts to flatness</text>
+  <text x="662" y="285" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#22c55e">✓ Industry standard</text>
+  <text x="662" y="298" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">p=0.9: balanced</text>
+  <text x="662" y="312" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">Often combined with T</text>
+</svg>
