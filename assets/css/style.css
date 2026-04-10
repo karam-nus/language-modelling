@@ -314,18 +314,6 @@ body {
   color: var(--accent);
 }
 
-/* Hide TOC on screens too narrow to show it */
-@media (max-width: 1100px) {
-  .toc-sidebar,
-  .toc-open-btn {
-    display: none !important;
-  }
-  .layout.toc-open .main-content {
-    margin-right: 0;
-  }
-}
-
-
 .sidebar-toggle {
   display: flex;
   position: fixed;
@@ -384,9 +372,22 @@ body {
   transition: margin-left 250ms ease, margin-right 250ms ease;
 }
 
-/* Right TOC open — push content left */
+/* Right TOC open — push content left (only effective above the TOC breakpoint) */
 .layout.toc-open .main-content {
   margin-right: var(--toc-width);
+}
+
+/* Hide TOC on screens too narrow to show it.
+   This rule MUST come after .layout.toc-open .main-content above so that
+   margin-right: 0 correctly overrides it at narrow viewports. */
+@media (max-width: 1340px) {
+  .toc-sidebar,
+  .toc-open-btn {
+    display: none !important;
+  }
+  .layout.toc-open .main-content {
+    margin-right: 0;
+  }
 }
 
 /* Desktop sidebar collapsed state */
@@ -398,8 +399,17 @@ body {
   margin-left: 0;
 }
 
-/* On desktop, position toggle so it doesn't overlap content when sidebar visible */
+/* On desktop, position toggle so it sits just outside the visible sidebar */
 @media (min-width: 769px) {
+  .sidebar-toggle {
+    left: calc(var(--sidebar-width) + 0.75rem);
+    transition: left 250ms ease, background-color var(--transition), border-color var(--transition);
+  }
+
+  .layout.sidebar-collapsed .sidebar-toggle {
+    left: 0.75rem;
+  }
+
   .sidebar {
     transition: transform 250ms ease;
   }
