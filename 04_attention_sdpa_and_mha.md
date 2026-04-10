@@ -182,6 +182,11 @@ mask = causal_mask(5)
 
 ## Multi-Head Attention (MHA)
 
+<div class="img-caption">
+  <img src="{{ '/assets/images/self_attention.svg' | relative_url }}" alt="Scaled dot-product attention showing Q/K/V projections, causal attention weight matrix, and multi-head concatenation">
+  <figcaption>Scaled dot-product attention with causal masking and multi-head mechanism</figcaption>
+</div>
+
 Instead of computing a single attention function, **multi-head attention** runs H parallel attention operations (called "heads"), each on a different d_k-dimensional subspace. This lets different heads learn different types of relationships (syntactic, semantic, positional, etc.).
 
 <div class="diagram">

@@ -239,6 +239,11 @@ Mistral 7B uses W = 4096 with alternating sliding-window and full-attention laye
 
 ## Comparison Summary
 
+<div class="img-caption">
+  <img src="{{ '/assets/images/gqa_mha_mqa.svg' | relative_url }}" alt="Side-by-side comparison of MHA, GQA, and MQA showing Q, K, V head counts and KV cache sizes">
+  <figcaption>Multi-Head Attention vs Grouped-Query Attention vs Multi-Query Attention — head configurations and cache implications</figcaption>
+</div>
+
 | Variant | KV per Head | KV Heads | Cache Size | Quality | Models |
 |---------|:-----------:|:--------:|:----------:|:-------:|--------|
 | **MHA** | Full | H | `2 × L × H × d_k × T` | Best | GPT, LLaMA-1 |

@@ -20,6 +20,11 @@ Dequantization (at inference time): $\hat{x} = s \cdot (x_q - z)$
 
 ## Symmetric vs Asymmetric Quantization
 
+<div class="img-caption">
+  <img src="{{ '/assets/images/quantization_overview.svg' | relative_url }}" alt="Symmetric versus asymmetric INT8 quantization showing number lines, formulas, and worked examples">
+  <figcaption>Symmetric quantization maps to [−127, 127] around zero; asymmetric maps to [0, 255] with a zero-point offset</figcaption>
+</div>
+
 <div class="diagram">
 <div class="diagram-title">Symmetric vs Asymmetric Quantization</div>
 <div class="compare">

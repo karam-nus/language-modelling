@@ -105,6 +105,11 @@ The hidden dimension stays constant at d_model through all transformer blocks. O
 
 ## Component Deep Dive
 
+<div class="img-caption">
+  <img src="{{ '/assets/images/transformer_block.svg' | relative_url }}" alt="Decoder-only transformer block showing RMSNorm, Self-Attention, and Feed-Forward layers with residual connections, alongside a model scale comparison table">
+  <figcaption>Complete decoder-only transformer block with tensor shapes and model scale reference (LLaMA family)</figcaption>
+</div>
+
 ### Residual Connections
 
 Every sub-layer (attention and FFN) uses a **residual (skip) connection**: the input to the sub-layer is added to its output. This enables gradient flow through deep networks and lets each layer learn a *delta* rather than a full transformation:

@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 380" width="780" height="380" style="background:#111111;">
+  <defs>
+    <marker id="arrb" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrc" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#06b6d4"/>
+    </marker>
+    <marker id="arro" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#f97316"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="390" y="22" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#6b7280" letter-spacing="1">MHA vs GQA vs MQA — KV HEAD CONFIGURATIONS</text>
+
+  <!-- ── MHA panel ── -->
+  <rect x="20" y="32" width="228" height="310" rx="6" fill="#111" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="134" y="52" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10.5" fill="#3b82f6">Multi-Head Attention</text>
+  <text x="134" y="66" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">h Q heads,  h K heads,  h V heads</text>
+
+  <!-- MHA: 4 Q, 4 K, 4 V heads in columns -->
+  <!-- Q heads row label -->
+  <text x="32" y="89" font-family="monospace" font-size="9" fill="#3b82f6">Q</text>
+  <rect x="48" y="78" width="36" height="20" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="66" y="92" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Q₁</text>
+  <rect x="90" y="78" width="36" height="20" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="108" y="92" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Q₂</text>
+  <rect x="132" y="78" width="36" height="20" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="150" y="92" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Q₃</text>
+  <rect x="174" y="78" width="36" height="20" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="192" y="92" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Q₄</text>
+
+  <text x="32" y="125" font-family="monospace" font-size="9" fill="#f97316">K</text>
+  <rect x="48" y="114" width="36" height="20" rx="3" fill="#140a00" stroke="#f97316" stroke-width="1"/>
+  <text x="66" y="128" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#f97316">K₁</text>
+  <rect x="90" y="114" width="36" height="20" rx="3" fill="#140a00" stroke="#f97316" stroke-width="1"/>
+  <text x="108" y="128" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#f97316">K₂</text>
+  <rect x="132" y="114" width="36" height="20" rx="3" fill="#140a00" stroke="#f97316" stroke-width="1"/>
+  <text x="150" y="128" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#f97316">K₃</text>
+  <rect x="174" y="114" width="36" height="20" rx="3" fill="#140a00" stroke="#f97316" stroke-width="1"/>
+  <text x="192" y="128" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#f97316">K₄</text>
+
+  <text x="32" y="161" font-family="monospace" font-size="9" fill="#22c55e">V</text>
+  <rect x="48" y="150" width="36" height="20" rx="3" fill="#071207" stroke="#22c55e" stroke-width="1"/>
+  <text x="66" y="164" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">V₁</text>
+  <rect x="90" y="150" width="36" height="20" rx="3" fill="#071207" stroke="#22c55e" stroke-width="1"/>
+  <text x="108" y="164" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">V₂</text>
+  <rect x="132" y="150" width="36" height="20" rx="3" fill="#071207" stroke="#22c55e" stroke-width="1"/>
+  <text x="150" y="164" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">V₃</text>
+  <rect x="174" y="150" width="36" height="20" rx="3" fill="#071207" stroke="#22c55e" stroke-width="1"/>
+  <text x="192" y="164" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">V₄</text>
+
+  <!-- 1:1:1 connections lines -->
+  <line x1="66" y1="98" x2="66" y2="114" stroke="#2a2a2a" stroke-width="1"/>
+  <line x1="108" y1="98" x2="108" y2="114" stroke="#2a2a2a" stroke-width="1"/>
+  <line x1="150" y1="98" x2="150" y2="114" stroke="#2a2a2a" stroke-width="1"/>
+  <line x1="192" y1="98" x2="192" y2="114" stroke="#2a2a2a" stroke-width="1"/>
+  <line x1="66" y1="134" x2="66" y2="150" stroke="#2a2a2a" stroke-width="1"/>
+  <line x1="108" y1="134" x2="108" y2="150" stroke="#2a2a2a" stroke-width="1"/>
+  <line x1="150" y1="134" x2="150" y2="150" stroke="#2a2a2a" stroke-width="1"/>
+  <line x1="192" y1="134" x2="192" y2="150" stroke="#2a2a2a" stroke-width="1"/>
+
+  <text x="134" y="200" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">KV cache: h × 2 × T × d_k</text>
+  <text x="134" y="215" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">GPT-2, BERT, early models</text>
+  <text x="134" y="235" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">4 KV heads  (h=4 example)</text>
+  <text x="134" y="250" text-anchor="middle" font-family="monospace" font-size="9" fill="#f97316">Full KV cache size</text>
+
+  <!-- Stats -->
+  <rect x="32" y="265" width="196" height="64" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="130" y="283" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">Param overhead: high</text>
+  <text x="130" y="296" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">KV cache: large</text>
+  <text x="130" y="309" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">Quality: ★★★★★</text>
+  <text x="130" y="322" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">Memory efficiency: ★★☆☆☆</text>
+
+  <!-- ── GQA panel ── -->
+  <rect x="275" y="32" width="228" height="310" rx="6" fill="#111" stroke="#a855f7" stroke-width="1.2"/>
+  <text x="389" y="52" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10.5" fill="#a855f7">Grouped-Query Attention</text>
+  <text x="389" y="66" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">h Q heads,  g K heads,  g V heads  (g &lt; h)</text>
+
+  <!-- GQA: 4 Q, 2 K, 2 V (group size 2) -->
+  <text x="285" y="89" font-family="monospace" font-size="9" fill="#3b82f6">Q</text>
+  <rect x="300" y="78" width="36" height="20" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="318" y="92" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Q₁</text>
+  <rect x="342" y="78" width="36" height="20" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="360" y="92" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Q₂</text>
+  <rect x="384" y="78" width="36" height="20" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="402" y="92" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Q₃</text>
+  <rect x="426" y="78" width="36" height="20" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="444" y="92" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Q₄</text>
+
+  <!-- GQA: 2 KV heads, shared -->
+  <text x="285" y="131" font-family="monospace" font-size="9" fill="#f97316">K</text>
+  <rect x="321" y="120" width="36" height="20" rx="3" fill="#140a00" stroke="#f97316" stroke-width="1.5"/>
+  <text x="339" y="134" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#f97316">K₁</text>
+  <rect x="405" y="120" width="36" height="20" rx="3" fill="#140a00" stroke="#f97316" stroke-width="1.5"/>
+  <text x="423" y="134" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#f97316">K₂</text>
+
+  <text x="285" y="167" font-family="monospace" font-size="9" fill="#22c55e">V</text>
+  <rect x="321" y="156" width="36" height="20" rx="3" fill="#071207" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="339" y="170" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">V₁</text>
+  <rect x="405" y="156" width="36" height="20" rx="3" fill="#071207" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="423" y="170" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">V₂</text>
+
+  <!-- Q-to-K connections (2 Q per K group) -->
+  <line x1="318" y1="98" x2="339" y2="120" stroke="#a855f7" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="360" y1="98" x2="339" y2="120" stroke="#a855f7" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="402" y1="98" x2="423" y2="120" stroke="#a855f7" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="444" y1="98" x2="423" y2="120" stroke="#a855f7" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="339" y1="140" x2="339" y2="156" stroke="#2a2a2a" stroke-width="1"/>
+  <line x1="423" y1="140" x2="423" y2="156" stroke="#2a2a2a" stroke-width="1"/>
+
+  <text x="389" y="206" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">KV cache: g × 2 × T × d_k</text>
+  <text x="389" y="220" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#a855f7">LLaMA-3, Mistral, Gemma</text>
+  <text x="389" y="240" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">2 KV heads  (g=2, h=4 example)</text>
+  <text x="389" y="255" text-anchor="middle" font-family="monospace" font-size="9" fill="#a855f7">½ KV cache size vs MHA</text>
+
+  <rect x="285" y="265" width="196" height="64" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="383" y="283" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">Param overhead: low</text>
+  <text x="383" y="296" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">KV cache: reduced (÷g)</text>
+  <text x="383" y="309" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">Quality: ★★★★☆</text>
+  <text x="383" y="322" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">Memory efficiency: ★★★★☆</text>
+
+  <!-- ── MQA panel ── -->
+  <rect x="530" y="32" width="228" height="310" rx="6" fill="#111" stroke="#06b6d4" stroke-width="1.2"/>
+  <text x="644" y="52" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10.5" fill="#06b6d4">Multi-Query Attention</text>
+  <text x="644" y="66" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">h Q heads,  1 K head,  1 V head</text>
+
+  <!-- MQA: 4 Q, 1 K, 1 V -->
+  <text x="540" y="89" font-family="monospace" font-size="9" fill="#3b82f6">Q</text>
+  <rect x="555" y="78" width="36" height="20" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="573" y="92" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Q₁</text>
+  <rect x="597" y="78" width="36" height="20" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="615" y="92" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Q₂</text>
+  <rect x="639" y="78" width="36" height="20" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="657" y="92" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Q₃</text>
+  <rect x="681" y="78" width="36" height="20" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="699" y="92" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Q₄</text>
+
+  <!-- 1 K, 1 V -->
+  <text x="540" y="136" font-family="monospace" font-size="9" fill="#f97316">K</text>
+  <rect x="617" y="120" width="54" height="20" rx="3" fill="#140a00" stroke="#f97316" stroke-width="1.8"/>
+  <text x="644" y="134" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#f97316">K  (shared)</text>
+
+  <text x="540" y="172" font-family="monospace" font-size="9" fill="#22c55e">V</text>
+  <rect x="617" y="156" width="54" height="20" rx="3" fill="#071207" stroke="#22c55e" stroke-width="1.8"/>
+  <text x="644" y="170" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">V  (shared)</text>
+
+  <!-- All Q to single K -->
+  <line x1="573" y1="98" x2="644" y2="120" stroke="#06b6d4" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="615" y1="98" x2="644" y2="120" stroke="#06b6d4" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="657" y1="98" x2="644" y2="120" stroke="#06b6d4" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="699" y1="98" x2="644" y2="120" stroke="#06b6d4" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="644" y1="140" x2="644" y2="156" stroke="#2a2a2a" stroke-width="1"/>
+
+  <text x="644" y="206" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">KV cache: 1 × 2 × T × d_k</text>
+  <text x="644" y="220" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#06b6d4">Falcon, PaLM, early fast decoders</text>
+  <text x="644" y="240" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">1 KV head  (h=4 example)</text>
+  <text x="644" y="255" text-anchor="middle" font-family="monospace" font-size="9" fill="#06b6d4">¼ KV cache size vs MHA</text>
+
+  <rect x="538" y="265" width="196" height="64" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="636" y="283" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">Param overhead: minimal</text>
+  <text x="636" y="296" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">KV cache: minimal (÷h)</text>
+  <text x="636" y="309" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">Quality: ★★★☆☆</text>
+  <text x="636" y="322" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">Memory efficiency: ★★★★★</text>
+
+  <!-- Bottom footnote -->
+  <text x="390" y="357" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">GQA balances quality and memory; LLaMA-3-8B uses h=32 Q heads, g=8 KV heads (4:1 ratio)</text>
+</svg>

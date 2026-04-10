@@ -30,6 +30,11 @@ Key finding: **parameters matter more than data**. For a fixed compute budget, i
 
 ### Chinchilla Scaling Laws (2022)
 
+<div class="img-caption">
+  <img src="{{ '/assets/images/scaling_laws.svg' | relative_url }}" alt="Scaling laws chart showing compute-optimal frontier versus under-trained models, plus Chinchilla formula and model comparison table">
+  <figcaption>Chinchilla scaling laws: optimal compute splits equally between model size and data — over-training smaller models is now standard practice</figcaption>
+</div>
+
 DeepMind's Hoffmann et al. challenged the Kaplan findings. They showed that **data and parameters should scale equally**:
 
 <div class="diagram">

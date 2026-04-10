@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 360" width="780" height="360" style="background:#111111;">
+  <defs>
+    <marker id="arrb" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arro" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#f97316"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="390" y="22" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#6b7280" letter-spacing="1">SCALING LAWS — CHINCHILLA COMPUTE-OPTIMAL</text>
+
+  <!-- Log-log loss vs parameters chart -->
+  <rect x="30" y="35" width="340" height="280" rx="6" fill="#111" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="200" y="55" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#6b7280" letter-spacing="0.5">LOSS vs COMPUTE  (schematic)</text>
+
+  <!-- Axes -->
+  <line x1="60" y1="70" x2="60" y2="285" stroke="#2a2a2a" stroke-width="1.5"/>
+  <line x1="60" y1="285" x2="350" y2="285" stroke="#2a2a2a" stroke-width="1.5"/>
+  <text x="200" y="306" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">Compute  (FLOPs, log scale) →</text>
+  <text x="30" y="180" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555" transform="rotate(-90 30 180)">Test Loss  (log) →</text>
+
+  <!-- Frontier curve (optimal) -->
+  <path d="M65 240 Q120 190 180 155 Q240 125 300 105 Q340 92 350 86" fill="none" stroke="#22c55e" stroke-width="2.5"/>
+  <text x="310" y="84" font-family="monospace" font-size="8.5" fill="#22c55e">Chinchilla</text>
+  <text x="310" y="95" font-family="monospace" font-size="8" fill="#22c55e">optimal</text>
+
+  <!-- Under-trained (too large model, too few tokens) -->
+  <path d="M65 260 Q130 230 190 205 Q250 185 310 170 Q340 162 350 158" fill="none" stroke="#f97316" stroke-width="1.8" stroke-dasharray="5,3"/>
+  <text x="258" y="160" font-family="monospace" font-size="8" fill="#f97316">under-trained</text>
+  <text x="258" y="170" font-family="monospace" font-size="8" fill="#f97316">(GPT-3 regime)</text>
+
+  <!-- Kaplan scaling lines -->
+  <text x="85" y="265" font-family="monospace" font-size="7.5" fill="#555">10²³</text>
+  <text x="155" y="265" font-family="monospace" font-size="7.5" fill="#555">10²⁴</text>
+  <text x="225" y="265" font-family="monospace" font-size="7.5" fill="#555">10²⁵</text>
+  <text x="295" y="265" font-family="monospace" font-size="7.5" fill="#555">10²⁶</text>
+
+  <!-- Y axis labels -->
+  <text x="55" y="240" text-anchor="end" font-family="monospace" font-size="7.5" fill="#555">3.5</text>
+  <text x="55" y="200" text-anchor="end" font-family="monospace" font-size="7.5" fill="#555">3.0</text>
+  <text x="55" y="155" text-anchor="end" font-family="monospace" font-size="7.5" fill="#555">2.5</text>
+  <text x="55" y="110" text-anchor="end" font-family="monospace" font-size="7.5" fill="#555">2.0</text>
+
+  <!-- Chinchilla optimal point circles -->
+  <circle cx="180" cy="155" r="5" fill="none" stroke="#22c55e" stroke-width="1.5"/>
+  <circle cx="300" cy="105" r="5" fill="none" stroke="#22c55e" stroke-width="1.5"/>
+
+  <!-- Right panel: Chinchilla formula & models -->
+  <rect x="392" y="35" width="368" height="280" rx="6" fill="#111" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="576" y="55" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#6b7280" letter-spacing="0.5">CHINCHILLA OPTIMAL RULE</text>
+
+  <!-- Formula box -->
+  <rect x="410" y="65" width="332" height="50" rx="4" fill="#0f1520" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="576" y="85" text-anchor="middle" font-family="monospace" font-size="10" fill="#3b82f6">N_opt ≈ C^0.5 / 54.1</text>
+  <text x="576" y="103" text-anchor="middle" font-family="monospace" font-size="10" fill="#3b82f6">D_opt ≈ C^0.5 × 54.1</text>
+  <text x="576" y="118" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">(Hoffmann et al. 2022)</text>
+
+  <!-- Simplified rule -->
+  <rect x="410" y="125" width="332" height="30" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="576" y="144" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#ccc">Rule of thumb:  D = 20 × N  tokens</text>
+
+  <!-- Model comparison table -->
+  <text x="576" y="175" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#6b7280" letter-spacing="0.3">MODEL COMPUTE-OPTIMALITY</text>
+
+  <!-- Table -->
+  <text x="420" y="195" font-family="monospace" font-size="8.5" fill="#3b82f6">Model</text>
+  <text x="530" y="195" font-family="monospace" font-size="8.5" fill="#3b82f6">Params</text>
+  <text x="620" y="195" font-family="monospace" font-size="8.5" fill="#3b82f6">Tokens</text>
+  <text x="700" y="195" font-family="monospace" font-size="8.5" fill="#3b82f6">Optimal?</text>
+
+  <line x1="410" y1="200" x2="754" y2="200" stroke="#2a2a2a" stroke-width="0.8"/>
+
+  <text x="420" y="215" font-family="monospace" font-size="8.5" fill="#ccc">GPT-3</text>
+  <text x="530" y="215" font-family="monospace" font-size="8.5" fill="#ccc">175B</text>
+  <text x="620" y="215" font-family="monospace" font-size="8.5" fill="#ccc">300B</text>
+  <text x="700" y="215" font-family="monospace" font-size="8.5" fill="#f97316">under-trained</text>
+
+  <text x="420" y="231" font-family="monospace" font-size="8.5" fill="#ccc">Chinchilla</text>
+  <text x="530" y="231" font-family="monospace" font-size="8.5" fill="#ccc">70B</text>
+  <text x="620" y="231" font-family="monospace" font-size="8.5" fill="#ccc">1.4T</text>
+  <text x="700" y="231" font-family="monospace" font-size="8.5" fill="#22c55e">✓ optimal</text>
+
+  <text x="420" y="247" font-family="monospace" font-size="8.5" fill="#ccc">LLaMA-3 8B</text>
+  <text x="530" y="247" font-family="monospace" font-size="8.5" fill="#ccc">8B</text>
+  <text x="620" y="247" font-family="monospace" font-size="8.5" fill="#ccc">15T</text>
+  <text x="700" y="247" font-family="monospace" font-size="8.5" fill="#3b82f6">over-trained*</text>
+
+  <text x="420" y="263" font-family="monospace" font-size="8.5" fill="#ccc">LLaMA-3 70B</text>
+  <text x="530" y="263" font-family="monospace" font-size="8.5" fill="#ccc">70B</text>
+  <text x="620" y="263" font-family="monospace" font-size="8.5" fill="#ccc">15T</text>
+  <text x="700" y="263" font-family="monospace" font-size="8.5" fill="#3b82f6">over-trained*</text>
+
+  <text x="576" y="285" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">* over-trained = better inference efficiency (cheaper to serve)</text>
+  <text x="576" y="297" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">  smaller model, same quality as larger under-trained model</text>
+
+  <!-- Bottom note -->
+  <text x="390" y="332" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#ccc">Loss ≈ A/N^α + B/D^β + irreducible_loss</text>
+  <text x="390" y="348" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">α ≈ β ≈ 0.5  (Chinchilla);  irreducible loss ≈ entropy of natural language</text>
+</svg>

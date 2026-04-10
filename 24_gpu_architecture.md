@@ -45,6 +45,11 @@ The SM is where computation happens. Each SM (H100) contains:
 
 ## Memory Hierarchy
 
+<div class="img-caption">
+  <img src="{{ '/assets/images/gpu_memory_hierarchy.svg' | relative_url }}" alt="GPU memory hierarchy pyramid showing registers, L1/Shared, L2 cache, and HBM with bandwidth and latency numbers for H100">
+  <figcaption>H100 memory hierarchy — 4 levels from fast per-thread registers to large off-chip HBM3</figcaption>
+</div>
+
 <div class="diagram">
 <div class="diagram-title">GPU Memory Hierarchy</div>
 <div class="flow">

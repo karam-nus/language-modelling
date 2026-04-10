@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 400" width="780" height="400" style="background:#111111;">
+  <defs>
+    <marker id="arrb" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrgr" markerWidth="7" markerHeight="7" refX="3.5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#2a2a2a"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="390" y="22" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#6b7280" letter-spacing="1">MIXTURE OF EXPERTS — SPARSE ROUTING</text>
+
+  <!-- Input token embedding -->
+  <rect x="320" y="35" width="140" height="30" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="390" y="54" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#999">Token embedding  x</text>
+
+  <!-- Router -->
+  <line x1="390" y1="65" x2="390" y2="84" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrb)"/>
+  <rect x="310" y="85" width="160" height="30" rx="4" fill="#0f1520" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="390" y="104" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3b82f6">Router  (linear+softmax)</text>
+
+  <!-- Routing weights output -->
+  <line x1="390" y1="115" x2="390" y2="132" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrb)"/>
+  <text x="390" y="147" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">scores [E] → top-k selection</text>
+
+  <!-- 8 Experts — arranged in 2 rows -->
+  <!-- Row 1: experts 1-4 -->
+  <!-- Expert 1 (selected) -->
+  <rect x="30" y="170" width="80" height="50" rx="4" fill="#0a1a0a" stroke="#22c55e" stroke-width="1.8"/>
+  <text x="70" y="192" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#22c55e">Expert 1</text>
+  <text x="70" y="207" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#22c55e">FFN(x)</text>
+  <text x="70" y="218" text-anchor="middle" font-family="monospace" font-size="7" fill="#22c55e">← selected</text>
+
+  <!-- Expert 2 (not selected) -->
+  <rect x="124" y="170" width="80" height="50" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="164" y="192" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#555">Expert 2</text>
+  <text x="164" y="207" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">FFN(x)</text>
+  <text x="164" y="218" text-anchor="middle" font-family="monospace" font-size="7" fill="#3a3a3a">skipped</text>
+
+  <!-- Expert 3 (not selected) -->
+  <rect x="218" y="170" width="80" height="50" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="258" y="192" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#555">Expert 3</text>
+  <text x="258" y="207" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">FFN(x)</text>
+  <text x="258" y="218" text-anchor="middle" font-family="monospace" font-size="7" fill="#3a3a3a">skipped</text>
+
+  <!-- Expert 4 (selected) -->
+  <rect x="312" y="170" width="80" height="50" rx="4" fill="#0a1a0a" stroke="#22c55e" stroke-width="1.8"/>
+  <text x="352" y="192" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#22c55e">Expert 4</text>
+  <text x="352" y="207" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#22c55e">FFN(x)</text>
+  <text x="352" y="218" text-anchor="middle" font-family="monospace" font-size="7" fill="#22c55e">← selected</text>
+
+  <!-- Expert 5 (not selected) -->
+  <rect x="406" y="170" width="80" height="50" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="446" y="192" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#555">Expert 5</text>
+  <text x="446" y="207" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">FFN(x)</text>
+  <text x="446" y="218" text-anchor="middle" font-family="monospace" font-size="7" fill="#3a3a3a">skipped</text>
+
+  <!-- Expert 6 (not selected) -->
+  <rect x="500" y="170" width="80" height="50" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="540" y="192" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#555">Expert 6</text>
+  <text x="540" y="207" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">FFN(x)</text>
+  <text x="540" y="218" text-anchor="middle" font-family="monospace" font-size="7" fill="#3a3a3a">skipped</text>
+
+  <!-- Expert 7 (not selected) -->
+  <rect x="594" y="170" width="80" height="50" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="634" y="192" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#555">Expert 7</text>
+  <text x="634" y="207" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">FFN(x)</text>
+  <text x="634" y="218" text-anchor="middle" font-family="monospace" font-size="7" fill="#3a3a3a">skipped</text>
+
+  <!-- Expert 8 (not selected) -->
+  <rect x="688" y="170" width="80" height="50" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="728" y="192" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#555">Expert 8</text>
+  <text x="728" y="207" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#555">FFN(x)</text>
+  <text x="728" y="218" text-anchor="middle" font-family="monospace" font-size="7" fill="#3a3a3a">skipped</text>
+
+  <!-- Routing arrows from router to experts -->
+  <!-- Selected: 1 and 4 get colored arrows -->
+  <line x1="370" y1="147" x2="70" y2="170" stroke="#22c55e" stroke-width="1.3" marker-end="url(#arrb)"/>
+  <line x1="380" y1="147" x2="164" y2="170" stroke="#2a2a2a" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="388" y1="147" x2="258" y2="170" stroke="#2a2a2a" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="396" y1="147" x2="352" y2="170" stroke="#22c55e" stroke-width="1.3" marker-end="url(#arrb)"/>
+  <line x1="402" y1="147" x2="446" y2="170" stroke="#2a2a2a" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="406" y1="147" x2="540" y2="170" stroke="#2a2a2a" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="408" y1="147" x2="634" y2="170" stroke="#2a2a2a" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="410" y1="147" x2="728" y2="170" stroke="#2a2a2a" stroke-width="1" stroke-dasharray="3,2"/>
+
+  <!-- Weight labels on routing arrows -->
+  <text x="220" y="162" font-family="monospace" font-size="8" fill="#22c55e">g₁=0.61</text>
+  <text x="354" y="162" font-family="monospace" font-size="8" fill="#22c55e">g₄=0.39</text>
+
+  <!-- Combine output -->
+  <line x1="70" y1="220" x2="70" y2="255" stroke="#22c55e" stroke-width="1.3"/>
+  <line x1="70" y1="255" x2="370" y2="255" stroke="#22c55e" stroke-width="1.3"/>
+  <line x1="352" y1="220" x2="352" y2="255" stroke="#22c55e" stroke-width="1.3"/>
+  <line x1="352" y1="255" x2="370" y2="255" stroke="#22c55e" stroke-width="1.3"/>
+  <line x1="390" y1="255" x2="390" y2="270" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrb)"/>
+
+  <!-- Output box -->
+  <rect x="300" y="271" width="180" height="30" rx="4" fill="#0a1a0a" stroke="#22c55e" stroke-width="1.2"/>
+  <text x="390" y="290" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#22c55e">g₁·E₁(x) + g₄·E₄(x)</text>
+
+  <!-- Combine label -->
+  <text x="390" y="263" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">weighted sum (only active experts)</text>
+
+  <!-- Stats box -->
+  <rect x="20" y="315" width="740" height="72" rx="6" fill="#111" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="390" y="334" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#6b7280" letter-spacing="0.5">KEY INSIGHT</text>
+  <text x="35" y="352" font-family="monospace" font-size="9" fill="#ccc">  8 experts exist but only 2 (top-k=2) activate per token → same FLOP cost as 1 dense FFN</text>
+  <text x="35" y="367" font-family="monospace" font-size="9" fill="#ccc">  Parameter count scales with E, compute scales with k/E  (Mixtral: 8 experts, k=2, 45B params, 13B active)</text>
+  <text x="35" y="382" font-family="monospace" font-size="9" fill="#555">  Load balancing loss penalizes expert collapse (all tokens routing to same expert)</text>
+</svg>

@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 400" width="780" height="400" style="background:#111111;">
+  <defs>
+    <marker id="arrb" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arro" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#f97316"/>
+    </marker>
+    <marker id="arrg" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#22c55e"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="390" y="22" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#6b7280" letter-spacing="1">RLHF PIPELINE — PROXIMAL POLICY OPTIMISATION</text>
+
+  <!-- Stage 1: SFT -->
+  <rect x="18" y="35" width="170" height="185" rx="6" fill="#111" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="103" y="55" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3b82f6">Stage 1 · SFT</text>
+
+  <rect x="28" y="64" width="150" height="24" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="103" y="80" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Prompt + Expert Response</text>
+
+  <line x1="103" y1="88" x2="103" y2="102" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrb)"/>
+
+  <rect x="28" y="103" width="150" height="24" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="103" y="119" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#999">Base LLM</text>
+
+  <line x1="103" y1="127" x2="103" y2="142" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrb)"/>
+
+  <rect x="28" y="143" width="150" height="24" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="103" y="159" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">Cross-entropy loss</text>
+
+  <line x1="103" y1="167" x2="103" y2="180" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrb)"/>
+
+  <rect x="28" y="181" width="150" height="24" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="103" y="197" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#3b82f6">SFT Model  π_sft</text>
+
+  <!-- Stage 2: Reward Model -->
+  <rect x="205" y="35" width="170" height="185" rx="6" fill="#111" stroke="#f97316" stroke-width="1.2"/>
+  <text x="290" y="55" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#f97316">Stage 2 · RM</text>
+
+  <rect x="215" y="64" width="150" height="24" rx="3" fill="#1c0e00" stroke="#f97316" stroke-width="1"/>
+  <text x="290" y="80" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#f97316">Human preferences</text>
+
+  <line x1="290" y1="88" x2="290" y2="102" stroke="#f97316" stroke-width="1.5" marker-end="url(#arro)"/>
+
+  <rect x="215" y="103" width="150" height="24" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="290" y="119" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#999">SFT Model + linear head</text>
+
+  <line x1="290" y1="127" x2="290" y2="142" stroke="#f97316" stroke-width="1.5" marker-end="url(#arro)"/>
+
+  <rect x="215" y="143" width="150" height="24" rx="3" fill="#1c0e00" stroke="#f97316" stroke-width="1"/>
+  <text x="290" y="159" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#f97316">Bradley-Terry loss</text>
+
+  <line x1="290" y1="167" x2="290" y2="180" stroke="#f97316" stroke-width="1.5" marker-end="url(#arro)"/>
+
+  <rect x="215" y="181" width="150" height="24" rx="3" fill="#1c0e00" stroke="#f97316" stroke-width="1.5"/>
+  <text x="290" y="197" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#f97316">Reward Model  r_θ</text>
+
+  <!-- Stage 3: PPO RL -->
+  <rect x="392" y="35" width="370" height="185" rx="6" fill="#111" stroke="#22c55e" stroke-width="1.2"/>
+  <text x="577" y="55" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#22c55e">Stage 3 · PPO Reinforcement Learning</text>
+
+  <!-- PPO loop -->
+  <!-- Prompt -->
+  <rect x="402" y="64" width="100" height="24" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="452" y="80" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#999">Prompt</text>
+
+  <line x1="452" y1="88" x2="452" y2="102" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrg)"/>
+
+  <!-- Policy (actor) -->
+  <rect x="402" y="103" width="100" height="24" rx="3" fill="#0a1a0a" stroke="#22c55e" stroke-width="1.2"/>
+  <text x="452" y="119" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">Policy  π_θ</text>
+
+  <line x1="452" y1="127" x2="452" y2="142" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrg)"/>
+
+  <!-- Response -->
+  <rect x="402" y="143" width="100" height="24" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="452" y="159" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#999">Response y</text>
+
+  <!-- Reward model scores -->
+  <line x1="502" y1="155" x2="530" y2="155" stroke="#f97316" stroke-width="1.5" marker-end="url(#arro)"/>
+  <rect x="530" y="143" width="90" height="24" rx="3" fill="#1c0e00" stroke="#f97316" stroke-width="1"/>
+  <text x="575" y="159" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#f97316">RM score r</text>
+
+  <!-- KL penalty -->
+  <line x1="452" y1="167" x2="452" y2="180" stroke="#22c55e" stroke-width="1.3"/>
+  <line x1="452" y1="180" x2="575" y2="180" stroke="#22c55e" stroke-width="1.3"/>
+
+  <rect x="530" y="172" width="90" height="24" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="575" y="185" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">−β · KL(π||π_sft)</text>
+
+  <!-- Combine to reward -->
+  <line x1="575" y1="167" x2="575" y2="180" stroke="#f97316" stroke-width="1"/>
+
+  <!-- PPO objective label -->
+  <rect x="400" y="64" width="352" height="24" rx="3" fill="none" stroke="none"/>
+
+  <!-- Value labels -->
+  <text x="650" y="87" font-family="monospace" font-size="8" fill="#555">π_θ initialized</text>
+  <text x="650" y="99" font-family="monospace" font-size="8" fill="#555">from π_sft</text>
+  <text x="650" y="130" font-family="monospace" font-size="8" fill="#555">reference model</text>
+  <text x="650" y="142" font-family="monospace" font-size="8" fill="#555">π_sft frozen</text>
+  <text x="650" y="163" font-family="monospace" font-size="8" fill="#555">reward = r − β·KL</text>
+  <text x="650" y="185" font-family="monospace" font-size="8" fill="#555">PPO clips gradient</text>
+
+  <!-- DPO alternative note -->
+  <rect x="18" y="232" width="744" height="148" rx="6" fill="#111" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="390" y="251" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#6b7280" letter-spacing="0.5">DPO ALTERNATIVE  (Direct Preference Optimisation)</text>
+
+  <text x="35" y="272" font-family="monospace" font-size="9" fill="#ccc">  PPO requires 4 models loaded simultaneously: policy, reference, reward, value → expensive</text>
+  <text x="35" y="288" font-family="monospace" font-size="9" fill="#ccc">  DPO eliminates the reward model by directly optimising a closed-form preference objective:</text>
+
+  <rect x="200" y="300" width="380" height="26" rx="4" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="390" y="317" text-anchor="middle" font-family="monospace" font-size="9" fill="#3b82f6">ℒ_DPO = −E [log σ(β(log π(y_w|x)/π_ref(y_w|x) − log π(y_l|x)/π_ref(y_l|x)))]</text>
+
+  <text x="390" y="348" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">y_w = preferred response,  y_l = rejected response,  β controls divergence from reference</text>
+  <text x="390" y="363" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">DPO: 2 models only (policy + reference), same quality, much cheaper to train</text>
+</svg>

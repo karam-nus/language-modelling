@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 400" width="780" height="400" style="background:#111111;">
+  <!-- Title -->
+  <text x="390" y="22" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#6b7280" letter-spacing="1">GPU MEMORY HIERARCHY  (NVIDIA H100)</text>
+
+  <!-- ── Pyramid ── -->
+  <!-- DRAM / HBM3 — widest, slowest, largest -->
+  <rect x="80" y="300" width="620" height="60" rx="4" fill="#0f1520" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="390" y="325" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11.5" fill="#3b82f6">HBM3  (High Bandwidth Memory)</text>
+  <text x="390" y="342" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">80 GB  ·  3.35 TB/s bandwidth  ·  latency ~700 ns</text>
+  <text x="390" y="356" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">Weights, activations, KV-cache, optimizer states live here</text>
+
+  <!-- L2 Cache -->
+  <rect x="148" y="230" width="484" height="58" rx="4" fill="#0a1a0a" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="390" y="254" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#22c55e">L2 Cache</text>
+  <text x="390" y="269" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">50 MB  ·  ~12 TB/s  ·  shared across all SMs</text>
+  <text x="390" y="282" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">Caches tiles between L1 and HBM; fusion avoids round-trips</text>
+
+  <!-- L1 / Shared Memory (per SM) -->
+  <rect x="216" y="168" width="348" height="52" rx="4" fill="#170b2a" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="390" y="190" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#a855f7">L1 / Shared Memory  (per SM)</text>
+  <text x="390" y="205" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">256 KB  ·  ~33 TB/s  ·  shared across warps in one SM</text>
+  <text x="390" y="217" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">Programmer-managed; Flash Attention uses this aggressively</text>
+
+  <!-- Register File (per thread) -->
+  <rect x="284" y="108" width="212" height="50" rx="4" fill="#1c0e00" stroke="#f97316" stroke-width="1.5"/>
+  <text x="390" y="129" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#f97316">Register File  (per thread)</text>
+  <text x="390" y="144" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">~256 KB total  ·  ~80 TB/s  ·  fastest</text>
+  <text x="390" y="156" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">Holds per-thread variables; zero-latency access</text>
+
+  <!-- Right side annotations -->
+  <!-- Capacity arrow -->
+  <text x="730" y="130" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555" transform="rotate(90 730 230)">← smaller, faster, costlier</text>
+  <line x1="740" y1="108" x2="740" y2="360" stroke="#2a2a2a" stroke-width="1.5"/>
+  <text x="756" y="113" font-family="monospace" font-size="8" fill="#f97316">fast</text>
+  <text x="756" y="355" font-family="monospace" font-size="8" fill="#3b82f6">slow</text>
+
+  <!-- Left side latency -->
+  <text x="55" y="136" text-anchor="end" font-family="monospace" font-size="8" fill="#f97316">~1 cycle</text>
+  <text x="55" y="200" text-anchor="end" font-family="monospace" font-size="8" fill="#a855f7">~5–20 ns</text>
+  <text x="55" y="262" text-anchor="end" font-family="monospace" font-size="8" fill="#22c55e">~30 ns</text>
+  <text x="55" y="337" text-anchor="end" font-family="monospace" font-size="8" fill="#3b82f6">~700 ns</text>
+
+  <!-- SM count note -->
+  <rect x="80" y="38" width="260" height="52" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="210" y="55" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#6b7280">H100 SM COUNT</text>
+  <text x="210" y="71" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#ccc">132 Streaming Multiprocessors (SMs)</text>
+  <text x="210" y="83" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">Each SM has 4 warp schedulers, 128 FP32 CUDA cores</text>
+
+  <!-- Bandwidth note -->
+  <rect x="440" y="38" width="300" height="52" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="590" y="55" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#6b7280">PEAK COMPUTE</text>
+  <text x="590" y="71" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#ccc">989 TFLOPS FP16,  1979 TFLOPS FP8</text>
+  <text x="590" y="83" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">Arithmetic Intensity = FLOPs / bytes moved</text>
+</svg>

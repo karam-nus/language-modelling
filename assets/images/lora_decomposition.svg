@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 380" width="780" height="380" style="background:#111111;">
+  <defs>
+    <marker id="arrb" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrc" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#06b6d4"/>
+    </marker>
+    <marker id="arrf" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#f97316"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="390" y="22" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#6b7280" letter-spacing="1">LORA — LOW-RANK ADAPTATION</text>
+
+  <!-- Left panel: concept -->
+  <rect x="20" y="32" width="370" height="320" rx="6" fill="#111" stroke="#a855f7" stroke-width="1.2"/>
+  <text x="205" y="52" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10.5" fill="#a855f7">Weight Decomposition</text>
+
+  <!-- W0 original frozen weight -->
+  <rect x="50" y="65" width="130" height="90" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+  <text x="115" y="90" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="12" fill="#555">W₀</text>
+  <text x="115" y="108" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">d × d</text>
+  <text x="115" y="122" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">frozen  (no grad)</text>
+  <text x="115" y="133" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">~4B params (8B model)</text>
+
+  <!-- Plus sign -->
+  <text x="200" y="116" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#2a2a2a">+</text>
+
+  <!-- Delta W = BA -->
+  <rect x="215" y="65" width="140" height="90" rx="4" fill="#170b2a" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="285" y="90" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="12" fill="#a855f7">ΔW = BA</text>
+  <text x="285" y="108" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#a855f7">d×r · r×d</text>
+  <text x="285" y="122" text-anchor="middle" font-family="monospace" font-size="8" fill="#a855f7">trainable  (with grad)</text>
+  <text x="285" y="133" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">rank r ≪ d</text>
+
+  <!-- B and A matrix shapes -->
+  <text x="205" y="178" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">B: [d × r]    A: [r × d]</text>
+  <text x="205" y="194" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">A initialised to N(0,σ²),  B = 0</text>
+  <text x="205" y="210" text-anchor="middle" font-family="monospace" font-size="9" fill="#a855f7">→  ΔW = 0 at init (stable start)</text>
+
+  <!-- Param comparison -->
+  <rect x="40" y="225" width="310" height="110" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="195" y="243" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#6b7280" letter-spacing="0.5">PARAMETER COUNT</text>
+
+  <text x="55" y="262" font-family="monospace" font-size="8.5" fill="#555">Full fine-tune (d=4096):</text>
+  <text x="55" y="276" font-family="monospace" font-size="8.5" fill="#ccc">  4096 × 4096 = 16.7M params per layer</text>
+
+  <text x="55" y="295" font-family="monospace" font-size="8.5" fill="#555">LoRA rank=8 (d=4096):</text>
+  <text x="55" y="309" font-family="monospace" font-size="8.5" fill="#a855f7">  (4096+4096)×8 = 65.5K params per layer</text>
+  <text x="55" y="323" font-family="monospace" font-size="8.5" fill="#22c55e">  ≈ 255× fewer trainable parameters</text>
+
+  <!-- Right panel: forward pass -->
+  <rect x="404" y="32" width="356" height="320" rx="6" fill="#111" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="582" y="52" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10.5" fill="#3b82f6">Forward Pass During Training</text>
+
+  <!-- x input -->
+  <rect x="514" y="65" width="136" height="28" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="582" y="83" text-anchor="middle" font-family="monospace" font-size="10" fill="#999">Input  x  [B, T, d]</text>
+
+  <!-- Two parallel paths -->
+  <line x1="582" y1="93" x2="582" y2="108" stroke="#2a2a2a" stroke-width="1.3"/>
+  <line x1="582" y1="103" x2="480" y2="103" stroke="#2a2a2a" stroke-width="1.3"/>
+  <line x1="480" y1="103" x2="480" y2="120" stroke="#2a2a2a" stroke-width="1.3"/>
+  <line x1="582" y1="103" x2="680" y2="103" stroke="#a855f7" stroke-width="1.3"/>
+  <line x1="680" y1="103" x2="680" y2="120" stroke="#a855f7" stroke-width="1.3"/>
+
+  <!-- W₀ x path -->
+  <rect x="430" y="121" width="100" height="26" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="480" y="138" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#555">W₀ · x</text>
+
+  <!-- B·A path -->
+  <rect x="630" y="121" width="100" height="26" rx="3" fill="#1a0a2a" stroke="#a855f7" stroke-width="1"/>
+  <text x="680" y="138" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#a855f7">B·A·x</text>
+
+  <!-- Lines to + -->
+  <line x1="480" y1="147" x2="480" y2="167" stroke="#2a2a2a" stroke-width="1.3"/>
+  <line x1="480" y1="167" x2="572" y2="167" stroke="#2a2a2a" stroke-width="1.3"/>
+  <line x1="680" y1="147" x2="680" y2="167" stroke="#a855f7" stroke-width="1.3"/>
+  <line x1="680" y1="167" x2="592" y2="167" stroke="#a855f7" stroke-width="1.3"/>
+  <line x1="582" y1="167" x2="582" y2="183" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrb)"/>
+
+  <!-- + circle -->
+  <circle cx="582" cy="171" r="9" fill="#111" stroke="#3b82f6" stroke-width="1.3"/>
+  <text x="582" y="175" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#3b82f6">+</text>
+
+  <!-- Scaling note -->
+  <rect x="514" y="184" width="136" height="26" rx="3" fill="#0f1520" stroke="#3b82f6" stroke-width="1"/>
+  <text x="582" y="201" text-anchor="middle" font-family="monospace" font-size="9.5" fill="#3b82f6">(W₀ + α/r · BA) x</text>
+
+  <!-- Output -->
+  <line x1="582" y1="210" x2="582" y2="226" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrb)"/>
+  <rect x="514" y="227" width="136" height="26" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="582" y="244" text-anchor="middle" font-family="monospace" font-size="10" fill="#999">Output  [B, T, d]</text>
+
+  <!-- Alpha/r note -->
+  <text x="582" y="272" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">α = scaling factor  (typically α = r)</text>
+  <text x="582" y="287" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">At merge:  W' = W₀ + (α/r) · BA</text>
+  <text x="582" y="302" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#22c55e">Merge = zero inference overhead</text>
+
+  <!-- Which layers to apply -->
+  <rect x="414" y="315" width="326" height="28" rx="4" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="577" y="329" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">Typically applied to Q, V projections</text>
+  <text x="577" y="340" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">(sometimes K, O, gate, up, down)</text>
+
+  <!-- Bottom note -->
+  <text x="390" y="368" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#555">QLoRA adds NF4 quantisation of W₀ to ~4-bit, further reducing GPU memory by 2–4×</text>
+</svg>
