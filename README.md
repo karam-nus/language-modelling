@@ -65,6 +65,7 @@ You're comfortable with Python and basic machine learning. You've heard about tr
 | **Appendices** | | |
 | A | [History of Language Modelling](./appendix_a_history.md) | Full timeline from Shannon to GPT-4 — every milestone, paper, and breakthrough |
 | B | [Tokenization Deep Dive](./appendix_b_tokenization.md) | BPE step-by-step, WordPiece, SentencePiece, training tokenizers from scratch |
+| C | [HuggingFace Model Config Field Reference](./appendix_c_model_config.md) | Every `config.json` parameter explained — values, formulae, caveats, VLM/VLA configs, and kernel pitfall checklist |
 
 ## 🗺️ Learning Path
 
@@ -137,6 +138,7 @@ Before diving in, you should be comfortable with:
 
 | Date | Changes |
 |------|---------|
+| April 2026 | Added Appendix C — HuggingFace Model Config Field Reference (LLM, VLM, VLA configs, kernel pitfall checklist) |
 | April 2026 | Added Ch 9 (Data), Ch 11 (Optimizers & Loss Functions), Ch 14 (PEFT Deep Dive), Ch 23 (Knowledge Distillation & QAD) — renumbered all chapters accordingly |
 | April 2026 | Initial release — 34 chapters + 2 appendices |
 

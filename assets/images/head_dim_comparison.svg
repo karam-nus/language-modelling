@@ -1,0 +1,71 @@
+<svg viewBox="0 0 860 420" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+  <rect width="860" height="420" fill="#111111"/>
+
+  <!-- Title -->
+  <text x="430" y="34" text-anchor="middle" fill="#f8fafc" font-size="15" font-weight="bold">head_dim: Standard Convention vs Qwen3 Override</text>
+
+  <!-- ===== LEFT PANEL: Standard Models ===== -->
+  <rect x="20" y="55" width="390" height="345" rx="8" fill="#1e2030" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="215" y="80" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="bold">Standard Models (LLaMA, Mistral, Gemma…)</text>
+
+  <!-- Formula box -->
+  <rect x="50" y="92" width="330" height="40" rx="5" fill="#0f172a" stroke="#3b82f6" stroke-width="1"/>
+  <text x="215" y="107" text-anchor="middle" fill="#94a3b8" font-size="10">Formula</text>
+  <text x="215" y="124" text-anchor="middle" fill="#f8fafc" font-size="13" font-weight="bold">head_dim = hidden_size ÷ num_attention_heads</text>
+
+  <!-- Concrete example: LLaMA 3.1 8B -->
+  <text x="50" y="155" fill="#94a3b8" font-size="10">LLaMA 3.1 8B</text>
+  <rect x="50" y="162" width="330" height="70" rx="5" fill="#0f172a" stroke="#22c55e" stroke-width="1"/>
+  <text x="215" y="181" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="bold">hidden_size = 4096</text>
+  <text x="215" y="198" text-anchor="middle" fill="#f97316" font-size="11" font-weight="bold">num_attention_heads = 32</text>
+  <text x="215" y="216" text-anchor="middle" fill="#94a3b8" font-size="10">↓  4096 ÷ 32</text>
+  <text x="215" y="226" text-anchor="middle" fill="#06b6d4" font-size="12" font-weight="bold">head_dim = 128  ✓  (implicit)</text>
+
+  <!-- Concrete example: Mistral 7B -->
+  <text x="50" y="250" fill="#94a3b8" font-size="10">Mistral 7B</text>
+  <rect x="50" y="257" width="330" height="70" rx="5" fill="#0f172a" stroke="#22c55e" stroke-width="1"/>
+  <text x="215" y="276" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="bold">hidden_size = 4096</text>
+  <text x="215" y="293" text-anchor="middle" fill="#f97316" font-size="11" font-weight="bold">num_attention_heads = 32</text>
+  <text x="215" y="311" text-anchor="middle" fill="#94a3b8" font-size="10">↓  4096 ÷ 32</text>
+  <text x="215" y="321" text-anchor="middle" fill="#06b6d4" font-size="12" font-weight="bold">head_dim = 128  ✓  (implicit)</text>
+
+  <!-- Note -->
+  <rect x="50" y="338" width="330" height="45" rx="5" fill="#1e3a5f"/>
+  <text x="215" y="357" text-anchor="middle" fill="#94a3b8" font-size="10">head_dim NOT in config.json — derived at</text>
+  <text x="215" y="373" text-anchor="middle" fill="#94a3b8" font-size="10">runtime. Kernels can safely compute it.</text>
+
+  <!-- ===== RIGHT PANEL: Qwen3 ===== -->
+  <rect x="450" y="55" width="390" height="345" rx="8" fill="#1e2030" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="645" y="80" text-anchor="middle" fill="#a855f7" font-size="12" font-weight="bold">Qwen3 (0.6B – 235B) — Override!</text>
+
+  <!-- Formula box -->
+  <rect x="480" y="92" width="330" height="40" rx="5" fill="#0f172a" stroke="#a855f7" stroke-width="1"/>
+  <text x="645" y="107" text-anchor="middle" fill="#94a3b8" font-size="10">Config entry</text>
+  <text x="645" y="124" text-anchor="middle" fill="#f8fafc" font-size="13" font-weight="bold">head_dim = 128  (hardcoded in JSON)</text>
+
+  <!-- Concrete example: Qwen3 8B -->
+  <text x="480" y="155" fill="#94a3b8" font-size="10">Qwen3-8B</text>
+  <rect x="480" y="162" width="330" height="88" rx="5" fill="#0f172a" stroke="#ef4444" stroke-width="1"/>
+  <text x="645" y="181" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="bold">hidden_size = 4096</text>
+  <text x="645" y="198" text-anchor="middle" fill="#f97316" font-size="11" font-weight="bold">num_attention_heads = 64</text>
+  <text x="645" y="216" text-anchor="middle" fill="#94a3b8" font-size="10">Naïve: 4096 ÷ 64 = 64  ✗  WRONG</text>
+  <text x="645" y="234" text-anchor="middle" fill="#f8fafc" font-size="10">Config overrides:  head_dim = 128</text>
+  <text x="645" y="245" text-anchor="middle" fill="#06b6d4" font-size="11" font-weight="bold">Actual Q/K/V shape: [B, 64, T, 128]</text>
+
+  <!-- Concrete example: Qwen3 0.6B -->
+  <text x="480" y="265" fill="#94a3b8" font-size="10">Qwen3-0.6B</text>
+  <rect x="480" y="272" width="330" height="88" rx="5" fill="#0f172a" stroke="#ef4444" stroke-width="1"/>
+  <text x="645" y="291" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="bold">hidden_size = 1024</text>
+  <text x="645" y="308" text-anchor="middle" fill="#f97316" font-size="11" font-weight="bold">num_attention_heads = 16</text>
+  <text x="645" y="326" text-anchor="middle" fill="#94a3b8" font-size="10">Naïve: 1024 ÷ 16 = 64  ✗  WRONG</text>
+  <text x="645" y="344" text-anchor="middle" fill="#f8fafc" font-size="10">Config overrides:  head_dim = 128</text>
+  <text x="645" y="355" text-anchor="middle" fill="#06b6d4" font-size="11" font-weight="bold">Actual Q/K/V shape: [B, 16, T, 128]</text>
+
+  <!-- Warning -->
+  <rect x="480" y="370" width="330" height="22" rx="4" fill="#7f1d1d"/>
+  <text x="645" y="385" text-anchor="middle" fill="#fca5a5" font-size="10">⚠  Reshape kernels MUST read head_dim from config</text>
+
+  <!-- Center arrow -->
+  <text x="430" y="240" text-anchor="middle" fill="#f97316" font-size="22">⚡</text>
+  <text x="430" y="258" text-anchor="middle" fill="#f97316" font-size="9">mismatch!</text>
+</svg>
