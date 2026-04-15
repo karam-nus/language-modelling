@@ -110,6 +110,8 @@ navigation:
     url: "/appendix_a_history"
   - title: "Appendix B — Tokenization"
     url: "/appendix_b_tokenization"
+  - title: "Appendix C — Model Config Reference"
+    url: "/appendix_c_model_config"
 
 defaults:
   - scope:
