@@ -44,11 +44,11 @@
   <text x="645" y="124" text-anchor="middle" fill="#f8fafc" font-size="13" font-weight="bold">head_dim = 128  (hardcoded in JSON)</text>
 
   <!-- Concrete example: Qwen3 8B -->
-  <text x="480" y="155" fill="#94a3b8" font-size="10">Qwen3-8B</text>
+  <text x="480" y="155" fill="#94a3b8" font-size="10">Qwen3-32B</text>
   <rect x="480" y="162" width="330" height="88" rx="5" fill="#0f172a" stroke="#ef4444" stroke-width="1"/>
-  <text x="645" y="181" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="bold">hidden_size = 4096</text>
+  <text x="645" y="181" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="bold">hidden_size = 5120</text>
   <text x="645" y="198" text-anchor="middle" fill="#f97316" font-size="11" font-weight="bold">num_attention_heads = 64</text>
-  <text x="645" y="216" text-anchor="middle" fill="#94a3b8" font-size="10">Naïve: 4096 ÷ 64 = 64  ✗  WRONG</text>
+  <text x="645" y="216" text-anchor="middle" fill="#94a3b8" font-size="10">Naïve: 5120 ÷ 64 = 80  ✗  WRONG</text>
   <text x="645" y="234" text-anchor="middle" fill="#f8fafc" font-size="10">Config overrides:  head_dim = 128</text>
   <text x="645" y="245" text-anchor="middle" fill="#06b6d4" font-size="11" font-weight="bold">Actual Q/K/V shape: [B, 64, T, 128]</text>
 
