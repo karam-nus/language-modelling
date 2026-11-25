@@ -87,7 +87,7 @@ Each physical block stores KV entries for `block_size` tokens:
 <div class="diagram-title">Physical KV Block</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">K block</span>
+    <span class="ts-label">K block</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim seq">block_size</span><span class="ts-sep">,</span>
@@ -95,10 +95,10 @@ Each physical block stores KV entries for `block_size` tokens:
       <span class="ts-dim feature">d_k</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">e.g., [16, 8, 128]</span>
+    <span class="ts-note">e.g., [16, 8, 128]</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">V block</span>
+    <span class="ts-label">V block</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim seq">block_size</span><span class="ts-sep">,</span>
@@ -108,13 +108,13 @@ Each physical block stores KV entries for `block_size` tokens:
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">Block memory</span>
+    <span class="ts-label">Block memory</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim generic">2 × 16 × 8 × 128 × 2B = 64 KB</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">per block per layer</span>
+    <span class="ts-note">per block per layer</span>
   </div>
 </div>
 </div>
@@ -172,7 +172,7 @@ Storing the KV-cache in lower precision (INT8, INT4) provides direct memory savi
 <div class="diagram-title">KV-Cache Quantization Impact</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">FP16 KV-cache</span>
+    <span class="ts-label">FP16 KV-cache</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -180,11 +180,11 @@ Storing the KV-cache in lower precision (INT8, INT4) provides direct memory savi
       <span class="ts-dim seq">T</span><span class="ts-sep">,</span>
       <span class="ts-dim feature">d_k</span>
       <span class="ts-bracket">]</span>
-      <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">@ 2 bytes</span>
+      <span class="ts-note">@ 2 bytes</span>
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">INT8 KV-cache</span>
+    <span class="ts-label">INT8 KV-cache</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -192,11 +192,11 @@ Storing the KV-cache in lower precision (INT8, INT4) provides direct memory savi
       <span class="ts-dim seq">T</span><span class="ts-sep">,</span>
       <span class="ts-dim feature">d_k</span>
       <span class="ts-bracket">]</span>
-      <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">@ 1 byte → 2× savings</span>
+      <span class="ts-note">@ 1 byte → 2× savings</span>
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">INT4 KV-cache</span>
+    <span class="ts-label">INT4 KV-cache</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -204,7 +204,7 @@ Storing the KV-cache in lower precision (INT8, INT4) provides direct memory savi
       <span class="ts-dim seq">T</span><span class="ts-sep">,</span>
       <span class="ts-dim feature">d_k</span>
       <span class="ts-bracket">]</span>
-      <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">@ 0.5 byte → 4× savings</span>
+      <span class="ts-note">@ 0.5 byte → 4× savings</span>
     </div>
   </div>
 </div>

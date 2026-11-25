@@ -41,17 +41,17 @@ BERT's pre-training objective: randomly mask 15% of tokens and predict them from
 <div class="diagram-title">BERT Tensor Flow</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">Input</span>
+    <span class="ts-label">Input</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
       <span class="ts-dim seq">T</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">token IDs</span>
+    <span class="ts-note">token IDs</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">Embeddings</span>
+    <span class="ts-label">Embeddings</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -59,10 +59,10 @@ BERT's pre-training objective: randomly mask 15% of tokens and predict them from
       <span class="ts-dim feature">768</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">token + position + segment</span>
+    <span class="ts-note">token + position + segment</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">Encoder output</span>
+    <span class="ts-label">Encoder output</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -70,17 +70,17 @@ BERT's pre-training objective: randomly mask 15% of tokens and predict them from
       <span class="ts-dim feature">768</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">contextual representations</span>
+    <span class="ts-note">contextual representations</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">[CLS] pooled</span>
+    <span class="ts-label">[CLS] pooled</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
       <span class="ts-dim feature">768</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">sentence-level representation</span>
+    <span class="ts-note">sentence-level representation</span>
   </div>
 </div>
 </div>

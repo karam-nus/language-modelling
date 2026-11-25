@@ -61,7 +61,7 @@ LLaMA-3.1 increased RoPE base frequency from 500,000 to 8,000,000 and trained on
 <div class="diagram-title">Context Extension Tensor Impact</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">Short context</span>
+    <span class="ts-label">Short context</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -70,10 +70,10 @@ LLaMA-3.1 increased RoPE base frequency from 500,000 to 8,000,000 and trained on
       <span class="ts-dim feature">d_k</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">pre-training context</span>
+    <span class="ts-note">pre-training context</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">Extended context</span>
+    <span class="ts-label">Extended context</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -82,7 +82,7 @@ LLaMA-3.1 increased RoPE base frequency from 500,000 to 8,000,000 and trained on
       <span class="ts-dim feature">d_k</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">16× more attention compute + KV-cache</span>
+    <span class="ts-note">16× more attention compute + KV-cache</span>
   </div>
 </div>
 </div>

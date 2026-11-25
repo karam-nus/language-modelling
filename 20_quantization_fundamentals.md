@@ -95,43 +95,43 @@ print(f"Max error: {(w - w_hat).abs().max():.6f}") # Small reconstruction error
 <div class="diagram-title">Per-Group Quantization Tensor Layout</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">Original weight</span>
+    <span class="ts-label">Original weight</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim feature">d_out</span><span class="ts-sep">,</span>
       <span class="ts-dim feature">d_in</span>
       <span class="ts-bracket">]</span>
-      <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">@ FP16: 2 bytes each</span>
+      <span class="ts-note">@ FP16: 2 bytes each</span>
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">Quantized weight</span>
+    <span class="ts-label">Quantized weight</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim feature">d_out</span><span class="ts-sep">,</span>
       <span class="ts-dim feature">d_in/pack</span>
       <span class="ts-bracket">]</span>
-      <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">@ INT4: 8 values packed per int32</span>
+      <span class="ts-note">@ INT4: 8 values packed per int32</span>
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">Scales</span>
+    <span class="ts-label">Scales</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim feature">d_out</span><span class="ts-sep">,</span>
       <span class="ts-dim generic">d_in/G</span>
       <span class="ts-bracket">]</span>
-      <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">@ FP16: 1 scale per group of G</span>
+      <span class="ts-note">@ FP16: 1 scale per group of G</span>
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">Zero points</span>
+    <span class="ts-label">Zero points</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim feature">d_out</span><span class="ts-sep">,</span>
       <span class="ts-dim generic">d_in/G</span>
       <span class="ts-bracket">]</span>
-      <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">@ INT4 or FP16</span>
+      <span class="ts-note">@ INT4 or FP16</span>
     </div>
   </div>
 </div>

@@ -75,7 +75,7 @@ This is a **matrix-vector product** (not matrix-matrix), making decode steps **m
 <div class="diagram-title">KV-Cache Tensor Shapes (Per Layer)</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">K cache (MHA)</span>
+    <span class="ts-label">K cache (MHA)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -86,7 +86,7 @@ This is a **matrix-vector product** (not matrix-matrix), making decode steps **m
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">V cache (MHA)</span>
+    <span class="ts-label">V cache (MHA)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -97,7 +97,7 @@ This is a **matrix-vector product** (not matrix-matrix), making decode steps **m
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">K cache (GQA, G groups)</span>
+    <span class="ts-label">K cache (GQA, G groups)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -106,10 +106,10 @@ This is a **matrix-vector product** (not matrix-matrix), making decode steps **m
       <span class="ts-dim feature">d_k</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">G < H → smaller cache</span>
+    <span class="ts-note">G < H → smaller cache</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">Per-step append</span>
+    <span class="ts-label">Per-step append</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -118,7 +118,7 @@ This is a **matrix-vector product** (not matrix-matrix), making decode steps **m
       <span class="ts-dim feature">d_k</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">one new K, V per layer per step</span>
+    <span class="ts-note">one new K, V per layer per step</span>
   </div>
 </div>
 </div>
@@ -177,7 +177,7 @@ With Sliding Window Attention ([Chapter 5](./05_attention_gqa_mqa_mla.md)), the 
 <div class="diagram-title">Sliding Window Cache (W=4096)</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">Full KV-cache</span>
+    <span class="ts-label">Full KV-cache</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -186,10 +186,10 @@ With Sliding Window Attention ([Chapter 5](./05_attention_gqa_mqa_mla.md)), the 
       <span class="ts-dim feature">d_k</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">grows with T — unbounded</span>
+    <span class="ts-note">grows with T — unbounded</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">Sliding window cache</span>
+    <span class="ts-label">Sliding window cache</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -198,7 +198,7 @@ With Sliding Window Attention ([Chapter 5](./05_attention_gqa_mqa_mla.md)), the 
       <span class="ts-dim feature">d_k</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">fixed at W — evicts oldest entry</span>
+    <span class="ts-note">fixed at W — evicts oldest entry</span>
   </div>
 </div>
 </div>

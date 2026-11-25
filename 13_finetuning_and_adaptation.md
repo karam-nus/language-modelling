@@ -77,7 +77,7 @@ where $W \in \mathbb{R}^{d \times k}$, $A \in \mathbb{R}^{r \times k}$, $B \in \
 <div class="diagram-title">LoRA Tensor Shapes</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">Input x</span>
+    <span class="ts-label">Input x</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -87,7 +87,7 @@ where $W \in \mathbb{R}^{d \times k}$, $A \in \mathbb{R}^{r \times k}$, $B \in \
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">W·x (frozen)</span>
+    <span class="ts-label">W·x (frozen)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -95,10 +95,10 @@ where $W \in \mathbb{R}^{d \times k}$, $A \in \mathbb{R}^{r \times k}$, $B \in \
       <span class="ts-dim feature">d</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">original path</span>
+    <span class="ts-note">original path</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">A·x (down-project)</span>
+    <span class="ts-label">A·x (down-project)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -106,10 +106,10 @@ where $W \in \mathbb{R}^{d \times k}$, $A \in \mathbb{R}^{r \times k}$, $B \in \
       <span class="ts-dim generic">r</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">r ≪ d (e.g., 16)</span>
+    <span class="ts-note">r ≪ d (e.g., 16)</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">B·(A·x) (up-project)</span>
+    <span class="ts-label">B·(A·x) (up-project)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -117,10 +117,10 @@ where $W \in \mathbb{R}^{d \times k}$, $A \in \mathbb{R}^{r \times k}$, $B \in \
       <span class="ts-dim feature">d</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">LoRA delta</span>
+    <span class="ts-note">LoRA delta</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">Output (W + BA)·x</span>
+    <span class="ts-label">Output (W + BA)·x</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -128,7 +128,7 @@ where $W \in \mathbb{R}^{d \times k}$, $A \in \mathbb{R}^{r \times k}$, $B \in \
       <span class="ts-dim feature">d</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">frozen + learned combined</span>
+    <span class="ts-note">frozen + learned combined</span>
   </div>
 </div>
 </div>

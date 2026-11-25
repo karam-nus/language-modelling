@@ -177,7 +177,7 @@ Continue until reaching the desired vocabulary size (typically 32K–256K).
   <div class="tensor-flow-row">
     <span class="ts-label">Token IDs:</span>
     <span class="ts-dim seq">[15496, 11, 995, 0]</span>
-    <span style="color: var(--text-secondary); margin-left: 0.5rem;">seq_len = 4</span>
+    <span class="ts-note">seq_len = 4</span>
   </div>
   <div class="tensor-flow-row">
     <span class="ts-label">One-hot (conceptual):</span>

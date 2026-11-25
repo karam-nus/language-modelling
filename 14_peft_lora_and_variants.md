@@ -71,7 +71,7 @@ The product `BA` has rank at most `r`, which is ≪ min(d, k) for large weight m
 <div class="diagram-title">LoRA Forward Pass — Tensor Shapes</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">Input x</span>
+    <span class="ts-label">Input x</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -79,10 +79,10 @@ The product `BA` has rank at most `r`, which is ≪ min(d, k) for large weight m
       <span class="ts-dim feature">k</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">e.g. [4, 2048, 4096]</span>
+    <span class="ts-note">e.g. [4, 2048, 4096]</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">W·x (frozen path)</span>
+    <span class="ts-label">W·x (frozen path)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -90,10 +90,10 @@ The product `BA` has rank at most `r`, which is ≪ min(d, k) for large weight m
       <span class="ts-dim feature">d</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">no gradient flows here</span>
+    <span class="ts-note">no gradient flows here</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">A·x (down-project)</span>
+    <span class="ts-label">A·x (down-project)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -101,10 +101,10 @@ The product `BA` has rank at most `r`, which is ≪ min(d, k) for large weight m
       <span class="ts-dim generic">r</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">e.g. [4, 2048, 16]</span>
+    <span class="ts-note">e.g. [4, 2048, 16]</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">B·(A·x) (up-project)</span>
+    <span class="ts-label">B·(A·x) (up-project)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -112,10 +112,10 @@ The product `BA` has rank at most `r`, which is ≪ min(d, k) for large weight m
       <span class="ts-dim feature">d</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">LoRA delta</span>
+    <span class="ts-note">LoRA delta</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 180px;">Output (W + α/r·BA)·x</span>
+    <span class="ts-label">Output (W + α/r·BA)·x</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -123,7 +123,7 @@ The product `BA` has rank at most `r`, which is ≪ min(d, k) for large weight m
       <span class="ts-dim feature">d</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">frozen + trainable combined</span>
+    <span class="ts-note">frozen + trainable combined</span>
   </div>
 </div>
 </div>

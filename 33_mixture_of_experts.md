@@ -79,7 +79,7 @@ In a standard transformer, each layer has one FFN. In MoE, the FFN is replaced b
   <div class="tensor-flow-row">
     <span class="ts-label">Expert k FFN output:</span>
     <span class="ts-dim batch">B</span> × <span class="ts-dim seq">T_k</span> × <span class="ts-dim feature">d</span>
-    <span style="color: var(--text-secondary); margin-left: 0.5rem;">(T_k = tokens routed to expert k)</span>
+    <span class="ts-note">(T_k = tokens routed to expert k)</span>
   </div>
   <div class="tensor-flow-row">
     <span class="ts-label">Combined output:</span>

@@ -48,7 +48,7 @@ Vision Transformers (ViT) convert images into sequences of patch embeddings, mak
 <div class="diagram-title">Vision Encoder Tensor Shapes</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">Raw image</span>
+    <span class="ts-label">Raw image</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -57,10 +57,10 @@ Vision Transformers (ViT) convert images into sequences of patch embeddings, mak
       <span class="ts-dim generic">336</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">RGB pixels</span>
+    <span class="ts-note">RGB pixels</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">Patches (14×14 px)</span>
+    <span class="ts-label">Patches (14×14 px)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -68,10 +68,10 @@ Vision Transformers (ViT) convert images into sequences of patch embeddings, mak
       <span class="ts-dim feature">588</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">14×14×3 = 588 per patch</span>
+    <span class="ts-note">14×14×3 = 588 per patch</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">After ViT encoder</span>
+    <span class="ts-label">After ViT encoder</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -79,10 +79,10 @@ Vision Transformers (ViT) convert images into sequences of patch embeddings, mak
       <span class="ts-dim feature">1024</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">d_vision (SigLIP-L)</span>
+    <span class="ts-note">d_vision (SigLIP-L)</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 160px;">After projection</span>
+    <span class="ts-label">After projection</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span><span class="ts-sep">,</span>
@@ -90,7 +90,7 @@ Vision Transformers (ViT) convert images into sequences of patch embeddings, mak
       <span class="ts-dim feature">4096</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">mapped to LLM d_model</span>
+    <span class="ts-note">mapped to LLM d_model</span>
   </div>
 </div>
 </div>
