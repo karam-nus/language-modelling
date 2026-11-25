@@ -1,12 +1,13 @@
 ---
 title: "Chapter 9 — Data for LLMs & VLMs"
+description: "What the data looks like at every training phase — pre-training mixes and filtered web corpora, synthetic data, mid-training, SFT chat formats and loss masks, preference pairs, RL environments with verifiable rewards — with tensor shapes, datasets and the dedup and contamination checks around them."
 ---
 
 [← Back to Table of Contents](./README.md)
 
 # Chapter 9 — Data for LLMs & VLMs
 
-> *"A model is only as good as its data. Every capability you see in a frontier model traces back to some text, image, or interaction in the training set."*
+> **The one-sentence version:** every training phase is next-token prediction or policy optimisation over a different kind of data — trillions of filtered web tokens, then curated and synthetic mixes, then conversations, then preferences, then environments that grade the model's own attempts.
 
 ## The Data Hierarchy
 
@@ -23,7 +24,7 @@ Modern LLM/VLM training unfolds in distinct phases — each with its own data fo
   <div class="flow-arrow accent"></div>
   <div class="flow-node orange wide">⚖️ Post-Training: RLHF/DPO — preference pairs, reward signals</div>
   <div class="flow-arrow accent"></div>
-  <div class="flow-node cyan wide">🤔 Post-Training: RL / Process Rewards — reasoning traces, verifiable rewards</div>
+  <div class="flow-node cyan wide">🤔 Post-Training: RL — verifiable rewards, rubrics, agent environments</div>
 </div>
 </div>
 
@@ -49,8 +50,8 @@ It replaced recurrent networks with self-attention, enabling parallelism...
 **After tokenization and packing**:
 
 ```
-tokens = [464, 47058, 10478, 373, 5495, 287, 2177, 416, 569, 853, 648, ...]
-# shape: [seq_len]  e.g. [4096]
+tokens = [464, 47058, 10478, 373, 5495, 287, 2177, 416, 569, 853, 648, ...]   # illustrative IDs
+# shape: [seq_len]  e.g. [8192]
 ```
 
 Multiple documents are concatenated with a special separator token `<|endoftext|>` and packed to fill `max_seq_len`, minimising padding waste:
@@ -64,39 +65,60 @@ doc1_tokens + [EOS] + doc2_tokens + [EOS] + doc3_tokens... → packed to [4096]
 | Tensor | Shape | Description |
 |--------|-------|-------------|
 | `input_ids` | `[B, T]` | Token IDs fed into the model |
-| `labels` | `[B, T]` | Same as `input_ids`, shifted by 1 position |
-| `attention_mask` | `[B, T]` | 1 for real tokens, 0 for padding |
-| `position_ids` | `[B, T]` | 0…T-1, reset at document boundaries |
+| `labels` | `[B, T]` | A copy of `input_ids`; the model shifts by one internally (position t predicts token t+1) |
+| `attention_mask` | `[B, T]` | 1 for real tokens, 0 for padding (all 1s when packed) |
+| `position_ids` | `[B, T]` | 0…T−1; reset at document boundaries when document masking is used |
 
-Where `B` = batch size (e.g., 1024–4096 with gradient accumulation), `T` = sequence length (e.g., 4096–8192).
+Where `B` = sequences per step (summed over all GPUs and accumulation micro-steps) and `T` = sequence length (8K is typical for the main pre-training phase in 2024–26).
 
-**Concrete example** (LLaMA-3 8B training):
-- `B = 1024`, `T = 4096` → 4.2M tokens per step
-- Global batch: often 4M–16M tokens
-- `input_ids`: `[1024, 4096]` of dtype `int32`
-- Logits output: `[1024, 4096, 128256]` (vocab size 128k)
-- Loss: scalar (mean cross-entropy over all `B×T` positions)
+**Concrete example** (Llama 3 405B, from its paper): sequences grew from 4,096 to 8,192 tokens early in training while the global batch ramped from 4M to 8M to 16M tokens (≈ 2,000 sequences of 8K per step), over 15.6T tokens in total.
+
+The logits for a whole step would be `[2048, 8192, 128256]` — 2.1 × 10¹² values, 4 TB in BF16. They never exist at once: each GPU holds only its micro-batch, and modern trainers compute the loss in **chunks** (or fused with the LM head, as in Liger Kernel and Apple's Cut Cross-Entropy) so that even one micro-batch's `[b, T, V]` logits are never fully materialised. With 128K–262K vocabularies, the output layer is one of the largest activation-memory consumers in the model.
 
 ### Pre-Training Data Mix
 
-| Source | Typical Weight | Why |
+Labs rarely publish exact mixes. Llama 3's paper is one of the few that does, and it is a good reference point:
+
+| Category (Llama 3 final mix) | Share | Why |
 |--------|:--------------:|-----|
-| Common Crawl (filtered) | 60–70% | Broad world knowledge |
-| Code (GitHub, etc.) | 10–15% | Reasoning, structure |
-| Books / long documents | 5–10% | Coherence, narrative |
-| Wikipedia / encyclopaedias | 3–5% | Factual, clean |
-| Scientific papers (ArXiv) | 2–5% | STEM reasoning |
-| Multilingual web | 5–10% | Cross-lingual transfer |
+| General knowledge (filtered web, books, encyclopaedic) | ~50% | Breadth of world knowledge |
+| Mathematical and reasoning data | ~25% | Maths, science, step-by-step text |
+| Code | ~17% | Structure, precision, and a boost to reasoning |
+| Multilingual | ~8% | Cross-lingual transfer |
+
+Compared with 2020 (GPT-3: ~60% filtered Common Crawl, ~3% Wikipedia), the trend is clear: far more code and maths, and web text that has been filtered by model-based quality classifiers rather than simple heuristics. Mixes are chosen with small-scale **proxy experiments** — train many 1B-scale models on candidate mixes and extrapolate (RegMix, DoReMi-style methods, Llama 3's scaling-law approach).
 
 **Key pre-training datasets**:
 
-| Dataset | Tokens | Notes |
+| Dataset | Size | Notes |
 |---------|-------:|-------|
-| The Pile | 825B | 22 diverse sources, early open standard |
-| RedPajama v2 | 30T+ | Filtered Common Crawl + others |
-| Dolma | 3T | OLMo training set, fully open |
-| FineWeb | 15T | Hugging Face, high-quality web filter |
-| DCLM | 4T | DataComp competition winner |
+| The Pile (2020) | 825 GiB (~300B tokens) | 22 diverse sources; the early open standard |
+| RedPajama v2 (2023) | 30T tokens (raw) | Common Crawl with quality signals to filter by |
+| Dolma (2024) | 3T tokens | OLMo's corpus, fully documented |
+| FineWeb / FineWeb-Edu (2024) | 15T / 1.3T tokens | Hugging Face; Edu keeps pages an LLM-trained classifier rates as educational |
+| DCLM-Baseline (2024) | ~4T tokens | DataComp-LM; a simple fastText quality classifier beat elaborate heuristics |
+| Nemotron-CC (2024) | 6.3T tokens | NVIDIA; classifier ensembles plus LLM rephrasing of lower-quality pages |
+| FineWeb2 (2024–25) | 1,000+ languages | Multilingual FineWeb pipeline |
+| The Stack v2 (2024) | ~900B tokens | Permissively licensed code (BigCode) |
+| Common Pile v0.1 (2025) | 8 TB of text | Openly licensed and public-domain only |
+
+## Synthetic Data
+
+By 2025–26 a large and growing share of every frontier mix is **generated by other models**:
+
+| Kind | What it is | Example |
+|---|---|---|
+| **Rephrased web** | An LLM rewrites noisy pages as clean Q&A, Wikipedia-style or textbook prose — same facts, better form | Nemotron-CC, WRAP, Kimi K2's rephrasing pipeline |
+| **Synthetic textbooks and exercises** | Generated explanations and problems targeted at skills | Phi-1 → Phi-4 (about 40% synthetic tokens in Phi-4) |
+| **Distilled reasoning traces** | Long chains of thought from a strong reasoning model, used in mid-training and SFT | OpenThoughts, DeepSeek-R1 distillation sets |
+| **Self-generated RL data** | The model's own rollouts, filtered by a verifier | Every RLVR run (Chapter 35) |
+
+Synthetic data is cheap, controllable and decontaminated by construction — but it copies the generator's blind spots and, used carelessly in loops, narrows the output distribution ("model collapse"). The practical rule: synthetic data should *re-express* or *verify* knowledge from real sources, not replace them.
+
+<div class="callout warn">
+<span class="callout-title">Provenance matters</span>
+<p>Data sourcing is now a legal as well as a technical question. In 2025 a US court found training on lawfully purchased books to be fair use while letting claims over pirated copies proceed, and the case (<em>Bartz v. Anthropic</em>) settled for $1.5B. Openly licensed corpora such as Common Pile, and documented pipelines such as Dolma and FineWeb, exist partly so that provenance can be audited.</p>
+</div>
 
 ---
 
@@ -186,13 +208,17 @@ labels = [-100, -100, ..., -100,   # system + user tokens (masked)
 
 **Key SFT datasets**:
 
-| Dataset | Size | Quality | Source |
-|---------|:----:|:-------:|--------|
-| OpenHermes 2.5 | 1M | High | GPT-4 generated |
-| UltraChat 200K | 200K | Very High | Filtered multi-turn |
-| Tulu 3 SFT Mix | 939K | Very High | Curated open-source |
-| FLAN Collection | 1.8M | Medium | Multi-task NLP |
-| ShareGPT | 90K | Medium | Real ChatGPT conversations |
+| Dataset | Size | Source |
+|---------|:----:|--------|
+| FLAN Collection (2023) | 1.8K tasks, millions of examples | Templated academic NLP tasks |
+| OpenHermes 2.5 (2023) | 1M | GPT-4-generated |
+| UltraChat 200K (2023) | 200K | Filtered multi-turn synthetic dialogue |
+| Tulu 3 SFT Mix (2024) | 939K | Curated open mix with safety and maths |
+| SmolTalk / SmolTalk2 (2024–25) | ~1M+ | Hugging Face; includes reasoning traces |
+| OpenThoughts3 (2025) | 1.2M | Reasoning traces for maths, code, science |
+| Llama-Nemotron Post-Training (2025) | ~30M | NVIDIA; reasoning on/off SFT data |
+
+Two shifts: SFT sets now carry **reasoning traces** (with a "thinking" segment the chat template wraps in special tokens) and **tool-call transcripts** (function calls and results as structured turns), and almost all of them are synthetic or model-filtered.
 
 ---
 
@@ -241,10 +267,12 @@ The DPO loss uses log-probabilities of both responses under the current and refe
 
 | Dataset | Pairs | Notes |
 |---------|------:|-------|
-| UltraFeedback | 64K prompts | GPT-4 rated, 4 responses each |
-| HelpSteer2 | 21K | NVIDIA human annotations |
-| Anthropic HH-RLHF | 170K | Human preference pairs |
-| OpenAI WebGPT | 20K | Human + web comparison |
+| Anthropic HH-RLHF (2022) | ~170K | Human helpfulness and harmlessness pairs |
+| OpenAI WebGPT comparisons (2021) | 20K | Human comparisons of web-grounded answers |
+| UltraFeedback (2023) | 64K prompts × 4 responses | GPT-4 ratings |
+| HelpSteer2 / HelpSteer3 (2024–25) | ~21K / ~40K | NVIDIA, human multi-attribute ratings |
+| Skywork-Reward-Preference-80K (2024) | 80K | Curated mix behind top open reward models |
+| Tulu 3 preference mix (2024) | ~270K | On-policy pairs scored by an LLM judge |
 
 ---
 
@@ -256,7 +284,7 @@ The latest frontier in post-training uses **verifiable rewards** — the model g
 
 Used for math, code, and reasoning tasks where answers can be checked programmatically.
 
-**Data format**: problems with ground-truth answers
+**Data format**: problems with ground-truth answers (or tests, or a grader)
 
 ```json
 {
@@ -278,18 +306,26 @@ Used for math, code, and reasoning tasks where answers can be checked programmat
 |--------|-------|-------------|
 | `input_ids` | `[B×G, T]` | B problems × G rollouts each |
 | `rewards` | `[B×G]` | Scalar reward per rollout |
-| `advantages` | `[B×G]` | Normalised within group |
-| `old_log_probs` | `[B×G, T]` | Log-probs from reference policy |
+| `advantages` | `[B×G]` | (r − group mean) / group std, broadcast over the rollout's tokens |
+| `old_log_probs` | `[B×G, T]` | Log-probs under the policy that *generated* the rollouts (for the importance ratio) |
+| `ref_log_probs` | `[B×G, T]` | Log-probs under the frozen reference model (for the KL penalty, if used) |
+| `completion_mask` | `[B×G, T]` | 1 on generated tokens, 0 on prompt and padding |
 
 **Key RL datasets**:
 
 | Dataset | Size | Domain |
 |---------|:----:|--------|
-| MATH | 12.5K | Competition mathematics |
-| GSM8K | 8.5K | Grade school math |
-| APPS | 10K | Programming problems |
-| LiveCodeBench | 400+ | Recent coding contests |
-| NuminaMath-TIR | 860K | Tool-integrated reasoning |
+| GSM8K (2021) | 8.5K | Grade-school maths |
+| MATH (2021) | 12.5K | Competition mathematics |
+| APPS (2021) | 10K | Programming problems with tests |
+| NuminaMath-1.5 (2025) | ~900K | Olympiad-style maths with verified answers |
+| DeepScaleR (2025) | 40K | Curated hard maths for RL |
+| Big-Math (2025) | 250K | Filtered for RL-friendly, checkable answers |
+| SWE-Gym / SWE-smith (2025) | thousands of repo tasks | Executable software-engineering environments |
+
+### From Datasets to Environments
+
+The 2025–26 shift in RL data is from static problem sets to **environments**: a container with a repository and a test suite, a terminal, a browser, a spreadsheet, a simulated customer. The model acts for many turns, and a grader scores the end state. Labs now build and buy environments the way they once bought labelled data, and the bottleneck is writing graders that cannot be gamed ("reward hacking", Chapter 15). For tasks without a checkable answer — writing, advice, research — **rubric-based rewards** (an LLM judge scoring against a task-specific checklist) extend RL beyond maths and code.
 
 ### Process Reward Models (PRMs)
 
@@ -307,6 +343,8 @@ Instead of just rewarding the final answer, **PRMs** give step-level rewards for
   ]
 }
 ```
+
+Datasets: OpenAI's PRM800K (800K human step labels on MATH solutions); Math-Shepherd (labels estimated automatically by rolling out from each step). After DeepSeek-R1 showed that outcome-only rewards suffice for strong reasoning, PRMs moved from training signal to mostly *verification* and search (Chapter 35).
 
 **Reward tensor shapes**:
 
@@ -342,10 +380,12 @@ Large-scale image-text pairs (alt-text, web captions):
 
 | Dataset | Scale | Notes |
 |---------|------:|-------|
-| LAION-400M | 400M pairs | Web-scraped, noisy |
-| LAION-5B | 5B pairs | Larger, filtered version |
-| COYO-700M | 700M pairs | Higher quality filtering |
-| DataComp | 1.28B–12.8B | Competition benchmark |
+| LAION-400M / LAION-5B (2021–22) | 0.4B / 5.85B pairs | Web alt-text; 5B withdrawn in 2023 after harmful content was found, re-released as Re-LAION-5B (2024) |
+| COYO-700M (2022) | 700M pairs | Stricter filtering |
+| DataComp CommonPool (2023) | 12.8B pairs | Benchmark for filtering strategies |
+| OBELICS / MINT-1T (2023–24) | 141M docs / 1T tokens | *Interleaved* image–text documents |
+
+Since 2024, most VLM pre-training data is **re-captioned**: alt-text is replaced or augmented with dense captions written by an existing VLM, and OCR, chart, table and UI-screenshot data are synthesised at scale.
 
 ### SFT for VLMs
 
@@ -373,10 +413,12 @@ Structured conversations with image inputs:
 
 | Dataset | Size | Type |
 |---------|:----:|------|
-| LLaVA-1.5 Mix | 665K | GPT-4V generated |
-| ShareGPT4V | 100K | GPT-4V detailed captions |
-| MMDU | 20K | Multi-image dialogue |
-| DocVQA | 50K | Document understanding |
+| LLaVA-1.5 Mix (2023) | 665K | Academic VQA + GPT-4-generated conversations |
+| ShareGPT4V (2023) | 100K (+1.2M) | Detailed captions |
+| The Cauldron (2024) | 50 datasets | Hugging Face collection used for Idefics2 |
+| Cambrian-10M (2024) | 10M | Large open visual-instruction mix |
+| FineVision (2025) | ~24M samples | Hugging Face; deduplicated and decontaminated open VLM mix |
+| DocVQA (2020) | 50K questions | Document understanding (mostly an eval) |
 
 ---
 
@@ -409,9 +451,10 @@ A common insight from scaling: **quality beats raw token count** at a fixed comp
 </div>
 
 Key findings from research:
-- **Phi-1** (2023): 1.3B model trained on "textbook quality" synthetic data matched models 10× larger
-- **LIMA** (2023): 1000 carefully curated SFT examples matched 52K example models on alignment
-- **MiniCPM** (2024): Annealing on high-quality data in final training stage boosts benchmarks significantly
+- **Phi-1** (2023): a 1.3B model trained on "textbook-quality" filtered and synthetic code reached 50.6% on HumanEval, beating models more than 10× larger.
+- **LIMA** (2023): 1,000 carefully curated SFT examples were enough to elicit good chat behaviour from a strong base model — the "superficial alignment hypothesis".
+- **FineWeb-Edu, DCLM** (2024): a cheap classifier trained on LLM judgements of "educational value" improved downstream benchmarks more than any heuristic filter, at the cost of discarding ~90% of the web.
+- **MiniCPM, Llama 3** (2024): **annealing** — upweighting the best data while the learning rate decays to zero — gives outsized gains, and is now the standard end of pre-training (Chapter 12).
 
 ---
 
@@ -428,7 +471,7 @@ A critical but often overlooked issue: **benchmark contamination** — when test
 | SimHash | Near-duplicates | Streaming-friendly |
 | SemDeDup | Semantic duplicates | Embedding-based clustering |
 
-**Contamination detection**: n-gram overlap between training data and benchmark test sets. Most responsible training runs report contamination analysis.
+**Contamination detection**: n-gram overlap between training data and benchmark test sets (GPT-3 used 13-grams; Llama 3 used 8-grams), plus behavioural checks — does the model complete benchmark questions verbatim, or score far better on old versions of a benchmark than on fresh ones? Contamination is why 2025–26 evaluation favours private or continuously refreshed test sets (LiveCodeBench, LiveBench, SWE-bench variants) — see [Chapter 30](./30_evaluation_and_benchmarks.md).
 
 ---
 
@@ -442,14 +485,68 @@ A critical but often overlooked issue: **benchmark contamination** — when test
 | Reward model | `[2B, T]` | scalar `[B]` per pair | Paired chosen/rejected |
 | DPO | `[2B, T]` | implicit from log-probs | No explicit reward model |
 | GRPO/RLVR | `[B×G, T]` | `[B×G]` reward | Multiple rollouts per prompt |
+| Agentic RL | many turns per episode | reward on the final state | Tool outputs are masked from the loss |
 | VLM pre-train | `[B, C, H, W]` + `[B, T]` | `[B, T]` | Image + text |
 
-## What's Next
+<div class="callout ponder">
+<span class="callout-title">Ponder</span>
+<p>Quality filters like FineWeb-Edu throw away ~90% of the web, and frontier runs already train on 15–40T tokens. If high-quality human text runs out before compute does, which of this chapter's tools — rephrasing, synthetic textbooks, multimodal data, RL environments, repeating data for several epochs — buys the most, and which risks narrowing what the model knows?</p>
+</div>
 
-With a solid understanding of data across all training phases, we're ready to look at **pre-training at scale** — how you orchestrate a trillion-token training run.
+## Key Takeaways
 
-[← Previous: Chapter 8 — Multimodal Models](./08_multimodal_models.md) · **Next: [Chapter 10 — Pre-Training at Scale →](./10_pretraining_at_scale.md)**
+- Each phase has its own data: filtered web + code + maths (pre-training), curated and long-context mixes (mid-training), chat transcripts with assistant-only loss (SFT), preference pairs (RLHF/DPO), and graded rollouts in environments (RL).
+- Pre-training data is now selected by model-based quality classifiers and increasingly rephrased or generated by LLMs; synthetic data should re-express real knowledge, not replace it.
+- Shapes are simple — `[B, T]` everywhere, `[B×G, T]` for group RL — but the `[B, T, V]` logits are large enough that loss is computed in chunks.
+- RL data has become environments plus graders; reward hacking and rubric design are the new data-quality problems.
+- Deduplicate (exact, MinHash, semantic) and check contamination; provenance is now a legal requirement, not only good hygiene.
+
+## Check Yourself
+
+<details class="check">
+<summary>In Hugging Face, why do you pass <code>labels = input_ids.clone()</code> rather than labels shifted by one?</summary>
+<p>The model shifts internally: logits at position t are compared with labels at position t+1, and the last position has no target. Shifting yourself would make the model predict two tokens ahead.</p>
+</details>
+
+<details class="check">
+<summary>An SFT batch has 1,200 prompt tokens and 300 assistant tokens per example. How many positions contribute to the loss, and what goes in <code>labels</code> for the rest?</summary>
+<p>Only the 300 assistant tokens (plus the end-of-turn token). The 1,200 prompt positions get −100, the index PyTorch's cross-entropy ignores.</p>
+</details>
+
+<details class="check">
+<summary>In GRPO, what is the difference between <code>old_log_probs</code> and <code>ref_log_probs</code>?</summary>
+<p><code>old_log_probs</code> come from the policy that generated the rollouts and form the importance ratio π<sub>θ</sub>/π<sub>old</sub> that PPO-style clipping acts on. <code>ref_log_probs</code> come from a frozen reference (usually the SFT model) and feed an optional KL penalty that keeps the policy from drifting too far.</p>
+</details>
+
+<details class="check">
+<summary>Why did DCLM's simple fastText filter beat sophisticated heuristic pipelines?</summary>
+<p>It was trained to recognise text resembling high-quality reference data (instruction data and highly rated forum answers), so it optimised directly for "looks like what helps downstream", whereas heuristics (length, punctuation, stop-words) only remove obvious junk.</p>
+</details>
+
+<details class="check">
+<summary>Name two ways benchmark contamination can be detected, and one way evaluation designers now avoid it.</summary>
+<p>N-gram overlap between the training corpus and test items; behavioural probes such as verbatim completion of test questions or a performance gap between old and freshly written items. Avoidance: private held-out sets or continuously refreshed benchmarks dated after the model's training cutoff.</p>
+</details>
+
+## References
+
+| Source | Author / Org, Year | Link | What this chapter takes from it |
+|---|---|---|---|
+| The Pile | Gao et al., 2020 | [arxiv.org/abs/2101.00027](https://arxiv.org/abs/2101.00027) | Early open pre-training corpus |
+| The FineWeb Datasets | Penedo et al., 2024 | [arxiv.org/abs/2406.17557](https://arxiv.org/abs/2406.17557) | Web filtering, FineWeb-Edu |
+| DataComp-LM | Li et al., 2024 | [arxiv.org/abs/2406.11794](https://arxiv.org/abs/2406.11794) | Classifier-based filtering |
+| Nemotron-CC | Su et al. (NVIDIA), 2024 | [arxiv.org/abs/2412.02595](https://arxiv.org/abs/2412.02595) | Rephrasing and classifier ensembles |
+| Textbooks Are All You Need (Phi-1) | Gunasekar et al., 2023 | [arxiv.org/abs/2306.11644](https://arxiv.org/abs/2306.11644) | Synthetic, textbook-quality data |
+| Phi-4 Technical Report | Abdin et al., 2024 | [arxiv.org/abs/2412.08905](https://arxiv.org/abs/2412.08905) | Synthetic data at scale |
+| LIMA: Less Is More for Alignment | Zhou et al., 2023 | [arxiv.org/abs/2305.11206](https://arxiv.org/abs/2305.11206) | Small high-quality SFT |
+| The Llama 3 Herd of Models | Meta AI, 2024 | [arxiv.org/abs/2407.21783](https://arxiv.org/abs/2407.21783) | Data mix, batch schedule, contamination |
+| Tulu 3 | Lambert et al. (Ai2), 2024 | [arxiv.org/abs/2411.15124](https://arxiv.org/abs/2411.15124) | Open SFT, preference and RLVR data |
+| Let's Verify Step by Step (PRM800K) | Lightman et al., 2023 | [arxiv.org/abs/2305.20050](https://arxiv.org/abs/2305.20050) | Process supervision data |
+| DeepSeekMath (GRPO) | Shao et al., 2024 | [arxiv.org/abs/2402.03300](https://arxiv.org/abs/2402.03300) | GRPO data layout |
+| Deduplicating Training Data Makes Language Models Better | Lee et al., 2021 | [arxiv.org/abs/2107.06499](https://arxiv.org/abs/2107.06499) | Exact and near-duplicate removal |
 
 ---
 
-*Last updated: April 2026*
+**Next:** [Chapter 10 — Pre-Training at Scale](./10_pretraining_at_scale.md) — how a trillion-token run is actually set up and kept alive.
+
+[← Back to Table of Contents](./README.md)
