@@ -34,9 +34,9 @@ The key insight: **not all heads need their own K and V.** Query heads are diver
   <div class="flow-node accent">…</div>
   <div class="flow-node accent">Q head H</div>
 </div>
-<div style="text-align: center; padding: 0.5rem 0; color: var(--text-muted);">↓ all attend using ↓</div>
+<div class="flow-caption">↓ all attend using ↓</div>
 <div class="flow-h">
-  <div class="flow-node green" style="min-width: 300px;">K head 1 (shared) &nbsp; V head 1 (shared)</div>
+  <div class="flow-node green wide">K head 1 (shared) &nbsp; V head 1 (shared)</div>
 </div>
 </div>
 
@@ -98,7 +98,7 @@ Trade-off: measurably lower quality than MHA, and training can be less stable. U
     <div class="card-desc">Q heads 13–16 share KV head 4</div>
   </div>
 </div>
-<div style="text-align: center; padding: 0.25rem 0; color: var(--text-muted); font-size: 0.75rem;">Example: H=16 query heads, G=4 KV heads → 4 queries per KV head</div>
+<div class="flow-caption">Example: H=16 query heads, G=4 KV heads → 4 queries per KV head</div>
 </div>
 
 <div class="diagram">

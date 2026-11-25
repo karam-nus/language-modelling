@@ -207,7 +207,7 @@ $d_{\text{head}}$ is the per-head dimension. It determines the shape of every Q/
 <div class="diagram">
 <div class="diagram-title">head_dim: Standard Convention vs Qwen3 Override</div>
 
-<img src="./assets/images/head_dim_comparison.svg" alt="head_dim comparison diagram" style="width:100%;max-width:860px"/>
+<img src="./assets/images/head_dim_comparison.svg" alt="head_dim comparison diagram"/>
 </div>
 
 #### Standard convention (no `head_dim` field in config)
@@ -658,7 +658,7 @@ Vision-Language Models nest multiple sub-configs inside a single `config.json`. 
 <div class="diagram">
 <div class="diagram-title">VLM Config Anatomy — Qwen2.5-VL Style</div>
 
-<img src="./assets/images/vlm_config_anatomy.svg" alt="VLM config anatomy diagram" style="width:100%;max-width:860px"/>
+<img src="./assets/images/vlm_config_anatomy.svg" alt="VLM config anatomy diagram"/>
 </div>
 
 ### General VLM Config Structure

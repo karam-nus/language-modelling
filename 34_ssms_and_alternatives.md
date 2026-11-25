@@ -150,7 +150,7 @@ Mix many cheap linear-time layers with a few attention layers that provide exact
 |-------|---|------------|---------|---|
 | Jamba / Jamba 1.5 (AI21) | 2024 | Mamba | 7 : 1 | + MoE; 256K context |
 | Samba (Microsoft) | 2024 | Mamba + sliding-window attention | 1 : 1 | Long-context extrapolation |
-| Nemotron-H, Nemotron Nano 2 (NVIDIA) | 2025 | Mamba-2 | ~10 : 1 (few attention layers) | Up to ~3× faster inference at long outputs |
+| Nemotron-H, Nemotron Nano 2 (NVIDIA) | 2025 | Mamba-2 | ~11 : 1 (about 8% of layers are attention) | Up to ~3× faster inference at long outputs |
 | Granite 4.0 (IBM) | 2025 | Mamba-2 | ~9 : 1 | Enterprise open models; large memory savings |
 | Falcon-H1 (TII) | 2025 | Mamba-2 (parallel with attention heads) | Parallel hybrid | 0.5B–34B |
 | MiniMax-M1 | 2025 | Lightning (linear) attention | 7 : 1 | 1M context reasoning model |
