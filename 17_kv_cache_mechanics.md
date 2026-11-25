@@ -1,18 +1,19 @@
 ---
 title: "Chapter 17 — KV-Cache: Mechanics & Memory"
+description: "Why the KV cache exists and what it actually saves, its shapes per layer, the memory formula checked on Llama, Qwen3, DeepSeek-V3 and gpt-oss, why decode is bandwidth-bound, how cache size sets batch size and throughput, and how to inspect the cache in transformers."
 ---
 
 [← Back to Table of Contents](./README.md)
 
 # Chapter 17 — KV-Cache: Mechanics & Memory
 
-> *"The KV-cache is the single most important optimization in LLM inference — without it, generating each token would require recomputing attention over the entire sequence from scratch."*
+> **The one-sentence version:** the KV cache stores every past token's keys and values so each new token costs one forward pass instead of T — at the price of a memory footprint that grows with every token and, at long context, outweighs the model itself.
 
 ## Why KV-Cache Exists
 
-During autoregressive generation, each new token needs to attend to all previous tokens. Without caching, we'd recompute Q, K, V for every previous token at every step — O(T²) total computation to generate T tokens.
+During autoregressive generation, each new token must attend to all previous tokens. Without a cache, step t would rerun the *entire model* over all t tokens — every projection, every MLP — so generating T tokens costs O(T²) token-forward-passes.
 
-The KV-cache stores the Key and Value projections from all previous tokens, so each decode step only computes Q, K, V for the **new** token and reuses everything else.
+Keys and values of past tokens never change (the causal mask means later tokens cannot affect earlier ones), so they can be computed once and stored. With a KV cache each decode step runs the model on **one** token: its Q, K, V projections, its MLPs, and an attention read over the cached keys and values. Total work for T tokens drops to O(T) forward passes; only the attention read still grows with context (O(T) per step).
 
 <div class="diagram">
 <div class="diagram-title">Without vs With KV-Cache</div>
@@ -24,7 +25,7 @@ The KV-cache stores the Key and Value projections from all previous tokens, so e
       <li>Step 2: recompute K, V for tokens [1, 2]</li>
       <li>Step 3: recompute K, V for tokens [1, 2, 3]</li>
       <li>Step T: recompute all T tokens</li>
-      <li>Total compute: O(T²) per layer</li>
+      <li>Total: O(T²) token-passes through every layer</li>
     </ul>
   </div>
   <div class="compare-side right">
@@ -34,7 +35,7 @@ The KV-cache stores the Key and Value projections from all previous tokens, so e
       <li>Step 2: compute K₂, V₂, append to cache</li>
       <li>Step 3: compute K₃, V₃, append to cache</li>
       <li>Step T: compute Kₜ, Vₜ, attend to cached [1..T]</li>
-      <li>Total compute: O(T) per layer ✓</li>
+      <li>Total: O(T) token-passes ✓ (attention reads still grow with T)</li>
     </ul>
   </div>
 </div>
@@ -67,7 +68,11 @@ At each decode step, the computation is:
 - **Key/Value**: read from cache → `[B, H, T_total, d_k]`
 - **Attention**: `Q × K^T` → `[B, H, 1, T_total]` → softmax → `× V` → `[B, H, 1, d_k]`
 
-This is a **matrix-vector product** (not matrix-matrix), making decode steps **memory-bandwidth bound** rather than compute-bound.
+For one sequence these are **matrix-vector products** (one query row against T cached rows), and the projections and MLPs likewise multiply each weight by just one token. Every weight byte and every cache byte is read from HBM to do about one multiply-add — so decode is **memory-bandwidth bound**. A useful ceiling for batch size 1:
+
+$$\text{tokens/s} \lesssim \frac{\text{HBM bandwidth}}{\text{weight bytes} + \text{KV-cache bytes}}$$
+
+An H100 (3.35 TB/s) serving Llama 3.1 8B in BF16 (16 GB) can therefore produce at most ~200 tokens/s for a single short sequence — no matter how many TFLOP/s it has. Batching amortises the weight reads across sequences; the KV reads cannot be shared, because each sequence has its own cache.
 
 ## Tensor Shapes in Detail
 
@@ -133,22 +138,28 @@ where: L = layers, G = KV heads, d_k = head dimension, T = sequence length, B = 
 
 ### Worked Examples
 
-| Model | L | G (KV heads) | d_k | Formula | Per Token | At 8K | At 128K |
+| Model | L | G (KV heads) | d_k | Formula | Per token | At 8K | At 128K |
 |-------|:-:|:---:|:---:|---------|:---:|:---:|:---:|
-| LLaMA-2 7B (MHA) | 32 | 32 | 128 | 2×32×32×128×2 | 512 KB | 4 GB | 64 GB |
-| LLaMA-3 8B (GQA) | 32 | 8 | 128 | 2×32×8×128×2 | 128 KB | 1 GB | 16 GB |
-| LLaMA-3 70B (GQA) | 80 | 8 | 128 | 2×80×8×128×2 | 320 KB | 2.5 GB | 40 GB |
-| Mistral 7B (GQA) | 32 | 8 | 128 | 2×32×8×128×2 | 128 KB | 1 GB | 16 GB |
-| LLaMA-3.1 405B | 126 | 8 | 128 | 2×126×8×128×2 | 504 KB | 3.9 GB | 63 GB |
+| Llama 2 7B (MHA) | 32 | 32 | 128 | 2×32×32×128×2 | 512 KiB | 4 GiB | 64 GiB |
+| Llama 3.1 8B (GQA) | 32 | 8 | 128 | 2×32×8×128×2 | 128 KiB | 1 GiB | 16 GiB |
+| Llama 3.1 70B (GQA) | 80 | 8 | 128 | 2×80×8×128×2 | 320 KiB | 2.5 GiB | 40 GiB |
+| Llama 3.1 405B (GQA) | 126 | 8 | 128 | 2×126×8×128×2 | 504 KiB | 3.9 GiB | 63 GiB |
+| Qwen3-235B-A22B (GQA) | 94 | 4 | 128 | 2×94×4×128×2 | 188 KiB | 1.5 GiB | 23.5 GiB |
+| DeepSeek-V3 (MLA) | 61 | — | 512 + 64 | 61×576×2 | 68.6 KiB | 0.54 GiB | 8.6 GiB |
+| gpt-oss-120b (half windowed) | 36 (18 full) | 8 | 64 | 2×18×8×64×2 (+ fixed 128-token windows) | 36 KiB | 0.28 GiB | 4.5 GiB |
 
-> **Key insight**: The KV-cache for LLaMA-3.1 405B at 128K context exceeds 63 GB **per request** in FP16. This is why KV-cache optimization ([Chapter 18](./18_kv_cache_optimization.md)) is critical.
+> **Key insight**: Llama 3.1 405B needs 63 GiB of cache **per 128K-token request** in BF16 — on top of 810 GB of weights. Compare DeepSeek-V3 (MLA) at 8.6 GiB and gpt-oss (small heads, half the layers windowed) at 4.5 GiB: the attention design is the single biggest lever on long-context serving cost. [Chapter 18](./18_kv_cache_optimization.md) covers the rest.
+
+Plug in any model's shape — or the presets — and a context length:
+
+<div class="lab" data-lab="kvcache"><noscript>Interactive lab: KV-cache size calculator with model presets and attention variants. Enable JavaScript to use it.</noscript></div>
 
 ## GQA/MQA Impact on KV-Cache
 
 The attention variant directly determines KV-cache size (see [Chapter 5](./05_attention_gqa_mqa_mla.md)):
 
 <div class="diagram">
-<div class="diagram-title">KV-Cache Size by Attention Variant (LLaMA-3-8B Scale)</div>
+<div class="diagram-title">KV-Cache Size by Attention Variant (Llama 3.1 8B scale)</div>
 <div class="diagram-grid cols-4">
   <div class="diagram-card accent">
     <div class="card-title">MHA (H=32)</div>
@@ -206,40 +217,29 @@ With Sliding Window Attention ([Chapter 5](./05_attention_gqa_mqa_mla.md)), the 
 ## Inspecting KV-Cache in Transformers
 
 ```python
-from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-model = AutoModelForCausalLM.from_pretrained(
-    "meta-llama/Llama-3.1-8B", torch_dtype=torch.bfloat16, device_map="auto"
-)
-tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B")
+model_id = "meta-llama/Llama-3.1-8B"
+model = AutoModelForCausalLM.from_pretrained(model_id, dtype=torch.bfloat16, device_map="auto")
+tok = AutoTokenizer.from_pretrained(model_id)
+ids = tok("Hello, world!", return_tensors="pt").input_ids.to(model.device)   # [1, 5] incl. BOS
 
-input_ids = tokenizer("Hello, world!", return_tensors="pt").input_ids.to(model.device)
+out = model(ids, use_cache=True)                    # prefill
+cache = out.past_key_values                         # a DynamicCache object
+layer0 = cache.layers[0]                            # recent transformers: one entry per layer
+print(layer0.keys.shape, layer0.values.shape)       # [1, 8, 5, 128] each: 8 KV heads, 5 tokens
+print(cache.get_seq_length())                       # 5
 
-# First forward pass (prefill)
-outputs = model(input_ids, use_cache=True)
-past_kv = outputs.past_key_values
+nbytes = sum(l.keys.nbytes + l.values.nbytes for l in cache.layers)
+print(f"{nbytes / 1024:.0f} KiB")                   # 640 KiB = 5 tokens × 128 KiB
 
-# Inspect shapes
-for layer_idx, (k, v) in enumerate(past_kv):
-    if layer_idx == 0:
-        print(f"Layer {layer_idx}:")
-        print(f"  K shape: {k.shape}")  # [1, 8, T, 128] for GQA with 8 KV heads
-        print(f"  V shape: {v.shape}")  # [1, 8, T, 128]
-
-# Total KV-cache memory
-total_bytes = sum(k.nbytes + v.nbytes for k, v in past_kv)
-print(f"Total KV-cache: {total_bytes / 1024**2:.1f} MB")
-
-# Decode one more token — only feed the last token
-next_token = torch.argmax(outputs.logits[:, -1, :], dim=-1, keepdim=True)
-outputs2 = model(next_token, past_key_values=past_kv, use_cache=True)
-past_kv2 = outputs2.past_key_values
-
-# Cache grew by 1 token
-k0_old, k0_new = past_kv[0][0], past_kv2[0][0]
-print(f"Cache grew: {k0_old.shape[2]} → {k0_new.shape[2]} tokens")
+nxt = out.logits[:, -1:].argmax(-1)                 # [1, 1]
+out = model(nxt, past_key_values=cache, use_cache=True)   # decode: feed only the new token
+print(cache.get_seq_length())                       # 6 — the same cache object grew in place
 ```
+
+(Older transformers versions return a tuple of per-layer `(k, v)` pairs or expose `cache.key_cache[i]`; the shapes are the same.)
 
 ## KV-Cache vs Model Weights Memory
 
@@ -257,14 +257,71 @@ At 128K context, the KV-cache equals the model size. At 512K, it's 4× the model
 
 ## Batching and KV-Cache
 
-When serving multiple requests, each request has its own KV-cache of potentially different length. Managing memory across a dynamic batch is non-trivial — this is the core problem that **PagedAttention** and other optimizations solve (see [Chapter 18](./18_kv_cache_optimization.md)).
+When serving many requests, the cache — not the weights — decides how many fit at once, and batch size decides throughput:
 
-## What's Next
+| Llama 3.1 8B, BF16 on one 80 GB GPU | |
+|---|---|
+| Weights | 16 GB |
+| Left for KV cache (after ~4 GB activations/workspace) | ~60 GB |
+| Cache per 32K-token request | 32,768 × 128 KiB = 4 GiB |
+| Concurrent 32K requests | **~14** |
+| Concurrent 2K requests | **~220** |
 
-The KV-cache memory problem is the central challenge of LLM serving. The next chapter covers the full landscape of **KV-cache optimization** — from PagedAttention to quantized KV-cache to token eviction strategies.
+Each request's cache grows at its own rate and ends at an unpredictable length, so naive allocation (reserve the maximum per request) wastes most of that memory. Managing it like an operating system manages RAM is the job of **PagedAttention** and the rest of [Chapter 18](./18_kv_cache_optimization.md).
 
-[← Previous: Chapter 16 — Inference & Sampling](./16_inference_and_sampling.md) · **Next: [Chapter 18 — KV-Cache — Optimization →](./18_kv_cache_optimization.md)**
+<div class="callout ponder">
+<span class="callout-title">Ponder</span>
+<p>A reasoning model may write 30,000 thinking tokens to answer a 200-token question. Its KV cache is then dominated by text no user will ever read. Which of the ideas in Chapter 18 — compression, eviction, offloading, sharing — fits a cache that is mostly the model's own scratch work?</p>
+</div>
+
+## Key Takeaways
+
+- The cache stores per-layer K and V for every past token; decode then runs the model on one token per step.
+- KV bytes per token = 2 × layers × KV heads × head dim × bytes per value (MLA: layers × (latent + RoPE dim) × bytes).
+- Decode is bandwidth-bound: tokens/s ≲ bandwidth / (weights + KV bytes) at batch 1; batching shares weight reads but not cache reads.
+- At long context the cache exceeds the weights, and cache capacity sets the batch size — and therefore throughput and cost.
+- Attention design (GQA, MLA, windows, hybrids) changes the cache by 10–100×; it is a serving decision as much as an architecture one.
+
+## Check Yourself
+
+<details class="check">
+<summary>Llama 3.1 70B serves a 64K-token conversation in BF16. How large is the cache, and what fraction of an 80 GB GPU is that?</summary>
+<p>65,536 × 320 KiB = 20 GiB ≈ 21.5 GB — over a quarter of one GPU, for a single request (and the 140 GB of weights need two GPUs anyway).</p>
+</details>
+
+<details class="check">
+<summary>Why does batching raise decode throughput almost linearly at first, and why does it eventually stop?</summary>
+<p>At batch 1 each step reads all weights to produce one token; with batch B the same weight read produces B tokens, so throughput grows ~B× while still bandwidth-bound. It stops when either compute becomes the bottleneck (arithmetic intensity reaches the GPU's ridge point) or the KV caches of B sequences no longer fit in memory.</p>
+</details>
+
+<details class="check">
+<summary>Why can the cache store K and V but not Q?</summary>
+<p>Past queries are never needed again: each query is used only at its own step to read the cache. Keys and values of past tokens are read by every future query, so they are worth keeping.</p>
+</details>
+
+<details class="check">
+<summary>What is the upper bound on single-sequence decode speed for a 30 GB model on a 4.8 TB/s H200 with a 6 GB cache?</summary>
+<p>4.8 TB/s / 36 GB ≈ 133 tokens/s — before kernel overheads, which typically leave you at 60–80% of the bound.</p>
+</details>
+
+<details class="check">
+<summary>gpt-oss-120b has 36 layers but the table counts only 18 for its growing cache. Why?</summary>
+<p>Half its layers use a 128-token sliding window, so their cache is capped at 128 tokens regardless of context length; only the 18 full-attention layers grow with T.</p>
+</details>
+
+## References
+
+| Source | Author / Org, Year | Link | What this chapter takes from it |
+|---|---|---|---|
+| Efficiently Scaling Transformer Inference | Pope et al. (Google), 2022 | [arxiv.org/abs/2211.05102](https://arxiv.org/abs/2211.05102) | KV-cache memory and decode bandwidth analysis |
+| Efficient Memory Management for LLM Serving with PagedAttention | Kwon et al., 2023 | [arxiv.org/abs/2309.06180](https://arxiv.org/abs/2309.06180) | Cache fragmentation, batching |
+| The Llama 3 Herd of Models | Meta AI, 2024 | [arxiv.org/abs/2407.21783](https://arxiv.org/abs/2407.21783) | Llama 3.1 shapes |
+| DeepSeek-V3 Technical Report | DeepSeek-AI, 2024 | [arxiv.org/abs/2412.19437](https://arxiv.org/abs/2412.19437) | MLA cache dimensions |
+| gpt-oss model card | OpenAI, 2025 | [openai.com/index/gpt-oss-model-card](https://openai.com/index/gpt-oss-model-card/) | Windowed/full layer pattern |
+| Transformers cache documentation | Hugging Face, 2025 | [huggingface.co/docs/transformers/cache_explanation](https://huggingface.co/docs/transformers/cache_explanation) | DynamicCache API |
 
 ---
 
-*Last updated: April 2026*
+**Next:** [Chapter 18 — KV-Cache: Optimization Strategies](./18_kv_cache_optimization.md) — paging, sharing, compressing, evicting and offloading the cache.
+
+[← Back to Table of Contents](./README.md)
