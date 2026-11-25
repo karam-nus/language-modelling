@@ -1,5 +1,6 @@
 ---
 title: "Chapter 2 — Embeddings & Representations"
+description: "Embedding tables, the road from one-hot to contextual vectors, and positional encodings: sinusoidal, learned, RoPE and its context-extension tricks, M-RoPE for images and video, ALiBi, NoPE and partial RoPE."
 ---
 
 [← Back to Table of Contents](./README.md)
@@ -7,16 +8,18 @@ title: "Chapter 2 — Embeddings & Representations"
 # Chapter 2 — Embeddings & Representations
 
 > *"You shall know a word by the company it keeps."*
-> — J.R. Firth, 1957
+> — J. R. Firth, 1957
+
+> **The one-sentence version:** an embedding table turns each token ID into a learned vector, and a positional scheme — today almost always a rotation of the attention queries and keys — tells the model where each vector sits in the sequence.
 
 ## From IDs to Vectors
 
-After tokenization (see [Appendix B](./appendix_b_tokenization.md)), each token is an integer ID — say, `4037` for the token "token". But a model can't learn meaningful patterns from raw integers. The **embedding layer** maps each token ID to a dense vector in a continuous space where similar tokens live near each other.
+After tokenization (see [Appendix B](./appendix_b_tokenization.md)), each token is an integer ID — say, `4037` for `" token"` in some vocabulary. But a model can't learn meaningful patterns from raw integers. The **embedding layer** maps each token ID to a dense vector in a continuous space where similar tokens live near each other.
 
 <div class="diagram">
 <div class="diagram-title">Embedding Lookup</div>
 <div class="flow">
-  <div class="flow-node wide">Token IDs: [14658, 4211, 7963]</div>
+  <div class="flow-node wide">Token IDs: [B, T] integers</div>
   <div class="flow-arrow accent"></div>
   <div class="flow-node accent wide">Embedding Matrix <small>E ∈ ℝ^(V × d_model)</small></div>
   <div class="flow-arrow accent"></div>
@@ -30,7 +33,7 @@ The embedding matrix **E** has shape `[V, d_model]` — one row per token in the
 <div class="diagram-title">Tensor Shapes — Embedding Lookup</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 140px;">Input token IDs</span>
+    <span class="ts-label">Input token IDs</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span>
@@ -40,7 +43,7 @@ The embedding matrix **E** has shape `[V, d_model]` — one row per token in the
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 140px;">Embedding matrix</span>
+    <span class="ts-label">Embedding matrix</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim vocab">V</span>
@@ -50,7 +53,7 @@ The embedding matrix **E** has shape `[V, d_model]` — one row per token in the
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 140px;">Output embeddings</span>
+    <span class="ts-label">Output embeddings</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span>
@@ -64,7 +67,7 @@ The embedding matrix **E** has shape `[V, d_model]` — one row per token in the
 </div>
 </div>
 
-For LLaMA-3-8B: V = 128,256 and d_model = 4,096, so the embedding matrix alone is 128,256 × 4,096 × 2 bytes (BF16) ≈ **1 GB**.
+For Llama 3.1 8B: V = 128,256 and d_model = 4,096, so the embedding matrix alone is 128,256 × 4,096 × 2 bytes (BF16) ≈ **1.05 GB** — 525M parameters, about 6.5% of the model. In a 0.6B model with a 152K vocabulary (Qwen3-0.6B, d_model = 1,024) the same table is 156M parameters, a quarter of the whole network, which is why small models share it with the output head (see *Tying Embeddings* below).
 
 ```python
 import torch
@@ -77,10 +80,10 @@ d_model = 4096
 embedding = nn.Embedding(vocab_size, d_model)
 
 # Input: batch of token IDs
-token_ids = torch.tensor([[14658, 4211, 7963, 279]])  # [1, 4]
-vectors = embedding(token_ids)                          # [1, 4, 4096]
-print(f"Input shape:  {token_ids.shape}")   # [1, 4]
-print(f"Output shape: {vectors.shape}")     # [1, 4, 4096]
+token_ids = torch.randint(0, vocab_size, (1, 4))  # [1, 4]
+vectors = embedding(token_ids)                     # [1, 4, 4096]
+print(token_ids.shape, vectors.shape)
+# torch.Size([1, 4]) torch.Size([1, 4, 4096])
 ```
 
 ## The Evolution of Word Representations
@@ -192,11 +195,13 @@ When two rotated vectors $q'$ (at position $m$) and $k'$ (at position $n$) are d
 
 $$q'^{\top} k' = \text{Re}\!\left[\sum_{i=0}^{d/2-1} q_{[i]} k_{[i]}^{*} e^{j(m-n)\theta_i}\right]$$
 
-The model never needs to learn absolute positions — relative offsets are **built into the geometry**.
+The model never needs to learn absolute positions — relative offsets are **built into the geometry**. Drag the sliders below: move both tokens together and the score does not change; change the gap and it does.
+
+<div class="lab" data-lab="rope"><noscript>Interactive lab: rotate a query and key pair at several RoPE frequencies and watch the attention score depend only on their distance. Enable JavaScript to use it.</noscript></div>
 
 #### Angle Rotation Visualization
 
-The diagram below shows how the same query vector for position *m=1* (vs *m=0*) rotates by different amounts across three frequency bands. Low-frequency pairs barely move; high-frequency pairs rotate nearly 90° per step.
+The diagram below shows how a query vector rotates at three frequency bands as its position advances. The first pair (θ₀ = 1) turns a full radian — about 57° — per position, so it wraps around every ~6 tokens and resolves fine local order. The last pair (θ ≈ 10⁻⁴ with base 10,000) turns so slowly that it takes tens of thousands of positions to complete a revolution, so it encodes coarse, long-range position.
 
 ![RoPE angle rotation across frequency bands]({{ '/assets/images/rope_rotation.svg' | relative_url }})
 
@@ -206,7 +211,7 @@ The diagram below shows how the same query vector for position *m=1* (vs *m=0*) 
 <div class="diagram-title">RoPE Tensor Shapes Inside Attention</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color:var(--text-muted);font-size:0.75rem;min-width:200px;">Q or K (after linear proj)</span>
+    <span class="ts-label">Q or K (after linear proj)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span>
@@ -220,7 +225,7 @@ The diagram below shows how the same query vector for position *m=1* (vs *m=0*) 
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color:var(--text-muted);font-size:0.75rem;min-width:200px;">Precomputed cos/sin cache</span>
+    <span class="ts-label">Precomputed cos/sin cache</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim seq">T</span>
@@ -228,10 +233,10 @@ The diagram below shows how the same query vector for position *m=1* (vs *m=0*) 
       <span class="ts-dim feature">d_head/2</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color:var(--text-muted);font-size:0.6875rem;margin-left:0.5rem;">one cos &amp; one sin table</span>
+    <span class="ts-note">one cos &amp; one sin table</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color:var(--text-muted);font-size:0.75rem;min-width:200px;">Q or K after RoPE</span>
+    <span class="ts-label">Q or K after RoPE</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span>
@@ -243,12 +248,17 @@ The diagram below shows how the same query vector for position *m=1* (vs *m=0*) 
       <span class="ts-dim feature">d_head</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color:var(--text-muted);font-size:0.6875rem;margin-left:0.5rem;">same shape, values rotated</span>
+    <span class="ts-note">same shape, values rotated</span>
   </div>
 </div>
 </div>
 
-RoPE does **not** change the shape of Q or K — it only rotates the values in-place.
+RoPE does **not** change the shape of Q or K — it only rotates the values in place.
+
+<div class="callout warn">
+<span class="callout-title">Two pairing conventions</span>
+<p>The paper pairs <em>adjacent</em> dimensions (2i, 2i+1) — the "GPT-J / interleaved" layout. Hugging Face's Llama code instead pairs dimension <em>j</em> with <em>j + d/2</em> ("GPT-NeoX / rotate-half"), which is what the code below does. Both are the same mathematics on a permuted basis, and checkpoint converters permute the Q and K projection weights to switch between them — but mixing conventions between a checkpoint and a kernel silently scrambles positions. It is one of the most common bugs when porting a model.</p>
+</div>
 
 ```python
 import torch
@@ -296,15 +306,25 @@ k_rot = apply_rope(k, cos_cache, sin_cache)
 # Then compute attention scores: q_rot @ k_rot.transpose(-1, -2) / sqrt(d_head)
 ```
 
-#### RoPE Frequency Scaling (YaRN, LongRoPE, LLaMA-3 RoPE scaling)
+#### Extending Context: Base, Interpolation and YaRN
 
-The base frequency can be **scaled** to extend the context window beyond what the model was trained on. If a model was trained at 8K context with `base=10000`, multiplying the base (e.g., to `base=500000`) slows down all rotation frequencies, letting the model handle much longer sequences. LLaMA-3 uses `base=500000` and LLaMA-3.1 extends context to 128K this way.
+A model trained on 8K-token sequences has never seen the slow-frequency pairs rotate past the angle they reach at position 8,192. Feed it position 50,000 and those pairs land at angles it has never been trained on, and attention degrades. Every context-extension method is a way to keep angles in familiar territory:
+
+| Method | What it changes | Used by |
+|---|---|---|
+| **Larger base** | Raise `rope_theta` (10K → 500K–10M) so every pair rotates more slowly from the start | Llama 3 (500K), Qwen3 (1M), Gemma 3 global layers (1M) |
+| **Position Interpolation** | Divide positions by the extension factor *s* — squeezes 32K positions into the trained 8K range | Early Llama 2 extensions |
+| **NTK-aware / "by-parts"** | Interpolate only the low-frequency pairs; leave high-frequency pairs (local order) untouched | Llama 3.1's `rope_type: "llama3"` (factor 8, 8K → 128K) |
+| **YaRN** | NTK-by-parts plus a softmax-temperature correction for the flatter attention at long range | Qwen2.5/Qwen3 (32K → 128K), DeepSeek-V3, gpt-oss |
+| **LongRoPE** | Searches a separate rescale factor per frequency pair | Phi-3/Phi-4 long-context variants |
+
+All of these are cheap to apply but still need some training at the longer length — the "long-context extension" phase of mid-training ([Chapter 12](./12_mid_training.md)). The `rope_scaling` block of a model's `config.json` tells you which one was used ([Appendix C](./appendix_c_model_config.md)).
 
 ---
 
 ### M-RoPE — Multimodal Rotary Position Embedding
 
-**M-RoPE** (used in Qwen-VL2, LLaMA-3.2 Vision, and similar multimodal LLMs) extends RoPE to handle inputs that have **multiple spatial or temporal dimensions** — images, video frames, or interleaved text+image sequences.
+**M-RoPE** (introduced in Qwen2-VL, 2024, and used in Qwen2.5-VL and Qwen3-VL) extends RoPE to handle inputs that have **multiple spatial or temporal dimensions** — images, video frames, or interleaved text+image sequences.
 
 #### The Problem with 1D RoPE for Images
 
@@ -312,19 +332,21 @@ A standard 1D RoPE assigns each token a single scalar position: token 0, 1, 2, 3
 
 #### M-RoPE: Separate Frequency Bands per Axis
 
-M-RoPE assigns different **frequency bands** (subsets of the d_head dimensions) to encode each axis independently:
+M-RoPE gives every token a **(t, h, w)** position triple and splits the d_head/2 rotation pairs into three sections, one per axis. In Qwen2-VL (d_head = 128, so 64 pairs) the config says `mrope_section: [16, 24, 24]`: 16 pairs rotate by the temporal index, 24 by the row, 24 by the column.
 
-| Modality | Axes | Dim allocation |
+| Token type | (t, h, w) assignment | Effect |
 |----------|------|---------------|
-| **Text** | position | all d_head dims ← 1D pos |
-| **Image** | height, width | d_head/2 dims ← h · θ, d_head/2 dims ← w · θ |
-| **Video** | time, height, width | d_head/3 dims each ← t · θ, h · θ, w · θ |
+| **Text** | t = h = w = sequence position | Identical to ordinary 1D RoPE |
+| **Image** | t fixed for the whole image; h, w = patch row and column | Neighbours above and beside a patch are distinguishable |
+| **Video** | t = frame index (scaled to real time in Qwen2.5-VL); h, w as for images | Motion along time is encoded separately from space |
+
+After an image or video, the next text position continues from one past the largest index used, so the sequence stays monotonic. Qwen3-VL's **interleaved M-RoPE** spreads t, h and w across the whole frequency range instead of giving each a contiguous block, so no axis is stuck with only high or only low frequencies.
 
 Each token's RoPE rotation is computed from its (t, h, w) coordinates rather than a single scalar index:
 
 $$q' = R(t \cdot \theta_{\text{time}}) \cdot R(h \cdot \theta_{\text{height}}) \cdot R(w \cdot \theta_{\text{width}}) \cdot q$$
 
-For text tokens, the same position value is used for all three axes (t = h = w = seq_pos), so M-RoPE degrades gracefully to standard 1D RoPE.
+Because each section rotates its own disjoint set of pairs, the three rotations commute and the product above is just "rotate these 16 pairs by t, those 24 by h, those 24 by w".
 
 ![M-RoPE positional grid for text, image, and video]({{ '/assets/images/mrope_grid.svg' | relative_url }})
 
@@ -334,7 +356,7 @@ For text tokens, the same position value is used for all three axes (t = h = w =
 <div class="diagram-title">M-RoPE Tensor Shapes — Image Tokens</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color:var(--text-muted);font-size:0.75rem;min-width:220px;">Image patch grid (H×W patches)</span>
+    <span class="ts-label">Image patch grid (H×W patches)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span>
@@ -346,7 +368,7 @@ For text tokens, the same position value is used for all three axes (t = h = w =
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color:var(--text-muted);font-size:0.75rem;min-width:220px;">Position indices (h_ids, w_ids)</span>
+    <span class="ts-label">Position indices (h_ids, w_ids)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span>
@@ -354,10 +376,10 @@ For text tokens, the same position value is used for all three axes (t = h = w =
       <span class="ts-dim seq">H·W</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color:var(--text-muted);font-size:0.6875rem;margin-left:0.5rem;">one per spatial axis</span>
+    <span class="ts-note">one per spatial axis</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color:var(--text-muted);font-size:0.75rem;min-width:220px;">RoPE angle tensor (2-axis)</span>
+    <span class="ts-label">RoPE angle tensor (t, h, w sections)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim seq">H·W</span>
@@ -365,10 +387,10 @@ For text tokens, the same position value is used for all three axes (t = h = w =
       <span class="ts-dim feature">d_head/2</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color:var(--text-muted);font-size:0.6875rem;margin-left:0.5rem;">half dims ← h, half ← w</span>
+    <span class="ts-note">16 pairs ← t, 24 ← h, 24 ← w</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color:var(--text-muted);font-size:0.75rem;min-width:220px;">Q or K after M-RoPE</span>
+    <span class="ts-label">Q or K after M-RoPE</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span>
@@ -385,57 +407,56 @@ For text tokens, the same position value is used for all three axes (t = h = w =
 </div>
 
 ```python
-def mrope_image_frequencies(
-    h_ids: torch.Tensor,    # [N] — row index of each patch
-    w_ids: torch.Tensor,    # [N] — col index of each patch
-    d_head: int,
-    base: float = 10000.0
-):
-    """Compute M-RoPE angles for image patches.
-    Returns cos, sin each of shape [N, d_head/2].
-    Half the d_head dims encode height, half encode width.
+import torch
+
+def mrope_angles(t_ids, h_ids, w_ids, d_head=128, base=10000.0, section=(16, 24, 24)):
+    """Qwen2-VL-style M-RoPE angles.
+    t_ids, h_ids, w_ids: [N] position of each token along each axis.
+    Returns angles [N, d_head/2]; pairs are split into contiguous t | h | w sections.
     """
-    d_half = d_head // 2
-    d_quarter = d_half // 2                          # dims per spatial axis
+    assert sum(section) == d_head // 2
+    theta = 1.0 / base ** (torch.arange(0, d_head, 2).float() / d_head)   # [d_head/2]
+    per_axis = torch.stack([torch.outer(ids.float(), theta)               # [3, N, d_head/2]
+                            for ids in (t_ids, h_ids, w_ids)])
+    chunks = per_axis.split(list(section), dim=-1)                        # take t's first 16 pairs, h's next 24, w's last 24
+    return torch.cat([chunks[a][a] for a in range(3)], dim=-1)            # [N, d_head/2]
 
-    i = torch.arange(0, d_quarter * 2, 2).float()
-    theta = 1.0 / (base ** (i / d_head))             # [d_quarter] base freqs
-
-    h_angles = torch.outer(h_ids.float(), theta)     # [N, d_quarter]
-    w_angles = torch.outer(w_ids.float(), theta)     # [N, d_quarter]
-
-    # Interleave: first d_half dims ← height, second d_half dims ← width
-    # [N, d_quarter] + [N, d_quarter] → [N, d_quarter*2] = [N, d_half]
-    angles = torch.cat([h_angles, w_angles], dim=-1) # [N, d_half]
-    return torch.cos(angles), torch.sin(angles)
-
-
-# Example: 14×14 image (196 patches)
-H, W = 14, 14
-h_ids = torch.arange(H).repeat_interleave(W)        # [196]
-w_ids = torch.arange(W).repeat(H)                   # [196]
-
-cos_2d, sin_2d = mrope_image_frequencies(h_ids, w_ids, d_head=128)
-# cos_2d, sin_2d: [196, 64] — applied to Q and K patches
+# A 14×14 grid of image patches that starts at sequence position 5
+H, W, start = 14, 14, 5
+t_ids = torch.full((H * W,), start)                    # same t for the whole image
+h_ids = start + torch.arange(H).repeat_interleave(W)   # [196]
+w_ids = start + torch.arange(W).repeat(H)              # [196]
+angles = mrope_angles(t_ids, h_ids, w_ids)
+print(angles.shape)                                    # torch.Size([196, 64])
+cos, sin = angles.cos(), angles.sin()                  # applied to Q and K exactly as in 1D RoPE
 ```
 
 ### ALiBi — Attention with Linear Biases
 
 **ALiBi** (Press et al., 2022) takes a different approach: no positional encoding at all. Instead, it adds a **linear bias** to attention scores based on the distance between query and key positions. Position *i* attending to position *j* gets a bias of $-m \cdot |i - j|$ where *m* is a head-specific slope.
 
-ALiBi has strong length extrapolation properties — models trained on short sequences can generalize to longer ones at inference without re-training.
+ALiBi extrapolates well on perplexity — models trained on short sequences keep a sensible loss on longer ones — but the linear penalty also makes distant tokens hard to retrieve, which is one reason RoPE won.
+
+### NoPE, Partial RoPE and Per-Layer Mixes
+
+Since 2024 the trend has been to apply RoPE *less*, not more:
+
+- **NoPE layers.** A causal decoder can infer position without any encoding (the causal mask itself breaks symmetry). Llama 4 interleaves one NoPE layer after every three RoPE layers ("iRoPE"), and SmolLM3 drops RoPE in every fourth layer; the NoPE layers carry long-range retrieval while the RoPE layers carry local order.
+- **Partial RoPE.** Rotate only part of each head and leave the rest position-free. GLM-4 rotates half of each head's dimensions; DeepSeek's MLA attaches a separate 64-dimensional rotary component to a position-free compressed key ([Chapter 5](./05_attention_gqa_mqa_mla.md)).
+- **Different bases per layer.** Gemma 3 uses base 10K in its sliding-window layers and 1M in its global layers: local layers need sharp local order, global layers need slowly varying angles.
 
 ## Positional Encoding Comparison
 
 | Method | Added Where | Relative Position | Length Extrapolation | Used By |
 |--------|------------|-------------------|---------------------|---------|
-| **Sinusoidal** | Embedding output | Implicit (via rotation) | Moderate | Original Transformer |
+| **Sinusoidal** | Embedding output | Implicit (linear in offset) | Moderate | Original Transformer |
 | **Learned** | Embedding output | No | None (fixed max_len) | GPT-2, BERT |
-| **RoPE** | Q, K in attention | Yes (rotation angle) | Good (with base scaling) | LLaMA, Mistral, Qwen, Gemma |
-| **M-RoPE** | Q, K in attention | Yes (per axis) | Inherits from RoPE | Qwen-VL2, LLaMA-3.2 Vision |
-| **ALiBi** | Attention scores | Yes (linear bias) | Strong | BLOOM, MPT |
+| **RoPE** | Q, K in attention | Yes (rotation angle) | Good with base scaling / YaRN | Llama, Mistral, Qwen, Gemma, DeepSeek, gpt-oss |
+| **M-RoPE** | Q, K in attention | Yes (per axis) | Inherits from RoPE | Qwen2-VL, Qwen2.5-VL, Qwen3-VL |
+| **ALiBi** | Attention scores | Yes (linear bias) | Strong on loss, weak on retrieval | BLOOM, MPT |
+| **NoPE (in some layers)** | Nowhere | Learned implicitly | Good when mixed with RoPE layers | Llama 4 (iRoPE), SmolLM3 |
 
-Modern models overwhelmingly use **RoPE** (or M-RoPE for multimodal) due to its balance of performance, relative position awareness, and extensibility. The base frequency can be scaled for longer contexts — discussed further in [Chapter 12](./12_mid_training.md).
+RoPE (M-RoPE for multimodal) remains the default because relative position falls out of the geometry and its frequencies can be rescaled for longer contexts. The 2025–26 refinements — larger bases, YaRN, partial rotation and RoPE-free layers — all tune *how much* of the model sees position, and where.
 
 ## Tying Embeddings
 
@@ -445,14 +466,65 @@ $$\text{logits} = h \cdot E^T$$
 
 Where $h$ is the final hidden state `[B, T, d_model]` and $E^T$ is the transposed embedding matrix `[d_model, V]`.
 
-This halves the number of embedding parameters (significant when V is large) and enforces consistency — the output space matches the input space.
+This halves the number of embedding parameters and enforces consistency between input and output spaces. Whether to tie is a size decision in practice: Llama 3.2 1B/3B, Qwen3 up to 4B and all Gemma models tie; Llama 3.1 8B/70B, Qwen3 8B+ and DeepSeek-V3 do not, because at large d_model the table is a small fraction of parameters and separate matrices train slightly better.
 
-## What's Next
+<div class="callout ponder">
+<span class="callout-title">Ponder</span>
+<p>If a causal decoder can learn position from the mask alone, what exactly is RoPE buying in the layers that keep it — and why might the answer be different for a 1K-token chat turn and a 1M-token codebase?</p>
+</div>
 
-Embeddings give tokens their initial representations. The next chapter covers the architecture that transforms these representations into something powerful — the **transformer**.
+## Key Takeaways
 
-**Next: [Chapter 3 — The Transformer →](./03_the_transformer.md)**
+- The embedding table is a `[V, d_model]` lookup; its size is negligible in big models and dominant in tiny ones, which is why tying is a size-dependent choice.
+- Embeddings start static; the transformer layers make them contextual.
+- RoPE rotates Q and K by position so attention scores depend only on relative distance; high-frequency pairs encode local order, low-frequency pairs long range.
+- Context extension (larger base, interpolation, NTK-by-parts, YaRN) is about keeping rotation angles inside the range seen in training — and still needs some long-sequence training.
+- M-RoPE splits the rotation pairs between time, height and width; 2025–26 designs also mix RoPE with NoPE layers and partial rotation.
+
+## Check Yourself
+
+<details class="check">
+<summary>With base 10,000 and d_head = 128, roughly how many positions does the slowest RoPE pair take to complete one revolution?</summary>
+<p>θ<sub>63</sub> = 10000<sup>−126/128</sup> ≈ 1.15 × 10<sup>−4</sup> rad per position, so one revolution takes 2π / 1.15 × 10<sup>−4</sup> ≈ 55,000 positions. A model trained on 8K sequences has seen that pair cover only about 15% of a turn.</p>
+</details>
+
+<details class="check">
+<summary>Why does RoPE make q·k depend only on the distance between positions?</summary>
+<p>Each pair of q at position m is rotated by mθ and each pair of k at position n by nθ. A dot product of two rotated 2D vectors equals the dot product of the originals with one rotated by the difference of their angles, (m − n)θ. Absolute positions cancel.</p>
+</details>
+
+<details class="check">
+<summary>Llama 3.1 extends context 8K → 128K. Why does it leave the high-frequency RoPE pairs alone?</summary>
+<p>High-frequency pairs already wrap around many times within 8K tokens, so the model has seen every angle they can take; long sequences do not push them out of distribution. Only the slow pairs reach unseen angles, so only they are interpolated — which also preserves the model's sharp sense of local order.</p>
+</details>
+
+<details class="check">
+<summary>In Qwen2-VL, which positions does a 2×2 grid of image patches that starts at sequence position 10 receive, and where does the following text continue?</summary>
+<p>All four patches get t = 10; (h, w) = (10, 10), (10, 11), (11, 10), (11, 11). The largest index used is 11, so the next text token gets t = h = w = 12.</p>
+</details>
+
+<details class="check">
+<summary>A ported model produces fluent but jumbled output, and the only change was a new attention kernel. What RoPE bug is a prime suspect?</summary>
+<p>A pairing-convention mismatch: the checkpoint expects rotate-half (NeoX) pairing and the kernel applies interleaved (GPT-J) pairing or vice versa, so positions are encoded on the wrong dimension pairs.</p>
+</details>
+
+## References
+
+| Source | Author / Org, Year | Link | What this chapter takes from it |
+|---|---|---|---|
+| Efficient Estimation of Word Representations in Vector Space | Mikolov et al., 2013 | [arxiv.org/abs/1301.3781](https://arxiv.org/abs/1301.3781) | word2vec |
+| Attention Is All You Need | Vaswani et al., 2017 | [arxiv.org/abs/1706.03762](https://arxiv.org/abs/1706.03762) | Sinusoidal positional encoding |
+| RoFormer: Enhanced Transformer with Rotary Position Embedding | Su et al., 2021 | [arxiv.org/abs/2104.09864](https://arxiv.org/abs/2104.09864) | RoPE |
+| Train Short, Test Long (ALiBi) | Press et al., 2022 | [arxiv.org/abs/2108.12409](https://arxiv.org/abs/2108.12409) | ALiBi |
+| Extending Context Window of LLMs via Positional Interpolation | Chen et al., 2023 | [arxiv.org/abs/2306.15595](https://arxiv.org/abs/2306.15595) | Position Interpolation |
+| YaRN: Efficient Context Window Extension of LLMs | Peng et al., 2023 | [arxiv.org/abs/2309.00071](https://arxiv.org/abs/2309.00071) | NTK-by-parts and attention temperature |
+| The Impact of Positional Encoding on Length Generalization in Transformers | Kazemnejad et al., 2023 | [arxiv.org/abs/2305.19466](https://arxiv.org/abs/2305.19466) | NoPE in causal decoders |
+| Qwen2-VL | Wang et al., 2024 | [arxiv.org/abs/2409.12191](https://arxiv.org/abs/2409.12191) | M-RoPE |
+| The Llama 3 Herd of Models | Meta AI, 2024 | [arxiv.org/abs/2407.21783](https://arxiv.org/abs/2407.21783) | RoPE base 500K, 128K extension |
+| Gemma 3 Technical Report | Gemma Team, 2025 | [arxiv.org/abs/2503.19786](https://arxiv.org/abs/2503.19786) | Local/global layers with different RoPE bases |
 
 ---
 
-*Last updated: April 2026*
+**Next:** [Chapter 3 — The Transformer](./03_the_transformer.md) — the block that turns these position-aware vectors into contextual representations.
+
+[← Back to Table of Contents](./README.md)

@@ -44,7 +44,7 @@
     <!-- caption -->
     <text x="0" y="115" text-anchor="middle" font-family="monospace" font-size="10" fill="#8b949e">dim pair i=0</text>
     <text x="0" y="128" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">θ₀ = 10000⁻⁰ = 1.0</text>
-    <text x="0" y="140" text-anchor="middle" font-family="monospace" font-size="9" fill="#3b82f6">slow rotation</text>
+    <text x="0" y="140" text-anchor="middle" font-family="monospace" font-size="9" fill="#3b82f6">fast rotation</text>
   </g>
 
   <!-- ── Panel 2: Mid-frequency pair (i=d/4) ── -->
@@ -92,7 +92,7 @@
     <text x="-86" y="-18" font-family="monospace" font-size="9" fill="#f97316" opacity="0.7">pos=2</text>
     <text x="0" y="115" text-anchor="middle" font-family="monospace" font-size="10" fill="#8b949e">dim pair i=d/2−1</text>
     <text x="0" y="128" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">θᵢ = 10000⁻¹ = 0.0001</text>
-    <text x="0" y="140" text-anchor="middle" font-family="monospace" font-size="9" fill="#f97316">fast rotation</text>
+    <text x="0" y="140" text-anchor="middle" font-family="monospace" font-size="9" fill="#f97316">slow rotation</text>
   </g>
 
   <!-- Formula bar -->
