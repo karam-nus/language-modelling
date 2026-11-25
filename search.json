@@ -1,0 +1,34 @@
+---
+layout: null
+permalink: /assets/data/search.json
+---
+{%- comment -%}
+  Search index for the command palette: every page, every h2/h3, every lab.
+  Built by Jekyll at site-build time from the rendered headings, so ids always match.
+{%- endcomment -%}
+{%- assign first = true -%}{%- assign htags = "h2,h3" | split: "," -%}
+[
+{%- for item in site.navigation -%}{%- if item.url != "" -%}
+  {%- if item.url == "/" -%}{%- assign path = "README.md" -%}{%- assign href = "/" -%}{%- else -%}{%- assign path = item.url | remove_first: "/" | append: ".md" -%}{%- assign href = item.url | append: ".html" -%}{%- endif -%}
+  {%- assign pg = site.pages | where: "path", path | first -%}
+  {%- unless first %},{% endunless %}{%- assign first = false %}
+{"kind":"page","t":{{ item.title | jsonify }},"n":{{ item.n | jsonify }},"u":{{ href | jsonify }},"s":{{ pg.description | default: "" | truncate: 120 | jsonify }}}
+  {%- if pg and item.url != "/" -%}
+    {%- assign html = pg.content | markdownify -%}
+    {%- for tag in htags -%}
+      {%- assign open = '<' | append: tag | append: ' id="' -%}{%- assign close = '</' | append: tag | append: '>' -%}
+      {%- assign chunks = html | split: open -%}
+      {%- for chunk in chunks offset: 1 -%}
+        {%- assign hid = chunk | split: '"' | first -%}
+        {%- assign htext = chunk | split: close | first | remove_first: hid | remove_first: '">' | strip_html | replace: "&amp;", "&" | replace: "&lt;", "<" | replace: "&gt;", ">" | replace: "&quot;", '"' | replace: "&#39;", "'" | strip -%}
+        {%- unless htext contains "Check Yourself" or htext contains "References" or htext contains "Key Takeaways" -%}
+,{"kind":"sec","t":{{ htext | jsonify }},"n":{{ item.n | jsonify }},"u":{{ href | append: "#" | append: hid | jsonify }},"s":{{ item.title | jsonify }}}
+        {%- endunless -%}
+      {%- endfor -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endif -%}{%- endfor -%}
+{%- for lab in site.data.labs -%}
+,{"kind":"lab","t":{{ lab.title | jsonify }},"n":"⚗","u":{{ lab.ch | append: ".html#lab-" | append: lab.name | jsonify }},"s":{{ lab.desc | jsonify }},"k":{{ lab.kind | append: " lab interactive " | append: lab.name | jsonify }}}
+{%- endfor %}
+]
