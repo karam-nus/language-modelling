@@ -1,6 +1,6 @@
 title: "Language Modelling — The Complete Guide"
 short_title: "Language Modelling"
-description: "From tokens to the frontier: a first-principles guide to how large language models are built, trained, aligned, compressed and served — updated for late 2026, with tensor shapes on every page, verified code, and 23 interactive labs."
+description: "From tokens to the frontier: a first-principles guide to how large language models are built, trained, aligned, compressed and served — updated for late 2026, with tensor shapes on every page, verified code, and 26 interactive labs."
 baseurl: "/language-modelling"
 url: "https://karam-nus.github.io"
 updated: "November 2026"
@@ -94,6 +94,7 @@ navigation:
   - { title: "Scaling Laws", url: "/32_scaling_laws", n: "32" }
   - { title: "Mixture of Experts", url: "/33_mixture_of_experts", n: "33" }
   - { title: "SSMs & Hybrids", url: "/34_ssms_and_alternatives", n: "34" }
+  - { title: "Looped Transformers", url: "/looped_transformers", n: "↻" }
   - title: "IX · Reasoning, Retrieval & Agents"
     url: ""
   - { title: "Reasoning Models", url: "/35_reasoning_models", n: "35" }

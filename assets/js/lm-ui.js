@@ -123,7 +123,7 @@
     // h1 "Chapter 4 — Title" → eyebrow + title
     var h1 = $('h1', content);
     if (h1) {
-      var mm = h1.textContent.match(/^((?:Chapter|Appendix)\s+[\w]+)\s+[—–-]\s+(.*)$/);
+      var mm = h1.textContent.match(/^((?:Chapter|Appendix)\s+[\w]+|Deep Dive)\s+[—–-]\s+(.*)$/);
       if (mm) { h1.innerHTML = '<span class="h1-ch">' + mm[1] + '</span>' + mm[2].replace(/</g, '&lt;'); }
     }
     // the dek
