@@ -1,6 +1,9 @@
 ---
 title: "Chapter 5 — Attention Variants: GQA, MQA & MLA"
 description: "Why the KV cache is the bottleneck and how attention variants shrink it: MQA, GQA, DeepSeek's multi-head latent attention with weight absorption, sliding windows, and the 2025–26 wave of sparse and hybrid attention."
+related:
+  - { id: models, why: "Which attention variant each model generation chose." }
+  - { id: inference, why: "What these KV-cache savings mean on real inference systems." }
 ---
 
 [← Back to Table of Contents](./README.md)
@@ -267,6 +270,12 @@ Gemma 3's 5:1 mix cuts its KV cache at 32K context by roughly 5× versus all-glo
 
 ## Comparison Summary
 
+<div class="diagram">
+<div class="diagram-title">Who Reads Which Keys and Values</div>
+<div class="fig" data-fig="heads" data-variant="all"><noscript>Figure: query heads and the key/value heads they read under MHA (one each), GQA (groups share), MQA (all share one) and MLA (a cached latent expanded per head), with KV-cache bytes per token per layer for a 32-head, 128-dim layer in BF16: 16 KiB, 4 KiB, 512 B and 1,152 B.</noscript></div>
+<div class="flow-caption">Drawn with 8 of 32 query heads. Cache sizes are per token per layer in BF16 for a 32-head, d_head = 128 layer (GQA with 8 KV heads; MLA with DeepSeek's 512 + 64 dims).</div>
+</div>
+
 <div class="img-caption">
   <img src="{{ '/assets/images/gqa_mha_mqa.svg' | relative_url }}" alt="Side-by-side comparison of MHA, GQA, and MQA showing Q, K, V head counts and KV cache sizes">
   <figcaption>Multi-Head Attention vs Grouped-Query Attention vs Multi-Query Attention — head configurations and cache implications</figcaption>
@@ -287,6 +296,16 @@ Put real model shapes into the calculator and compare the variants at your own c
 ## Beyond Dense Attention: Sparse and Hybrid (2025–26)
 
 GQA, MLA and windows shrink the cache, but every global layer still does O(T²) work over the whole context. The 2025–26 frontier attacks that directly:
+
+<div class="diagram">
+<div class="diagram-title">The Sparse Patterns, Side by Side</div>
+<div class="fig" data-fig="masks" data-set="sliding,chunked,sink,dilated,nsa,topk" data-t="16"><noscript>Figure: 16×16 masks for sliding-window, chunked, sinks-plus-window, dilated, block-sparse (NSA-style) and top-k (DeepSeek DSA-style) attention, with pairs computed and keys read by the last query.</noscript></div>
+<div class="flow-caption">Windows and chunks bound the cache; NSA and DSA keep the whole cache but read only a fraction of it per query.</div>
+</div>
+
+Change the sequence length, window, chunk size and k yourself:
+
+<div class="lab" data-lab="masks"><noscript>Interactive lab: attention-mask explorer for causal, bidirectional, prefix-LM, sliding-window, chunked, sink, dilated, block-sparse and top-k patterns, with pairs computed and KV cache kept. Enable JavaScript to use it.</noscript></div>
 
 <div class="diagram">
 <div class="diagram-title">Attention in 2026 Is a Menu</div>

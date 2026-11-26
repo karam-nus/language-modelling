@@ -3,6 +3,7 @@
 - { name: rope,      kind: "Foundations",   title: "RoPE rotations",                ch: "/02_embeddings",                  n: "02", desc: "Rotate a query and a key at several frequencies; the score depends only on their distance." }
 - { name: params,    kind: "Foundations",   title: "Parameter counter",             ch: "/03_the_transformer",             n: "03", desc: "Where every parameter of Llama, Qwen or an MoE lives — and what each knob costs." }
 - { name: attention, kind: "Foundations",   title: "Attention heatmap",             ch: "/04_attention_sdpa_and_mha",      n: "04", desc: "Softmax(QKᵀ/√d) on a real sentence: pick a query, change the temperature, toggle the mask." }
+- { name: masks,     kind: "Architecture",  title: "Attention pattern explorer",    ch: "/05_attention_gqa_mqa_mla",       n: "05", desc: "Causal, sliding, chunked, sinks, block-sparse and top-k masks: pairs computed and cache kept." }
 - { name: kvcache,   kind: "Architecture",  title: "KV-cache calculator",           ch: "/05_attention_gqa_mqa_mla",       n: "05", desc: "MHA vs GQA vs MQA vs MLA vs sliding windows, at your context length." }
 - { name: compute,   kind: "Training",      title: "Training compute budget",       ch: "/10_pretraining_at_scale",        n: "10", desc: "6ND FLOPs → GPU-hours → days → dollars, for any model, data and cluster." }
 - { name: vram,      kind: "Training",      title: "Fine-tuning memory",            ch: "/13_finetuning_and_adaptation",   n: "13", desc: "Full fine-tuning vs LoRA vs QLoRA: weights, gradients, optimizer state, activations." }
@@ -16,9 +17,11 @@
 - { name: fit,       kind: "Precision",     title: "Will it fit? How fast?",        ch: "/22_quantization_benchmarks",     n: "22", desc: "Model × precision × GPU: memory left for cache, and the bandwidth ceiling on decode." }
 - { name: roofline,  kind: "Hardware",      title: "Roofline",                      ch: "/24_gpu_architecture",            n: "24", desc: "Place decode, batched decode, prefill and attention on a real GPU's roofline." }
 - { name: parallel,  kind: "Hardware",      title: "Parallelism memory planner",    ch: "/26_distributed_training",        n: "26", desc: "Per-GPU state under DP, TP, PP and ZeRO stages 0–3." }
+- { name: pipeline,  kind: "Hardware",      title: "Pipeline schedule simulator",   ch: "/26_distributed_training",        n: "26", desc: "GPipe, 1F1B, interleaved and zero-bubble schedules: watch the bubble and the activation memory." }
 - { name: servecost, kind: "Serving",       title: "Cost per million tokens",       ch: "/31_serving_and_deployment",      n: "31", desc: "GPU price, batch size and per-stream speed → $/M tokens and latency." }
 - { name: scaling,   kind: "Scale",         title: "Chinchilla & over-training",    ch: "/32_scaling_laws",                n: "32", desc: "The loss surface, the compute-optimal size, and the price of serving it." }
 - { name: moe,       kind: "Scale",         title: "Expert router",                 ch: "/33_mixture_of_experts",          n: "33", desc: "Route tokens with top-k; watch collapse, then fix it with a loss or a bias." }
+- { name: loop,      kind: "Scale",         title: "Adaptive depth",                ch: "/looped_transformers",            n: "↻",  desc: "Loop one block per token until it settles; compute follows difficulty." }
 - { name: ssm,       kind: "Scale",         title: "Fixed state vs KV cache",       ch: "/34_ssms_and_alternatives",       n: "34", desc: "Store facts in a d×d memory or a growing cache — and read them back." }
 - { name: tts,       kind: "Reasoning",     title: "Test-time compute: voting",     ch: "/35_reasoning_models",            n: "35", desc: "Majority vote and best-of-N accuracy as samples grow." }
 - { name: bpe,       kind: "Tokenization",  title: "Train a BPE tokenizer",         ch: "/appendix_b_tokenization",        n: "B",  desc: "Merge the most frequent pair, step by step, on your own text." }

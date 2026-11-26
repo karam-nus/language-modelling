@@ -1,6 +1,8 @@
 ---
 title: "The Lab Bench"
-description: "All 23 interactive labs from the guide on one bench: n-grams, RoPE, attention, KV caches, training compute, fine-tuning memory, GRPO, sampling, speculative decoding, number formats, quantization, rooflines, parallelism, serving cost, scaling laws, MoE routing, fixed-state memory, test-time voting and BPE."
+description: "All 26 interactive labs from the guide on one bench: n-grams, RoPE, attention, attention masks, KV caches, training compute, fine-tuning memory, GRPO, sampling, speculative decoding, number formats, quantization, rooflines, parallelism, pipeline schedules, serving cost, scaling laws, MoE routing, looped depth, fixed-state memory, test-time voting and BPE."
+related:
+  - { id: chips, why: "The accelerator data behind the hardware labs." }
 ---
 
 # The Lab Bench
@@ -24,6 +26,8 @@ Each lab also lives inside its chapter, next to the text that explains it; the l
 
 ## Architecture
 
+<p class="lab-from"><a href="05_attention_gqa_mqa_mla.html">From Chapter 5 →</a></p>
+<div class="lab" data-lab="masks"></div>
 <p class="lab-from"><a href="05_attention_gqa_mqa_mla.html">From Chapter 5 →</a></p>
 <div class="lab" data-lab="kvcache"></div>
 
@@ -62,6 +66,8 @@ Each lab also lives inside its chapter, next to the text that explains it; the l
 <div class="lab" data-lab="roofline"></div>
 <p class="lab-from"><a href="26_distributed_training.html">From Chapter 26 →</a></p>
 <div class="lab" data-lab="parallel"></div>
+<p class="lab-from"><a href="26_distributed_training.html">From Chapter 26 →</a></p>
+<div class="lab" data-lab="pipeline"></div>
 
 ## Serving
 
@@ -76,6 +82,8 @@ Each lab also lives inside its chapter, next to the text that explains it; the l
 <div class="lab" data-lab="moe"></div>
 <p class="lab-from"><a href="34_ssms_and_alternatives.html">From Chapter 34 →</a></p>
 <div class="lab" data-lab="ssm"></div>
+<p class="lab-from"><a href="looped_transformers.html">From the looped-transformers deep dive →</a></p>
+<div class="lab" data-lab="loop"></div>
 
 ## Reasoning
 

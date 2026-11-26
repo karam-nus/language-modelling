@@ -179,5 +179,46 @@ near('RoPE: score depends only on m − n', L.ropeScore(q, k, 12, 9, 10000), L.r
 near('RoPE: rotation preserves norm', Math.hypot.apply(null, L.ropeRotate(q, 37, 10000)), Math.hypot.apply(null, q), 1e-12);
 near('RoPE: θ_0 = 1', L.ropeFreq(0, 128, 500000), 1);
 
+
+// ---- Ch 5: attention masks
+var cz = L.maskStats(L.maskPattern('causal', 16));
+eq('causal pairs = T(T+1)/2', cz.pairs, 136);
+eq('sliding window W=4 keeps 4 keys for the last query', L.maskStats(L.maskPattern('sliding', 16, { window: 4 })).lastRow, 4);
+eq('sliding window pairs = 1+2+3+4 + 12×4', L.maskStats(L.maskPattern('sliding', 16, { window: 4 })).pairs, 1 + 2 + 3 + 4 + 12 * 4);
+eq('chunked C=4 pairs = 4 chunks × 10', L.maskStats(L.maskPattern('chunked', 16, { chunk: 4 })).pairs, 40);
+eq('sink(2)+window(4) last row reads 6 keys', L.maskStats(L.maskPattern('sink', 16, { sinks: 2, window: 4 })).lastRow, 6);
+eq('top-k reads exactly k keys per late query', L.maskStats(L.maskPattern('topk', 16, { topk: 4 })).lastRow, 4);
+eq('bidirectional pairs = T²', L.maskStats(L.maskPattern('bidirectional', 8)).pairs, 64);
+eq('prefix-LM(4) pairs = 16 + causal rest', L.maskStats(L.maskPattern('prefix', 8, { prefix: 4 })).pairs, 16 + (5 + 6 + 7 + 8));
+
+// ---- Ch 26: pipeline schedules (F = 1, full backward = 2 per stage)
+[[4, 8], [4, 16], [8, 32]].forEach(function (pm) {
+  var p = pm[0], m = pm[1];
+  near('GPipe bubble p=' + p + ' m=' + m, L.simulatePipeline('gpipe', p, m).bubble, (p - 1) / (m + p - 1), 1e-9);
+  near('1F1B bubble p=' + p + ' m=' + m, L.simulatePipeline('1f1b', p, m).bubble, (p - 1) / (m + p - 1), 1e-9);
+  eq('1F1B stage 0 holds p micro-batches of activations (p=' + p + ')', L.simulatePipeline('1f1b', p, m).peakActivations[0], p);
+  eq('GPipe stage 0 holds all m micro-batches (m=' + m + ')', L.simulatePipeline('gpipe', p, m).peakActivations[0], m);
+  near('zero-bubble (B/W split) bubble time = (p−1)(F+B−W) = p−1', L.simulatePipeline('zb', p, m).makespan - 3 * m, p - 1, 1e-9);
+});
+[[4, 8, 2], [4, 16, 2], [4, 8, 4], [8, 32, 2]].forEach(function (q) {
+  near('interleaved bubble p=' + q[0] + ' m=' + q[1] + ' v=' + q[2], L.simulatePipeline('interleaved', q[0], q[1], q[2]).bubble, (q[0] - 1) / (q[2] * q[1] + q[0] - 1), 1e-9);
+});
+
+// ---- Ch 26: collectives
+[2, 4, 8].forEach(function (N) {
+  var full = L.ringAllReduce(N, 2 * (N - 1)).state;
+  ok('ring all-reduce N=' + N + ': every rank ends with every chunk fully summed', full.every(function (r) { return r.every(function (c) { return L.popcount(c) === N; }); }));
+  var rs = L.ringAllReduce(N, N - 1).state;
+  ok('ring reduce-scatter N=' + N + ': rank i owns the full sum of chunk i+1', rs.every(function (r, i) { return L.popcount(r[(i + 1) % N]) === N; }));
+});
+near('all-reduce moves 2(N−1)/N × S per GPU', L.collectiveTime('allreduce', 8, 1e9, 100).bytesPerGpu, 1.75e9, 1e-12);
+near('all-gather of 1 GB over 8 GPUs at 400 GB/s', L.collectiveTime('allgather', 8, 1e9, 400).seconds, 0.875e9 / 400e9, 1e-12);
+
+// ---- Looped transformers: adaptive depth toy
+var lp = L.loopSim({ tokens: 10, cMin: 0.2, cMax: 0.95, rMax: 32, eps: 1e-3, seed: 3 });
+ok('easy tokens (small contraction) exit before hard ones', lp.tokens[0].loops < lp.tokens[9].loops);
+ok('residual shrinks while looping', lp.tokens[5].residuals[lp.tokens[5].residuals.length - 1] < lp.tokens[5].residuals[0]);
+eq('ε = 0 runs every token to rMax', L.loopSim({ tokens: 4, cMin: 0.2, cMax: 0.9, rMax: 12, eps: 0, seed: 1 }).computeFraction, 1);
+
 console.log((n - fails) + '/' + n + ' lab checks passed');
 process.exit(fails ? 1 : 0);

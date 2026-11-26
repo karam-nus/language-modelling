@@ -1,6 +1,8 @@
 ---
 title: "Chapter 34 — SSMs, Linear Attention & Hybrids"
 description: "Alternatives to quadratic attention and why hybrids won: state space models from S4 to Mamba-2, linear attention as a fixed-size memory, the delta rule and Gated DeltaNet, RWKV-7, a verified recall experiment showing what fixed state forgets, and the 2025–26 hybrid wave (Qwen3-Next/3.5, Kimi Linear and K3, Nemotron-H, Granite 4, MiniMax) — plus diffusion language models."
+related:
+  - { id: models, why: "Hybrid and recurrent architectures across generations." }
 ---
 
 [← Back to Table of Contents](./README.md)
@@ -92,6 +94,12 @@ Replace softmax with a feature map φ and reorder the product:
 $$\text{LinearAttn}(Q,K,V)_t = \phi(q_t)^\top \sum_{i \le t} \phi(k_i)\, v_i^\top = \phi(q_t)^\top S_t, \qquad S_t = S_{t-1} + \phi(k_t)\,v_t^\top$$
 
 The running sum $S_t$ is a fixed d×d matrix — an **associative memory** that stores key–value pairs by adding their outer products. Reading it with a query returns a blend of stored values weighted by key similarity. The catch: a d×d matrix can hold only about d independent associations; beyond that, writes interfere.
+
+<div class="diagram">
+<div class="diagram-title">A Growing Cache vs a Fixed State</div>
+<div class="fig" data-fig="linstate"><noscript>Figure: token by token, softmax attention appends a key and a value to its cache (2·t·d numbers) while linear attention adds an outer product into a fixed d×d state (d² numbers).</noscript></div>
+<div class="flow-caption">Step through ten tokens: the cache grows linearly; the state stays d × d and old associations blur together.</div>
+</div>
 
 ### The Delta Rule and Gated DeltaNet
 

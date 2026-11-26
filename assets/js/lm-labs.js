@@ -469,6 +469,169 @@
     return s;
   }
 
+  // ===================================================== 24 · attention masks
+  // grid[i][j] for query i, key j: 0 masked · 1 attended · 2 always-kept (sink / selected block) · 3 local window
+  function maskPattern(kind, T, o) {
+    o = o || {}; var g = [], i, j, W = o.window || 4, C = o.chunk || 4, S = o.sinks || 2, P = o.prefix || 4, K = o.topk || 4, b = o.block || 4, nb = o.blocks || 1;
+    var rnd = mulberry32(o.seed || 5);
+    for (i = 0; i < T; i++) { g.push([]); for (j = 0; j < T; j++) g[i].push(0); }
+    for (i = 0; i < T; i++) {
+      for (j = 0; j < T; j++) {
+        var c = j <= i, v = 0;
+        if (kind === 'bidirectional') v = 1;
+        else if (kind === 'causal') v = c ? 1 : 0;
+        else if (kind === 'prefix') v = (i < P && j < P) || c ? 1 : 0;
+        else if (kind === 'sliding') v = c && i - j < W ? 3 : 0;
+        else if (kind === 'chunked') v = c && Math.floor(i / C) === Math.floor(j / C) ? 1 : 0;
+        else if (kind === 'sink') v = c ? (j < S ? 2 : i - j < W ? 3 : 0) : 0;
+        else if (kind === 'dilated') v = c && (i - j) % 2 === 0 && (i - j) / 2 < W ? 1 : 0;
+        g[i][j] = v;
+      }
+      if (kind === 'topk') {                // DeepSeek sparse attention: a cheap indexer picks k keys per query
+        var cand = []; for (j = 0; j < i; j++) cand.push([rnd() + (j < 1 ? 0.6 : 0), j]);
+        cand.sort(function (a, b2) { return b2[0] - a[0]; });
+        g[i][i] = 1; cand.slice(0, Math.max(0, K - 1)).forEach(function (cj) { g[i][cj[1]] = 2; });
+      }
+      if (kind === 'nsa') {                 // native sparse attention: compressed blocks + top blocks + window
+        var qb = Math.floor(i / b), scores = [];
+        for (var bb = 0; bb < qb; bb++) scores.push([rnd() + (bb === 0 ? 0.5 : 0), bb]);
+        scores.sort(function (a, b2) { return b2[0] - a[0]; });
+        var pick = scores.slice(0, nb).map(function (x) { return x[1]; });
+        for (j = 0; j <= i; j++) {
+          if (i - j < W) g[i][j] = 3;
+          else if (pick.indexOf(Math.floor(j / b)) !== -1) g[i][j] = 2;
+          else g[i][j] = 0;
+        }
+      }
+    }
+    return g;
+  }
+  function maskStats(g) {
+    var T = g.length, pairs = 0, causal = T * (T + 1) / 2, need = 0, i, j;
+    for (i = 0; i < T; i++) for (j = 0; j < T; j++) if (g[i][j]) pairs++;
+    // keys the last query still reads (a lower bound on what the cache must hold at the end)
+    for (j = 0; j < T; j++) if (g[T - 1][j]) need++;
+    return { pairs: pairs, causalPairs: causal, frac: pairs / causal, lastRow: need };
+  }
+
+  // ===================================================== 25 · pipeline schedules
+  // Times in units of one forward of one full stage; a backward costs 2 (or 1 + 1 when split into B and W).
+  function pipelineOrder(kind, p, m, v) {
+    var orders = [], s, k;
+    for (s = 0; s < p; s++) {
+      var o = [];
+      if (kind === 'gpipe') {
+        for (k = 0; k < m; k++) o.push({ t: 'F', mb: k, c: 0 });
+        for (k = 0; k < m; k++) o.push({ t: 'B', mb: k, c: 0 });
+      } else if (kind === 'interleaved') {
+        var total = m * v, fwd = function (q) { return { t: 'F', c: Math.floor(q / p) % v, mb: Math.floor(q / (p * v)) * p + q % p }; },
+          bwd = function (q) { return { t: 'B', c: v - 1 - Math.floor(q / p) % v, mb: Math.floor(q / (p * v)) * p + q % p }; };
+        var warm = Math.min((p - s - 1) * 2 + (v - 1) * p, total);
+        for (k = 0; k < warm; k++) o.push(fwd(k));
+        for (k = 0; k < total - warm; k++) { o.push(fwd(warm + k)); o.push(bwd(k)); }
+        for (k = total - warm; k < total; k++) o.push(bwd(k));
+      } else {                               // 1f1b and zb share the forward/backward order
+        var w1 = Math.min(p - s - 1, m);
+        for (k = 0; k < w1; k++) o.push({ t: 'F', mb: k, c: 0 });
+        for (k = 0; k < m - w1; k++) { o.push({ t: 'F', mb: w1 + k, c: 0 }); o.push({ t: 'B', mb: k, c: 0 }); }
+        for (k = m - w1; k < m; k++) o.push({ t: 'B', mb: k, c: 0 });
+      }
+      orders.push(o);
+    }
+    return orders;
+  }
+  function simulatePipeline(kind, p, m, v) {
+    v = kind === 'interleaved' ? (v || 2) : 1;
+    var split = kind === 'zb', orders = pipelineOrder(kind, p, m, v), V = p * v;
+    // integer clock: forward of one chunk = 1 tick; full backward = 2 ticks (or B 1 + W 1)
+    var dur = { F: 1, B: split ? 1 : 2, W: 1 };
+    var done = {}, key = function (t, mb, vs) { return t + mb + ':' + vs; };
+    var ptr = orders.map(function () { return 0; }), busyUntil = orders.map(function () { return 0; });
+    var pendingW = orders.map(function () { return []; }), ops = [], inflight = orders.map(function () { return 0; }), peak = orders.map(function () { return 0; });
+    var remaining = orders.reduce(function (a, o) { return a + o.length * (split ? 1 : 1); }, 0) + (split ? p * m * v : 0);
+    for (var t = 0; remaining > 0 && t < 100000; t++) {
+      for (var s = 0; s < p; s++) {
+        if (busyUntil[s] > t) continue;
+        var next = orders[s][ptr[s]], run = null;
+        if (next) {
+          var vs = next.c * p + s, ready;
+          if (next.t === 'F') ready = vs === 0 || (done[key('F', next.mb, vs - 1)] !== undefined && done[key('F', next.mb, vs - 1)] <= t);
+          else ready = (vs === V - 1 ? done[key('F', next.mb, vs)] !== undefined && done[key('F', next.mb, vs)] <= t
+                                     : done[key('B', next.mb, vs + 1)] !== undefined && done[key('B', next.mb, vs + 1)] <= t);
+          if (ready) { run = { t: next.t, mb: next.mb, c: next.c, vs: vs }; ptr[s]++; }
+        }
+        if (!run && pendingW[s].length && (split)) run = pendingW[s].shift();
+        if (!run) continue;
+        var d = dur[run.t], end = t + d;
+        busyUntil[s] = end; done[key(run.t, run.mb, run.vs)] = end; remaining--;
+        if (run.t === 'F') { inflight[s] += 1 / v; peak[s] = Math.max(peak[s], inflight[s]); }
+        if (run.t === 'B') { inflight[s] -= 1 / v; if (split) pendingW[s].push({ t: 'W', mb: run.mb, c: run.c, vs: run.vs }); }
+        ops.push({ s: s, t: run.t, mb: run.mb, c: run.c, start: t / v, dur: d / v });
+      }
+    }
+    var span = Math.max.apply(null, ops.map(function (o) { return o.start + o.dur; }));
+    var work = m * 3;                         // per device, in full-stage units
+    return { ops: ops, makespan: span, bubble: 1 - work / span, peakActivations: peak };
+  }
+  function bubbleFormula(kind, p, m, v) {
+    if (kind === 'interleaved') return (p - 1) / (v * m + p - 1);
+    return (p - 1) / (m + p - 1);
+  }
+
+  // ===================================================== 26 · collectives
+  // Ring all-reduce over N ranks: chunks as contributor sets (bitmasks). Steps 0..N-2 reduce-scatter, N-1..2N-3 all-gather.
+  function ringAllReduce(N, steps) {
+    var st = [], i, c;
+    for (i = 0; i < N; i++) { st.push([]); for (c = 0; c < N; c++) st[i].push(1 << i); }
+    var sends = [];
+    for (var s = 0; s < steps && s < 2 * (N - 1); s++) {
+      var msgs = [];
+      for (i = 0; i < N; i++) {
+        var chunk = s < N - 1 ? ((i - s) % N + N) % N : ((i + 1 - (s - (N - 1))) % N + N) % N;
+        msgs.push({ from: i, to: (i + 1) % N, chunk: chunk, val: st[i][chunk] });
+      }
+      msgs.forEach(function (mm) { st[mm.to][mm.chunk] = s < N - 1 ? (st[mm.to][mm.chunk] | mm.val) : mm.val; });
+      sends = msgs;
+    }
+    return { state: st, last: sends };
+  }
+  function popcount(x) { var n = 0; while (x) { n += x & 1; x >>>= 1; } return n; }
+  function collectiveTime(kind, N, bytes, bwGBs, latencyUs) {   // ring algorithms; bw = per-GPU one-way bandwidth
+    var f = { allreduce: 2 * (N - 1) / N, allgather: (N - 1) / N, reducescatter: (N - 1) / N, alltoall: (N - 1) / N, broadcast: 1 }[kind];
+    var steps = { allreduce: 2 * (N - 1), allgather: N - 1, reducescatter: N - 1, alltoall: N - 1, broadcast: N - 1 }[kind];
+    return { bytesPerGpu: f * bytes, seconds: f * bytes / (bwGBs * 1e9) + steps * (latencyUs || 0) * 1e-6 };
+  }
+
+  // ===================================================== 27 · looped depth
+  // A toy recurrent block h ← c·tanh(W h) + e per token; c is the token's "difficulty" (contraction rate).
+  // A token exits when its update is small relative to its state, or at rMax.
+  function loopSim(o) {
+    var rnd = mulberry32(o.seed || 3), d = o.d || 16, n = o.tokens || 12, i, j, k;
+    // orthogonal W (Gram–Schmidt): spectral norm 1, so h ← c·tanh(W h) + e contracts at rate ≤ c
+    var W = [];
+    for (i = 0; i < d; i++) {
+      var v = []; for (j = 0; j < d; j++) v.push(gauss(rnd));
+      W.forEach(function (u) { var pr = dot(u, v); for (var q = 0; q < d; q++) v[q] -= pr * u[q]; });
+      var nv = Math.sqrt(dot(v, v)); W.push(v.map(function (x) { return x / nv; }));
+    }
+    var e = []; for (i = 0; i < d; i++) e.push(gauss(rnd));   // the same injected input, so only c (difficulty) differs
+    var out = [];
+    for (k = 0; k < n; k++) {
+      var c = o.cMin + (o.cMax - o.cMin) * (n === 1 ? 0.5 : k / (n - 1)), h = [];
+      for (i = 0; i < d; i++) h.push(0);
+      var res = [], loops = o.rMax;
+      for (var r = 1; r <= o.rMax; r++) {
+        var nh = W.map(function (row, ii) { return c * Math.tanh(dot(row, h)) + e[ii]; });
+        var num = 0, den = 0; for (i = 0; i < d; i++) { num += (nh[i] - h[i]) * (nh[i] - h[i]); den += nh[i] * nh[i]; }
+        var rel = Math.sqrt(num / den); res.push(rel); h = nh;
+        if (r >= (o.rMin || 1) && rel < o.eps) { loops = r; break; }
+      }
+      out.push({ c: c, loops: loops, residuals: res });
+    }
+    var mean = sum(out.map(function (x) { return x.loops; })) / n;
+    return { tokens: out, meanLoops: mean, computeFraction: mean / o.rMax };
+  }
+
   var PURE = {
     mulberry32: mulberry32, softmax: softmax, fmtBytes: fmtBytes,
     tokenizeWords: tokenizeWords, trainNgram: trainNgram, ngramNext: ngramNext, reshapeDist: reshapeDist, CORPUS: CORPUS,
@@ -485,9 +648,12 @@
     decodeCeiling: decodeCeiling, attainable: attainable, gemmIntensity: gemmIntensity,
     parallelMem: parallelMem, costPerMillion: costPerMillion, servePoint: servePoint,
     chinLoss: chinLoss, chinOptimal: chinOptimal, simulateRouting: simulateRouting,
-    recallError: recallError, votingCurve: votingCurve, bpeTrain: bpeTrain, bpeEncode: bpeEncode
+    recallError: recallError, votingCurve: votingCurve, bpeTrain: bpeTrain, bpeEncode: bpeEncode,
+    maskPattern: maskPattern, maskStats: maskStats, pipelineOrder: pipelineOrder, simulatePipeline: simulatePipeline, bubbleFormula: bubbleFormula,
+    ringAllReduce: ringAllReduce, popcount: popcount, collectiveTime: collectiveTime, loopSim: loopSim, gauss: gauss
   };
   if (typeof module !== 'undefined' && module.exports) { module.exports = PURE; }
+  if (typeof window !== 'undefined') window.LMPure = PURE;
   if (typeof document === 'undefined') return;
 
   // =====================================================================
@@ -596,6 +762,7 @@
         svg.appendChild(sv('path', { d: d, class: s.cls + (s.dash ? ' dash' : '') }));
         if (s.label && !cfg.legend) { var lp = pts[pts.length - 1]; svg.appendChild(sv('text', { x: tx(lp[0]) - 4, y: ty(clamp(lp[1], cfg.y.min, cfg.y.max)) - 6, 'text-anchor': 'end', class: 'lbl' }, s.label)); }
       });
+      (cfg.hlines || []).forEach(function (v) { svg.appendChild(sv('line', { x1: L, x2: W - R, y1: ty(v.y), y2: ty(v.y), class: 's-d dash' })); if (v.label) svg.appendChild(sv('text', { x: W - R - 4, y: ty(v.y) - 4, 'text-anchor': 'end', class: 'lbl' }, v.label)); });
       (cfg.vlines || []).forEach(function (v) { svg.appendChild(sv('line', { x1: tx(v.x), x2: tx(v.x), y1: T, y2: H - B, class: 's-d dash' })); if (v.label) svg.appendChild(sv('text', { x: tx(v.x) + 4, y: T + 10, class: 'lbl' }, v.label)); });
       (cfg.points || []).forEach(function (p) {
         var cx = tx(p.x), cy = ty(clamp(p.y, cfg.y.min, cfg.y.max));
@@ -1274,13 +1441,89 @@
     draw();
   };
 
+  // ---------------------------------------------------------- masks (attention patterns)
+  LABS.masks = function (root) {
+    var f = frame(root, 'Attention pattern explorer', 'Rows are queries, columns keys. Each pattern decides which pairs are computed — and therefore how much of the KV cache a layer must keep and read.');
+    var kS = select(f.controls, { label: 'pattern', options: [['causal', 'Causal (decoder)'], ['bidirectional', 'Bidirectional (encoder)'], ['prefix', 'Prefix-LM'], ['sliding', 'Sliding window'], ['chunked', 'Chunked (Llama 4)'], ['sink', 'Sinks + window (StreamingLLM)'], ['dilated', 'Dilated'], ['nsa', 'Block-sparse (NSA)'], ['topk', 'Top-k (DeepSeek DSA)']], value: 'sliding', onchange: draw });
+    var tS = slider(f.controls, { label: 'sequence length T', min: 8, max: 48, step: 4, value: 24, onchange: draw });
+    var wS = slider(f.controls, { label: 'window W', min: 1, max: 16, value: 6, onchange: draw });
+    var cS = slider(f.controls, { label: 'chunk / block size', min: 2, max: 12, value: 6, onchange: draw });
+    var sS = slider(f.controls, { label: 'sinks / selected blocks', min: 1, max: 4, value: 2, onchange: draw });
+    var kkS = slider(f.controls, { label: 'top-k keys', min: 1, max: 16, value: 6, onchange: draw });
+    var put = readouts(f.out, [{ id: 'p', k: 'pairs computed', hot: true }, { id: 'r', k: 'last query reads' }, { id: 'c', k: 'KV the layer must keep' }]);
+    var grid = h('div', { class: 'maskgrid' }); f.out.appendChild(grid);
+    var note = h('div', { class: 'lab-note' }); f.out.appendChild(note);
+    function draw() {
+      var kind = kS.get(), T = tS.get(), o = { window: wS.get(), chunk: cS.get(), block: cS.get(), sinks: sS.get(), blocks: sS.get(), prefix: Math.round(T / 3), topk: kkS.get(), seed: 5 };
+      var m = maskPattern(kind, T, o), st = maskStats(m);
+      grid.innerHTML = ''; grid.style.gridTemplateColumns = 'repeat(' + T + ', 1fr)';
+      var cls = ['', 'a', 's', 'w'];
+      for (var i = 0; i < T; i++) for (var j = 0; j < T; j++) { var c = h('i'); if (m[i][j]) c.className = cls[m[i][j]]; grid.appendChild(c); }
+      put('p', st.pairs.toLocaleString('en-US'), pct(st.frac, 0) + ' of full causal (' + st.causalPairs + ')');
+      put('r', st.lastRow + ' of ' + T + ' keys', '');
+      var keep = { causal: T, bidirectional: T, prefix: T, sliding: Math.min(T, o.window), chunked: ((T - 1) % o.chunk) + 1, sink: Math.min(T, o.sinks + o.window), dilated: Math.min(T, 2 * o.window), nsa: T, topk: T }[kind];
+      put('c', keep + ' tokens', keep < T ? 'bounded — the cache stops growing' : 'all of them: grows with T');
+      note.innerHTML = {
+        causal: 'Every token attends to all earlier tokens: T(T+1)/2 pairs, and the cache keeps everything.',
+        bidirectional: 'Encoders see the whole sequence in both directions; nothing is generated token by token, so there is no KV cache to grow.',
+        prefix: 'The prompt (first third here) attends bidirectionally; generated tokens attend causally — T5-style prefix LMs and some VLM image tokens.',
+        sliding: 'Each query sees the last W keys. The cache is a ring buffer of W tokens, and information travels further only by passing through layers (W per layer).',
+        chunked: 'Tokens attend only within their chunk (Llama 4\'s local layers); interleaved global layers reconnect the chunks.',
+        sink: 'Keeping the first few tokens plus a window stabilises streaming: softmax needs somewhere to dump attention (Chapter 4\'s attention sinks).',
+        dilated: 'Skipping keys widens the receptive field for the same cost — used in older sparse transformers, rarely in 2026 LLMs.',
+        nsa: 'Native sparse attention: a compressed summary picks the most relevant blocks, which are read in full alongside a local window. The cache keeps everything; each query reads a fraction.',
+        topk: 'DeepSeek sparse attention (V3.2): a tiny FP8 "lightning indexer" scores all previous tokens and the main attention reads only the top k. Reads shrink from T to k; the cache does not.'
+      }[kind];
+    }
+    draw();
+  };
+
+  // ---------------------------------------------------------- loop (adaptive depth)
+  LABS.loop = function (root) {
+    var f = frame(root, 'Adaptive depth: when should a token stop looping?', 'A toy recurrent block h ← c·tanh(W h) + e runs for each token; c sets how hard the token is (how slowly its state settles). A token exits when its update is smaller than ε of its state — the convergence-style exit of recurrent-depth models.');
+    var eS = slider(f.controls, { label: 'exit threshold ε', min: -6, max: -1, step: 0.25, value: -3, map: function (v) { return Math.pow(10, v); }, fmt: function (v) { return v.toExponential(0); }, onchange: draw });
+    var rS = slider(f.controls, { label: 'max loops r_max', min: 4, max: 48, step: 4, value: 32, onchange: draw });
+    var dS = slider(f.controls, { label: 'hardest token (c_max)', min: 0.5, max: 0.98, step: 0.01, value: 0.92, fmt: function (v) { return v.toFixed(2); }, onchange: draw });
+    var put = readouts(f.out, [{ id: 'm', k: 'mean loops per token', hot: true }, { id: 'c', k: 'compute vs always r_max' }, { id: 'd', k: 'effective depth (3-layer block)' }]);
+    var grid = h('div', { class: 'loopgrid' }); f.out.appendChild(grid);
+    var ch = chart(f.out, 200);
+    function draw() {
+      var r = loopSim({ tokens: 12, cMin: 0.15, cMax: dS.get(), rMax: rS.get(), eps: eS.get(), seed: 3 });
+      put('m', r.meanLoops.toFixed(1), 'of ' + rS.get());
+      put('c', pct(r.computeFraction, 0), 'parameters unchanged');
+      var lo = Math.min.apply(null, r.tokens.map(function (t) { return t.loops; })), hi = Math.max.apply(null, r.tokens.map(function (t) { return t.loops; }));
+      put('d', 3 * lo + '–' + 3 * hi + ' layers', 'from the same 3 layers of weights');
+      grid.innerHTML = ''; grid.style.gridTemplateColumns = '5.5rem repeat(' + rS.get() + ', 1fr)';
+      r.tokens.forEach(function (t, k) {
+        grid.appendChild(h('span', { class: 'lg-k', text: 't' + (k + 1) + '  c ' + t.c.toFixed(2) }));
+        for (var i = 0; i < rS.get(); i++) {
+          var c = h('i');
+          if (i < t.loops) { var v = clamp(-Math.log10(t.residuals[i]) / 6, 0, 1); c.style.background = 'color-mix(in srgb, var(--purple) ' + Math.round(90 - v * 70) + '%, var(--paper-2))'; if (i === t.loops - 1) c.className = 'exit'; }
+          grid.appendChild(c);
+        }
+      });
+      var pick = [0, 4, 8, 11];
+      ch({ x: { min: 1, max: rS.get(), label: 'loop', ticks: [1, Math.round(rS.get() / 4), Math.round(rS.get() / 2), Math.round(3 * rS.get() / 4), rS.get()], fmt: String },
+        y: { min: 1e-7, max: 10, log: true, label: 'update', ticks: [1e-6, 1e-3, 1], fmt: function (v) { return v === 1 ? '1' : '1e' + Math.round(Math.log10(v)); } },
+        legend: true,
+        series: pick.map(function (k, i) { var t = r.tokens[k]; return { pts: t.residuals.map(function (v, j) { return [j + 1, Math.max(v, 1e-7)]; }), cls: ['s-c', 's-b', 's-d', 's-a'][i], label: 'token ' + (k + 1) + ' (c=' + t.c.toFixed(2) + ')' }; }),
+        hlines: [{ y: eS.get(), label: 'ε' }] });
+    }
+    draw();
+  };
+
+  // shared with lm-figs.js, which registers labs that draw figures
+  LABS.__frame = { frame: frame, slider: slider, select: select, check: check, readouts: readouts, barList: barList, chart: chart };
+  window.LMLabs = LABS;
+
   // ============================================================ boot
   function boot() {
     Array.prototype.forEach.call(document.querySelectorAll('.lab[data-lab]'), function (el) {
       var fn = LABS[el.dataset.lab];
-      if (!fn) return;
+      if (typeof fn !== 'function') return;
       try { fn(el); } catch (e) { el.innerHTML = '<div class="lab-head"><span class="lab-badge">Lab</span><span class="lab-title">This lab failed to load</span></div><p class="lab-desc">' + String(e && e.message) + '</p>'; if (window.console) console.error(e); }
     });
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+  // wait for DOMContentLoaded so that lm-figs.js (loaded after this file) can register its labs first
+  if (document.readyState === 'complete') boot(); else document.addEventListener('DOMContentLoaded', boot);
 })();

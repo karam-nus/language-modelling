@@ -13,6 +13,6 @@
 {%- else -%}{%- assign c = "yellow" -%}
 {%- endcase -%}
 {%- if include.local -%}{%- assign href = "#lab-" | append: lab.name -%}{%- else -%}{%- assign href = lab.ch | append: ".html#lab-" | append: lab.name | relative_url -%}{%- endif %}
-<a class="labcard {{ c }}" href="{{ href }}"><span class="lc-k">{{ lab.kind }}</span><span class="lc-t">{{ lab.title }}</span><span class="lc-d">{{ lab.desc }}</span><span class="lc-ch">{% if lab.n == "B" %}Appendix B{% else %}Chapter {{ lab.n }}{% endif %} →</span></a>
+<a class="labcard {{ c }}" href="{{ href }}"><span class="lc-k">{{ lab.kind }}</span><span class="lc-t">{{ lab.title }}</span><span class="lc-d">{{ lab.desc }}</span><span class="lc-ch">{% if lab.n == "B" %}Appendix B{% elsif lab.n == "↻" %}Deep dive: looped transformers{% else %}Chapter {{ lab.n }}{% endif %} →</span></a>
 {%- endfor %}
 </div>

@@ -1,6 +1,9 @@
 ---
 title: "Chapter 4 — Attention Deep Dive: SDPA & Multi-Head Attention"
 description: "Scaled dot-product attention with shapes, why 1/√d_k, causal masks (and PyTorch's inverted boolean convention), multi-head attention, FlashAttention 1–4, attention sinks and gated attention, and what heads learn."
+related:
+  - { id: math, why: "Softmax, matrix products and scaling, from first principles." }
+  - { id: pytorch-essentials, why: "Tensors, broadcasting and SDPA in PyTorch." }
 ---
 
 [← Back to Table of Contents](./README.md)
@@ -149,6 +152,12 @@ Below, a seven-token sentence with small hand-built query and key vectors. Pick 
 In **decoder-only** models (GPT, Llama, Qwen, DeepSeek), each token can only attend to itself and previous tokens — it must not see the future. This is enforced with a **causal mask**: an upper-triangular matrix of `−∞` values that, after softmax, zero out attention to future positions.
 
 <div class="diagram">
+<div class="diagram-title">Three Masks, Three Kinds of Model</div>
+<div class="fig" data-fig="masks" data-set="causal,bidirectional,prefix" data-t="16"><noscript>Figure: 16×16 attention masks for causal (decoder), bidirectional (encoder) and prefix-LM attention, with the number of query–key pairs each computes.</noscript></div>
+<div class="flow-caption">Rows are queries, columns keys. Chapter 5 adds the sparse patterns — windows, chunks, sinks and learned selection.</div>
+</div>
+
+<div class="diagram">
 <div class="diagram-title">Causal (Lower-Triangular) Attention Mask</div>
 <div class="compare">
   <div class="compare-side left">
@@ -289,6 +298,12 @@ The attention score matrix `[B, H, T, T]` is **O(T²)** in memory. For T = 128K 
 3. **Kernel fusion**: Fuse the matmul, softmax, and output matmul into a single GPU kernel
 
 <div class="diagram">
+<div class="diagram-title">FlashAttention, One Tile at a Time</div>
+<div class="fig" data-fig="flash"><noscript>Figure: one query block is loaded into SRAM once; key and value blocks stream through; a running maximum, running sum and output accumulator are rescaled after every block; causal blocks above the diagonal are skipped; the output is normalised and written once.</noscript></div>
+<div class="flow-caption">Step through the key/value blocks: only one tile of scores ever exists, and it lives in SRAM.</div>
+</div>
+
+<div class="diagram">
 <div class="diagram-title">Flash Attention — Tiled Computation</div>
 <div class="diagram-grid cols-2">
   <div class="diagram-card accent">
@@ -348,6 +363,11 @@ Softmax weights must sum to 1, so a head with nothing relevant to read still has
 - **Streaming and eviction.** If you evict the first tokens from a long KV cache, the sink disappears and quality collapses. StreamingLLM keeps the first few "sink" tokens plus a recent window and stays stable for millions of tokens ([Chapter 18](./18_kv_cache_optimization.md)).
 - **Quantization.** Sinks come with massive activations in a few channels, one of the main sources of the outliers that make INT8/INT4 activation quantization hard ([Chapter 20](./20_quantization_fundamentals.md)).
 
+
+<div class="diagram">
+<div class="diagram-title">The Sink, and the Gate That Replaces It</div>
+<div class="fig" data-fig="gated"><noscript>Figure: an attention map where most heads put weight on the first token (the sink), next to the same map with a per-head sigmoid output gate that lets a head contribute nothing instead.</noscript></div>
+</div>
 Recent architectures give heads an explicit way to say "nothing here":
 
 | Mechanism | How it works | Used by |
