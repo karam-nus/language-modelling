@@ -1,17 +1,20 @@
 ---
 title: "Chapter 3 — The Transformer"
+description: "The decoder block with tensor shapes at every step: residual stream, RMSNorm and where to put it, QK-norm, SwiGLU feed-forward layers, a parameter count that adds up, and how 2026 blocks differ from 2017's."
+related:
+  - { id: models, why: "The same block traced through every model generation." }
+  - { id: pytorch-essentials, why: "Writing modules like these in PyTorch." }
 ---
 
 [← Back to Table of Contents](./README.md)
 
 # Chapter 3 — The Transformer
 
-> *"Attention is all you need."*
-> — Vaswani et al., 2017
+> **The one-sentence version:** a transformer is a stack of identical blocks, each of which reads from a shared residual stream, mixes information *across tokens* with attention, transforms each token *independently* with a feed-forward network, and writes the result back.
 
 ## The Architecture That Changed Everything
 
-The **transformer** is the architecture behind every modern LLM. Introduced in 2017 for machine translation, its purely attention-based design replaced recurrence and convolution with a mechanism that can attend to all positions in parallel. This chapter walks through every component with tensor shapes at each step.
+The **transformer** is the architecture behind almost every modern LLM. Introduced in 2017 for machine translation, it replaced recurrence and convolution with attention, which looks at all positions at once — so training parallelises across the whole sequence. This chapter walks through every component with tensor shapes at each step, then shows how the 2026 version of the block differs from the 2017 one.
 
 <div class="diagram">
 <div class="diagram-title">Transformer Block (Decoder-Only, Pre-Norm)</div>
@@ -32,15 +35,15 @@ The **transformer** is the architecture behind every modern LLM. Introduced in 2
 </div>
 </div>
 
-A transformer model is simply **N** of these blocks stacked sequentially. LLaMA-3-8B uses N = 32 blocks; LLaMA-3-70B uses N = 80.
+A transformer model is **N** of these blocks stacked. Llama 3.1 8B uses N = 32, Llama 3.1 70B N = 80, DeepSeek-V3 N = 61.
 
 ## Tensor Flow Through a Full Model
 
 <div class="diagram">
-<div class="diagram-title">End-to-End Tensor Shapes (LLaMA-3-8B Example)</div>
+<div class="diagram-title">End-to-End Tensor Shapes (Llama 3.1 8B)</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 150px;">Token IDs</span>
+    <span class="ts-label">Token IDs</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span>
@@ -48,22 +51,10 @@ A transformer model is simply **N** of these blocks stacked sequentially. LLaMA-
       <span class="ts-dim seq">T</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">e.g. [1, 512]</span>
+    <span class="ts-note">e.g. [1, 512]</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 150px;">Token Embeddings</span>
-    <div class="tensor-shape">
-      <span class="ts-bracket">[</span>
-      <span class="ts-dim batch">B</span>
-      <span class="ts-sep">,</span>
-      <span class="ts-dim seq">T</span>
-      <span class="ts-sep">,</span>
-      <span class="ts-dim feature">4096</span>
-      <span class="ts-bracket">]</span>
-    </div>
-  </div>
-  <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 150px;">After each Block ×32</span>
+    <span class="ts-label">Token Embeddings</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span>
@@ -75,7 +66,7 @@ A transformer model is simply **N** of these blocks stacked sequentially. LLaMA-
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 150px;">Final RMSNorm</span>
+    <span class="ts-label">After each Block ×32</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span>
@@ -87,7 +78,19 @@ A transformer model is simply **N** of these blocks stacked sequentially. LLaMA-
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 150px;">LM Head (logits)</span>
+    <span class="ts-label">Final RMSNorm</span>
+    <div class="tensor-shape">
+      <span class="ts-bracket">[</span>
+      <span class="ts-dim batch">B</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim seq">T</span>
+      <span class="ts-sep">,</span>
+      <span class="ts-dim feature">4096</span>
+      <span class="ts-bracket">]</span>
+    </div>
+  </div>
+  <div class="tensor-flow-row">
+    <span class="ts-label">LM Head (logits)</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span>
@@ -107,7 +110,7 @@ The hidden dimension stays constant at d_model through all transformer blocks. O
 
 <div class="img-caption">
   <img src="{{ '/assets/images/transformer_block.svg' | relative_url }}" alt="Decoder-only transformer block showing RMSNorm, Self-Attention, and Feed-Forward layers with residual connections, alongside a model scale comparison table">
-  <figcaption>Complete decoder-only transformer block with tensor shapes and model scale reference (LLaMA family)</figcaption>
+  <figcaption>Complete decoder-only transformer block with tensor shapes and model scale reference (Llama family)</figcaption>
 </div>
 
 ### Residual Connections
@@ -117,6 +120,13 @@ Every sub-layer (attention and FFN) uses a **residual (skip) connection**: the i
 $$\text{output} = x + \text{SubLayer}(\text{Norm}(x))$$
 
 Without residual connections, training a 32-layer or 80-layer model would be extremely difficult due to vanishing gradients.
+
+A useful mental model, popularised by interpretability research, is the **residual stream**: a `[T, d_model]` scratchpad that runs from the embedding to the output head. Each attention and FFN sub-layer *reads* a normalised copy of it and *adds* a small update back. Nothing is ever overwritten — later layers see the sum of everything written before them.
+
+<div class="callout trend">
+<span class="callout-title">2026 trend — wider residual streams</span>
+<p>Hyper-connections replace the single residual stream with several parallel streams and learned mixing between them. DeepSeek-V4 (2026) uses a constrained variant, <em>manifold-constrained hyper-connections</em>, which keeps the mixing matrices well-conditioned so that signals neither explode nor vanish across hundreds of layers. It is the first change to the residual path itself to reach a frontier open model since pre-norm.</p>
+</div>
 
 ### Layer Normalization vs RMS Normalization
 
@@ -128,15 +138,15 @@ $$\text{LayerNorm}(x) = \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} \cdot \gamma 
 **RMSNorm** (LLaMA, Mistral, modern models):
 $$\text{RMSNorm}(x) = \frac{x}{\sqrt{\frac{1}{d}\sum_{i=1}^{d} x_i^2 + \epsilon}} \cdot \gamma$$
 
-RMSNorm drops the mean-centering and bias, making it ~10–15% faster than LayerNorm with negligible quality difference. It's the standard in modern LLMs.
+RMSNorm drops the mean-centring and the bias. It needs one reduction over the hidden dimension instead of two, trains as well as LayerNorm in practice, and is the standard in modern LLMs. (Inside a fused kernel the speed difference is small; the simplicity is the main win.)
 
 | Property | LayerNorm | RMSNorm |
 |----------|-----------|---------|
-| Mean centering | Yes (−μ) | No |
+| Mean centring | Yes (−μ) | No |
 | Learnable bias | Yes (β) | No |
 | Learnable scale | Yes (γ) | Yes (γ) |
-| Speed | Baseline | ~10–15% faster |
-| Used by | BERT, GPT-2 | LLaMA, Mistral, Gemma |
+| Reductions over d | Two (mean, variance) | One (mean square) |
+| Used by | BERT, GPT-2, GPT-3 | Llama, Qwen, Mistral, Gemma, DeepSeek, gpt-oss |
 
 ### Pre-Norm vs Post-Norm
 
@@ -149,9 +159,9 @@ The **placement** of normalization matters:
     <div class="compare-title">Pre-Norm (Modern)</div>
     <ul>
       <li>x → Norm → SubLayer → + residual</li>
-      <li>More stable training</li>
-      <li>Used by LLaMA, GPT-3, Mistral</li>
-      <li>Gradients flow directly through residuals</li>
+      <li>More stable training, less warm-up sensitivity</li>
+      <li>Used by GPT-2/3, Llama, Qwen, DeepSeek</li>
+      <li>Gradients flow directly through the residual path</li>
     </ul>
   </div>
   <div class="compare-side right">
@@ -165,6 +175,15 @@ The **placement** of normalization matters:
   </div>
 </div>
 </div>
+
+Pre-norm has a known weakness: because nothing normalises the residual stream itself, its magnitude grows with depth and late layers' updates become relatively small. Two 2024–25 fixes are now common:
+
+- **Sandwich norm** (Gemma 2/3): normalise both the input *and* the output of each sub-layer, `x + Norm(SubLayer(Norm(x)))`.
+- **Reordered post-norm** (OLMo 2): `x + Norm(SubLayer(x))` — the norm moves inside the residual branch, which OLMo 2 found markedly more stable at scale.
+
+### QK-Norm
+
+A second source of instability is inside attention: if query and key vectors grow large, the attention logits $q \cdot k$ explode, softmax saturates to one-hot and the loss spikes. **QK-norm** applies an RMSNorm to every query and key head before the dot product. It was rare in 2023 and is standard in 2025–26 designs — OLMo 2, Qwen3, Gemma 3 and Kimi K2-style "QK-clip" variants all control attention-logit growth one way or another.
 
 ```python
 import torch
@@ -189,7 +208,7 @@ Each transformer block has a **position-wise feed-forward network** that operate
 <div class="diagram-title">FFN Tensor Shapes</div>
 <div class="tensor-flow">
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 120px;">Input</span>
+    <span class="ts-label">Input</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span>
@@ -201,7 +220,7 @@ Each transformer block has a **position-wise feed-forward network** that operate
     </div>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 120px;">Up projection</span>
+    <span class="ts-label">Up projection</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span>
@@ -211,10 +230,10 @@ Each transformer block has a **position-wise feed-forward network** that operate
       <span class="ts-dim feature">d_ff</span>
       <span class="ts-bracket">]</span>
     </div>
-    <span style="color: var(--text-muted); font-size: 0.6875rem; margin-left: 0.5rem;">d_ff = 14336 for LLaMA-3-8B</span>
+    <span class="ts-note">d_ff = 14336 for Llama 3.1 8B</span>
   </div>
   <div class="tensor-flow-row">
-    <span style="color: var(--text-muted); font-size: 0.75rem; min-width: 120px;">Down projection</span>
+    <span class="ts-label">Down projection</span>
     <div class="tensor-shape">
       <span class="ts-bracket">[</span>
       <span class="ts-dim batch">B</span>
@@ -234,12 +253,12 @@ The FFN's non-linearity determines what the model can learn:
 
 | Activation | Formula | Used By |
 |-----------|---------|---------|
-| **ReLU** | $\max(0, x)$ | Original Transformer |
-| **GELU** | $x \cdot \Phi(x)$ | GPT-2, BERT |
-| **SiLU (Swish)** | $x \cdot \sigma(x)$ | LLaMA, Mistral |
-| **SwiGLU** | $\text{SiLU}(xW_1) \otimes xW_3$ | LLaMA 2/3, Gemma |
+| **ReLU** | $\max(0, x)$ | Original Transformer, OPT |
+| **GELU** | $x \cdot \Phi(x)$ | GPT-2, GPT-3, BERT |
+| **SwiGLU** | $\text{SiLU}(xW_1) \odot xW_3$ | Llama, Qwen, Mistral, DeepSeek, gpt-oss (clamped variant) |
+| **GeGLU** | $\text{GELU}(xW_1) \odot xW_3$ | Gemma, T5 v1.1 |
 
-**SwiGLU** (Shazeer, 2020) is the dominant choice in modern models. It uses a gated linear unit — one linear projection creates the "gate" while another creates the "value," and they're multiplied element-wise:
+**SwiGLU** (Shazeer, 2020) is the dominant choice. It is a *gated* linear unit: one projection passed through SiLU acts as a gate, a second projection carries the values, and they are multiplied element-wise. SiLU itself, $x \cdot \sigma(x)$, is the smooth non-linearity inside the gate.
 
 ```python
 class SwiGLU_FFN(nn.Module):
@@ -255,7 +274,7 @@ class SwiGLU_FFN(nn.Module):
         return self.w_down(gate * up)                      # [B, T, d_model]
 ```
 
-Note that SwiGLU has **3 weight matrices** instead of 2, so d_ff is typically set to 2/3 of what it would be with a standard FFN to keep the parameter count similar (e.g., 14336 instead of ~21845 for d_model=4096).
+SwiGLU has **three** weight matrices instead of two. To match the parameters of a classic 4·d FFN, d_ff shrinks by 2/3 to $\tfrac{8}{3}d$ — 10,923 for d = 4,096. Llama 3 then scales that by an `ffn_dim_multiplier` of 1.3 and rounds up to a multiple of 1,024, giving 14,336 = 3.5·d. So Llama 3.1 8B's FFN is *larger* than the classic 4·d one, not equal to it.
 
 ## A Minimal Transformer Block
 
@@ -298,26 +317,98 @@ class Transformer(nn.Module):
 
 ## Parameter Count
 
-Understanding where parameters live in a transformer:
+Where the parameters of Llama 3.1 8B live. It uses grouped-query attention (Chapter 5): 32 query heads but only 8 key/value heads, each 128 wide, so the K and V projections are a quarter the size of Q.
 
-| Component | Shape | Count (LLaMA-3-8B) |
-|-----------|-------|---------------------|
-| Embedding | [128256, 4096] | 525M |
-| Per block: Q, K, V projections | [4096, 4096] × 3 | 50M |
-| Per block: Output projection | [4096, 4096] | 17M |
-| Per block: FFN (gate, up, down) | [4096, 14336] × 3 | 176M |
-| Per block: 2× RMSNorm | [4096] × 2 | 8K |
+| Component | Shape | Count |
+|-----------|-------|------:|
+| Token embedding | [128256, 4096] | 525.3M |
+| Per block: Q projection | [4096, 32 × 128] | 16.8M |
+| Per block: K and V projections | [4096, 8 × 128] × 2 | 8.4M |
+| Per block: output projection | [32 × 128, 4096] | 16.8M |
+| Per block: FFN (gate, up, down) | [4096, 14336] × 3 | 176.2M |
+| Per block: 2 × RMSNorm | [4096] × 2 | 8K |
+| **Per block total** | | **218.1M** |
+| 32 blocks | | 6,979.6M |
 | Final RMSNorm | [4096] | 4K |
-| **Total (32 blocks)** | | **~8B** |
+| LM head (untied) | [4096, 128256] | 525.3M |
+| **Total** | | **8,030M** |
 
-The FFN layers dominate — they account for roughly **2/3** of all parameters in each block. Attention parameters are about 1/3. The embedding matrix is large but shared with the LM head (weight tying).
+The FFN holds **81%** of each block's parameters; attention holds 19% (it would be 28% with full multi-head K and V). Llama 3.1 8B does *not* tie its embedding and output head, so the two vocabulary matrices together are 13% of the model. Change the knobs yourself — heads, KV heads, FFN width, vocabulary, tying, experts — and watch the budget move:
 
-## What's Next
+<div class="lab" data-lab="params"><noscript>Interactive lab: a transformer parameter and memory counter with presets for real models. Enable JavaScript to use it.</noscript></div>
 
-The transformer block contains two sub-layers, and we've covered the FFN in detail. The next chapter dives deep into the other — and arguably more important — component: **attention**.
+## The 2026 Block, Side by Side
 
-[← Previous: Chapter 2 — Embeddings](./02_embeddings.md) · **Next: [Chapter 4 — SDPA & Multi-Head Attention →](./04_attention_sdpa_and_mha.md)**
+The 2017 block and a 2026 block share the same skeleton. What changed is every detail:
+
+| | Original (2017) | Llama 3.1 8B (2024) | Qwen3-8B (2025) | Gemma 3 27B (2025) | DeepSeek-V3 (2024) | gpt-oss-120b (2025) |
+|---|---|---|---|---|---|---|
+| Norm | LayerNorm, post | RMSNorm, pre | RMSNorm, pre | RMSNorm, pre + post | RMSNorm, pre | RMSNorm, pre |
+| QK-norm | – | – | Yes | Yes | Norms on MLA latents | – |
+| Attention | MHA | GQA 32/8 | GQA 32/8 | GQA, 5 local : 1 global | MLA | GQA 64/8, alternating 128-token window / full, learned sinks |
+| FFN | ReLU | SwiGLU | SwiGLU | GeGLU | MoE: 1 shared + top-8 of 256 | MoE: top-4 of 128 |
+| Positions | Sinusoidal | RoPE 500K | RoPE 1M | RoPE 10K local / 1M global | Decoupled RoPE + YaRN | RoPE + YaRN |
+| Tied head | Yes | No | No | Yes | No | No |
+
+Two lessons hide in this table. First, *stability* features (QK-norm, extra norms, logit control) were added because training runs at 10²⁴–10²⁵ FLOPs cannot afford loss spikes. Second, the FFN is the part that scales: from 2024 the largest models replace it with a **mixture of experts** ([Chapter 33](./33_mixture_of_experts.md)), so most of a model's parameters sit in FFN experts that each token only partly uses.
+
+<div class="callout ponder">
+<span class="callout-title">Ponder</span>
+<p>The FFN treats every token independently, yet it holds four-fifths of a dense model's parameters. If attention is what moves information between tokens, what is all that FFN capacity storing — and what does it suggest that MoE models can hold most of it in experts a token only partly uses?</p>
+</div>
+
+## Key Takeaways
+
+- A decoder block is `x + Attn(Norm(x))` then `x + FFN(Norm(x))`; the hidden width d_model is constant through the stack, and only the output head maps to vocabulary size.
+- RMSNorm in pre-norm position is the default; QK-norm and extra (sandwich or reordered) norms were added in 2024–25 to keep huge training runs stable.
+- SwiGLU's third matrix shrinks d_ff to about $\tfrac{8}{3}d$ for the same parameters, but real models pick d_ff by multiplier and rounding (Llama 3.1 8B: 3.5·d).
+- In a GQA dense model the FFN holds ~80% of block parameters; MoE models move that share into experts.
+- Count parameters honestly: K/V projections shrink with GQA, and untied models pay for the vocabulary twice.
+
+## Check Yourself
+
+<details class="check">
+<summary>Llama 3.1 70B has d_model = 8,192, 64 query heads and 8 KV heads of width 128. How many parameters are in one block's attention projections?</summary>
+<p>Q and O: 2 × 8,192 × 8,192 = 134.2M. K and V: 2 × 8,192 × 1,024 = 16.8M. Total ≈ 151M per block.</p>
+</details>
+
+<details class="check">
+<summary>Why does pre-norm train more stably than post-norm, and what problem does it introduce?</summary>
+<p>In pre-norm the residual path from input to output is an identity with only additions, so gradients reach early layers undamped. But the stream is never normalised, so its scale grows with depth and each later layer's (normalised) update is a smaller relative change — motivating sandwich and reordered-norm variants.</p>
+</details>
+
+<details class="check">
+<summary>What failure does QK-norm prevent?</summary>
+<p>Attention-logit growth: if ‖q‖ and ‖k‖ drift upward during training, q·k becomes huge, softmax turns one-hot, gradients through attention vanish or spike, and the loss diverges. Normalising q and k per head bounds the logits.</p>
+</details>
+
+<details class="check">
+<summary>A SwiGLU FFN with d_model = 2,048 should have the same parameter count as a classic ReLU FFN with d_ff = 8,192. What d_ff should it use?</summary>
+<p>Classic: 2 × 2,048 × 8,192 = 33.6M. SwiGLU: 3 × 2,048 × d_ff = 33.6M → d_ff = 5,461 (8/3 × 2,048), usually rounded to a hardware-friendly 5,504 or 5,632.</p>
+</details>
+
+<details class="check">
+<summary>Where do the "8B" parameters of Llama 3.1 8B go, to the nearest few percent?</summary>
+<p>FFNs ≈ 70% (5.64B), attention ≈ 17% (1.34B), embedding + untied output head ≈ 13% (1.05B); norms are negligible.</p>
+</details>
+
+## References
+
+| Source | Author / Org, Year | Link | What this chapter takes from it |
+|---|---|---|---|
+| Attention Is All You Need | Vaswani et al., 2017 | [arxiv.org/abs/1706.03762](https://arxiv.org/abs/1706.03762) | The original block |
+| Root Mean Square Layer Normalization | Zhang & Sennrich, 2019 | [arxiv.org/abs/1910.07467](https://arxiv.org/abs/1910.07467) | RMSNorm |
+| On Layer Normalization in the Transformer Architecture | Xiong et al., 2020 | [arxiv.org/abs/2002.04745](https://arxiv.org/abs/2002.04745) | Pre-norm vs post-norm |
+| GLU Variants Improve Transformer | Shazeer, 2020 | [arxiv.org/abs/2002.05202](https://arxiv.org/abs/2002.05202) | SwiGLU, GeGLU |
+| A Mathematical Framework for Transformer Circuits | Elhage et al. (Anthropic), 2021 | [transformer-circuits.pub/2021/framework](https://transformer-circuits.pub/2021/framework/index.html) | The residual-stream view |
+| Scaling Vision Transformers to 22 Billion Parameters | Dehghani et al., 2023 | [arxiv.org/abs/2302.05442](https://arxiv.org/abs/2302.05442) | QK-norm against attention-logit growth |
+| The Llama 3 Herd of Models | Meta AI, 2024 | [arxiv.org/abs/2407.21783](https://arxiv.org/abs/2407.21783) | Llama 3 dimensions |
+| 2 OLMo 2 Furious | OLMo Team, 2024 | [arxiv.org/abs/2501.00656](https://arxiv.org/abs/2501.00656) | Reordered norm and QK-norm for stability |
+| Gemma 3 Technical Report | Gemma Team, 2025 | [arxiv.org/abs/2503.19786](https://arxiv.org/abs/2503.19786) | Sandwich norm, QK-norm, 5:1 local/global |
+| Hyper-Connections | Zhu et al., 2024 | [arxiv.org/abs/2409.19606](https://arxiv.org/abs/2409.19606) | Multiple residual streams |
 
 ---
 
-*Last updated: April 2026*
+**Next:** [Chapter 4 — Attention: SDPA & Multi-Head](./04_attention_sdpa_and_mha.md) — the sub-layer that lets tokens read from each other.
+
+[← Back to Table of Contents](./README.md)

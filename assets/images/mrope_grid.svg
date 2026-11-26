@@ -19,7 +19,7 @@
 
   <!-- Title -->
   <text x="350" y="22" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#6b7280" letter-spacing="1">M-ROPE — MULTIMODAL POSITION ENCODING</text>
-  <text x="350" y="38" text-anchor="middle" font-family="monospace" font-size="9" fill="#484f58">Temporal (t), Height (h), Width (w) axes assigned to different frequency bands</text>
+  <text x="350" y="38" text-anchor="middle" font-family="monospace" font-size="9" fill="#484f58">t, h, w each rotate their own section of the 64 RoPE pairs (Qwen2-VL: 16 | 24 | 24)</text>
 
   <!-- ── 1D Text RoPE (left panel) ── -->
   <g transform="translate(30, 60)">
@@ -38,7 +38,7 @@
     <text x="87" y="66" text-anchor="middle" font-family="monospace" font-size="9" fill="#3b82f6">pos: 0 → 1 → 2 → 3</text>
     <!-- all dims get same θ -->
     <rect x="0" y="76" width="175" height="20" rx="3" fill="rgba(59,130,246,0.08)" stroke="rgba(59,130,246,0.3)"/>
-    <text x="87" y="90" text-anchor="middle" font-family="monospace" font-size="9" fill="#3b82f6">all d dims ← 1D pos</text>
+    <text x="87" y="90" text-anchor="middle" font-family="monospace" font-size="9" fill="#3b82f6">t = h = w = pos</text>
   </g>
 
   <!-- separator -->
@@ -46,7 +46,7 @@
 
   <!-- ── 2D Image RoPE (middle panel) ── -->
   <g transform="translate(245, 60)">
-    <text x="95" y="0" text-anchor="middle" font-family="monospace" font-size="10" fill="#8b949e">IMAGE — 2D RoPE</text>
+    <text x="95" y="0" text-anchor="middle" font-family="monospace" font-size="10" fill="#8b949e">IMAGE — t fixed, h·w vary</text>
     <!-- 3x3 image patch grid -->
     <g font-family="monospace" font-size="9">
       <!-- row 0 -->
@@ -88,9 +88,9 @@
     <text x="85" y="148" text-anchor="middle" font-family="monospace" font-size="9" fill="#22c55e">w</text>
     <!-- dim split -->
     <rect x="0" y="158" width="82" height="20" rx="3" fill="rgba(168,85,247,0.1)" stroke="rgba(168,85,247,0.3)"/>
-    <text x="41" y="172" text-anchor="middle" font-family="monospace" font-size="9" fill="#a855f7">dims 0..d/2 ← h</text>
+    <text x="41" y="172" text-anchor="middle" font-family="monospace" font-size="9" fill="#a855f7">24 pairs ← h</text>
     <rect x="88" y="158" width="82" height="20" rx="3" fill="rgba(34,197,94,0.1)" stroke="rgba(34,197,94,0.3)"/>
-    <text x="129" y="172" text-anchor="middle" font-family="monospace" font-size="9" fill="#22c55e">dims d/2..d ← w</text>
+    <text x="129" y="172" text-anchor="middle" font-family="monospace" font-size="9" fill="#22c55e">24 pairs ← w</text>
   </g>
 
   <!-- separator -->
@@ -98,7 +98,7 @@
 
   <!-- ── 3D Video RoPE (right panel) ── -->
   <g transform="translate(495, 60)">
-    <text x="100" y="0" text-anchor="middle" font-family="monospace" font-size="10" fill="#8b949e">VIDEO — 3D RoPE</text>
+    <text x="100" y="0" text-anchor="middle" font-family="monospace" font-size="10" fill="#8b949e">VIDEO — t, h, w vary</text>
     <!-- 3 frames stacked -->
     <g font-family="monospace" font-size="9">
       <!-- frame 0 (back) -->
@@ -119,11 +119,11 @@
     <text x="55" y="117" text-anchor="middle" font-family="monospace" font-size="9" fill="#3b82f6">temporal (t)</text>
     <!-- dim split 3-way -->
     <rect x="0" y="130" width="60" height="20" rx="3" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.3)"/>
-    <text x="30" y="144" text-anchor="middle" font-family="monospace" font-size="8" fill="#3b82f6">d/3 ← t</text>
+    <text x="30" y="144" text-anchor="middle" font-family="monospace" font-size="8" fill="#3b82f6">16 ← t</text>
     <rect x="64" y="130" width="60" height="20" rx="3" fill="rgba(168,85,247,0.1)" stroke="rgba(168,85,247,0.3)"/>
-    <text x="94" y="144" text-anchor="middle" font-family="monospace" font-size="8" fill="#a855f7">d/3 ← h</text>
+    <text x="94" y="144" text-anchor="middle" font-family="monospace" font-size="8" fill="#a855f7">24 ← h</text>
     <rect x="128" y="130" width="60" height="20" rx="3" fill="rgba(34,197,94,0.1)" stroke="rgba(34,197,94,0.3)"/>
-    <text x="158" y="144" text-anchor="middle" font-family="monospace" font-size="8" fill="#22c55e">d/3 ← w</text>
+    <text x="158" y="144" text-anchor="middle" font-family="monospace" font-size="8" fill="#22c55e">24 ← w</text>
   </g>
 
   <!-- Bottom formula bar -->

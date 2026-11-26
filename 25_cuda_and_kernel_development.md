@@ -1,12 +1,16 @@
 ---
 title: "Chapter 25 — CUDA & Kernel Development"
+description: "The CUDA model from threads to grids, memory coalescing and occupancy, why fusion matters, tiled matmul, Triton, the online-softmax trick behind FlashAttention verified in NumPy, torch.compile, and the 2025–26 kernel ecosystem: CUTLASS/CuTe DSL, ThunderKittens, TileLang, DeepSeek's FlashMLA/DeepGEMM/DeepEP, Liger, and LLM-written kernels."
+related:
+  - { id: nvidia, why: "The NVIDIA stack: CUDA, libraries and tools." }
+  - { id: vectorization, why: "Vectorized code, from CPUs to GPU kernels." }
 ---
 
 [← Back to Table of Contents](./README.md)
 
 # Chapter 25 — CUDA & Kernel Development
 
-> *"If you want to understand why Flash Attention is fast, or why fused kernels matter, you need to understand how GPU programs work at the thread level."*
+> **The one-sentence version:** a fast kernel moves each byte between HBM and the chip as few times as possible and keeps the tensor cores fed — everything else (tiling, fusion, online softmax, warp specialisation) is a technique for doing that.
 
 ## The CUDA Programming Model
 
@@ -16,7 +20,7 @@ CUDA organizes computation into a hierarchy:
 <div class="diagram-title">CUDA Thread Hierarchy</div>
 <div class="layer-stack">
   <div class="layer accent">Grid — All threads launched by a single kernel call</div>
-  <div class="layer purple">Block — Up to 1024 threads. Shared memory within a block. Maps to one SM.</div>
+  <div class="layer purple">Block — Up to 1,024 threads that share shared memory and can synchronise. Runs entirely on one SM (an SM can host several blocks).</div>
   <div class="layer green">Warp — 32 threads executing in lockstep (SIMT). Hardware scheduling unit.</div>
   <div class="layer orange">Thread — Individual execution unit. Has its own registers.</div>
 </div>
@@ -42,7 +46,10 @@ __global__ void vector_add(float* a, float* b, float* c, int n) {
 // vector_add<<<(n+255)/256, 256>>>(a, b, c, n);
 ```
 
-This kernel is **memory-bound**: each thread does 1 add but reads 2 floats and writes 1 float (12 bytes for 1 FLOP).
+This kernel is **memory-bound**: each thread does 1 add but reads 2 floats and writes 1 float (12 bytes for 1 FLOP — an intensity of 0.08, thousands of times below an H100's ridge point). Two rules make memory-bound kernels as fast as they can be:
+
+- **Coalescing**: consecutive threads of a warp should touch consecutive addresses, so the 32 loads merge into a few wide memory transactions. `a[idx]` with `idx = blockIdx.x * blockDim.x + threadIdx.x` does exactly that; a strided pattern such as `a[idx * 32]` can be many times slower.
+- **Occupancy and latency hiding**: an HBM load takes hundreds of cycles. Each SM keeps many warps resident and switches to another warp while one waits, so enough independent work must be in flight. Registers and shared memory per block limit how many warps fit.
 
 ## Why Fused Kernels Matter
 
@@ -72,7 +79,7 @@ Every separate kernel launch reads from and writes to HBM. Fusing operations int
 </div>
 </div>
 
-This is why `torch.compile` and frameworks like Triton exist — they automatically fuse element-wise operations.
+This is why `torch.compile` and Triton exist — they fuse element-wise operations automatically — and why hand-fused kernels for the hottest paths (attention, RMSNorm + residual, SwiGLU, rotary embeddings, cross-entropy over a large vocabulary) are standard in training and serving stacks.
 
 ## Tiled Matrix Multiplication
 
@@ -104,7 +111,7 @@ __global__ void matmul_tiled(float* A, float* B, float* C, int M, int K, int N) 
 }
 ```
 
-Each element of A and B is loaded from HBM once per tile but reused TILE_SIZE times in shared memory. This reduces HBM traffic by TILE_SIZE×.
+Each element of A and B is loaded from HBM once per tile but reused TILE_SIZE times from shared memory, cutting HBM traffic by about TILE_SIZE×. (This teaching version assumes M, N and K are multiples of TILE_SIZE and uses CUDA cores; production GEMMs use tensor-core instructions, much larger tiles, multi-stage asynchronous pipelines and swizzled shared-memory layouts — which is why you call cuBLAS or CUTLASS rather than writing your own.)
 
 ## Triton: GPU Kernels in Python
 
@@ -117,7 +124,7 @@ import torch
 
 @triton.jit
 def softmax_kernel(input_ptr, output_ptr, n_cols, BLOCK_SIZE: tl.constexpr):
-    """Fused online softmax in Triton."""
+    """Fused row softmax: one program per row; the whole row fits in one block."""
     row_idx = tl.program_id(0)
     col_offsets = tl.arange(0, BLOCK_SIZE)
     mask = col_offsets < n_cols
@@ -144,7 +151,35 @@ def triton_softmax(x):
 
 ## Flash Attention Kernel Design
 
-Flash Attention ([Chapter 4](./04_attention_sdpa_and_mha.md)) is the most impactful fused kernel in LLM inference. Its key innovations:
+FlashAttention ([Chapter 4](./04_attention_sdpa_and_mha.md)) is the most important fused kernel in LLM training and inference. The enabling trick is **online softmax**: you can compute softmax(scores)·V while streaming over blocks of keys, keeping only a running maximum, a running sum and a running output, rescaling them whenever a new block raises the maximum:
+
+```python
+import numpy as np
+
+def attention_reference(q, K, V):
+    s = K @ q                                   # [T] scores
+    p = np.exp(s - s.max()); p /= p.sum()
+    return p @ V                                # [d]
+
+def attention_online(q, K, V, block=4):
+    """One query, keys/values streamed in blocks: never holds all T scores at once."""
+    m, l, acc = -np.inf, 0.0, np.zeros(V.shape[1])
+    for i in range(0, len(K), block):
+        s = K[i:i + block] @ q                  # scores for this block only
+        m_new = max(m, s.max())
+        scale = np.exp(m - m_new)               # rescale what we accumulated so far
+        p = np.exp(s - m_new)
+        l = l * scale + p.sum()
+        acc = acc * scale + p @ V[i:i + block]
+        m = m_new
+    return acc / l
+
+rng = np.random.default_rng(0)
+q, K, V = rng.standard_normal(8), rng.standard_normal((32, 8)), rng.standard_normal((32, 8))
+print(np.allclose(attention_reference(q, K, V), attention_online(q, K, V)))   # True
+```
+
+The streamed result matches the reference to machine precision (max difference ~2 × 10⁻¹⁶). A FlashAttention kernel does the same for a whole tile of queries at once, on tensor cores, with K/V tiles double-buffered in shared memory. Its ingredients:
 
 <div class="diagram">
 <div class="diagram-title">Flash Attention Kernel Techniques</div>
@@ -168,7 +203,7 @@ Flash Attention ([Chapter 4](./04_attention_sdpa_and_mha.md)) is the most impact
 </div>
 </div>
 
-Flash Attention reduces memory from O(T²) to O(T) and is 2–4× faster than unfused attention on long sequences.
+FlashAttention reduces attention's memory from O(T²) to O(T) and is several times faster than unfused attention on long sequences. FlashAttention-3 adds Hopper-specific **warp specialisation** — producer warps issue TMA copies while consumer warpgroups run `wgmma` matrix instructions, overlapping data movement, matmuls and softmax — and FlashAttention-4 retargets the design to Blackwell's tensor memory.
 
 ## torch.compile
 
@@ -185,11 +220,88 @@ model = torch.compile(model, mode="reduce-overhead")
 output = model(input_tensor)
 ```
 
-`torch.compile` with Inductor backend:
-- Fuses element-wise operations (LayerNorm components, activations, residuals)
-- Generates Triton kernels for fused operations
-- Doesn't replace Flash Attention (that's already hand-optimized)
-- 10–30% speedup on typical transformer workloads
+`torch.compile` with the Inductor backend:
+- captures the graph and fuses element-wise and reduction operations (norms, activations, residual adds);
+- generates Triton kernels for them, and can use CUDA graphs (`mode="reduce-overhead"`) to remove per-kernel launch overhead — important for small-batch decode, where launches can dominate;
+- calls into existing hand-written kernels (cuBLAS GEMMs, FlashAttention via SDPA) rather than replacing them;
+- typically gives 10–30% on transformer training and more on overhead-bound inference.
+
+## The 2025–26 Kernel Ecosystem
+
+| Layer | Tools | What they are for |
+|---|---|---|
+| Vendor libraries | cuBLAS, cuDNN, NCCL; ROCm's hipBLASLt, RCCL | GEMMs, attention, collectives — call these first |
+| Templates and DSLs | **CUTLASS 3/4 + CuTe**, **CuTe DSL** (Python, 2025), **ThunderKittens**, **TileLang** | Write near-peak tensor-core kernels for Hopper/Blackwell without raw PTX |
+| Python kernel languages | **Triton** (and its lower-level Gluon dialect), Pallas (TPU/JAX), MLX custom kernels (Apple) | Fast iteration; fused element-wise and attention variants |
+| Serving kernels | FlashAttention 2/3/4, **FlashInfer**, **FlashMLA**, Marlin/Machete | Paged attention, MLA decode, low-bit GEMMs |
+| Open lab releases | DeepSeek (Feb 2025): **FlashMLA**, **DeepGEMM** (FP8 GEMMs with fine-grained scaling), **DeepEP** (expert-parallel all-to-all) | Production kernels behind V3/R1 serving |
+| Training kernels | **Liger Kernel**, fused cross-entropy (Cut Cross-Entropy), TransformerEngine | Lower activation memory and higher MFU |
+
+<div class="callout trend">
+<span class="callout-title">2026 trend — kernels written by models</span>
+<p>Benchmarks such as KernelBench (2025) measure whether LLMs can write correct, fast GPU kernels, and labs use agentic search loops to generate and tune kernels. Results are real but uneven, and early claims of huge speed-ups were sometimes traced to kernels that exploited flaws in the evaluation harness — a reward-hacking story (Chapter 15) in miniature. Always verify a generated kernel's correctness on adversarial inputs.</p>
+</div>
+
+<div class="callout ponder">
+<span class="callout-title">Ponder</span>
+<p>FlashAttention required no new mathematics — only a reordering of an existing computation so that it fits the memory hierarchy. Which other operation in an LLM (cross-entropy over a 256K vocabulary? MoE routing and all-to-all? sampling?) still materialises something large it doesn't need to?</p>
+</div>
+
+## Key Takeaways
+
+- Grid → block (one SM, shared memory) → warp (32 threads, SIMT) → thread (registers).
+- Memory-bound kernels live or die by coalescing and occupancy; compute-bound ones by tiling and tensor-core utilisation.
+- Fusion keeps intermediates on chip; online softmax lets attention stream over keys without materialising T×T scores.
+- Use vendor libraries and existing kernels first; reach for Triton, CuTe DSL or ThunderKittens when you need something new.
+- The open kernel ecosystem (FlashInfer, FlashMLA, DeepGEMM, DeepEP, Liger) is where serving and training speed-ups ship in 2025–26.
+
+## Check Yourself
+
+<details class="check">
+<summary>A kernel reads a 4096 × 4096 BF16 matrix and writes one of the same size, doing one FLOP per element. What is its minimum time on an H100?</summary>
+<p>It moves 2 × 33.5 MB = 67 MB; at 3.35 TB/s that is ~20 µs. The 16.8 MFLOP of arithmetic would take ~0.02 µs on tensor cores — the kernel is entirely bandwidth-bound.</p>
+</details>
+
+<details class="check">
+<summary>In online softmax, why must the running sum and output be multiplied by exp(m_old − m_new) when a new block raises the maximum?</summary>
+<p>Earlier terms were exponentiated relative to the old maximum, e^(s − m_old). To express them relative to the new maximum, multiply by e^(m_old − m_new). Without the rescale, earlier blocks would be over-weighted.</p>
+</details>
+
+<details class="check">
+<summary>Why does CUDA-graph capture help small-batch decode much more than training?</summary>
+<p>A decode step launches hundreds of small kernels that each finish in microseconds, so CPU launch overhead (a few µs per launch) can rival the GPU work. Replaying a captured graph launches them all at once. Training kernels are large enough that launch overhead is negligible.</p>
+</details>
+
+<details class="check">
+<summary>Why are threads in a warp ideally given consecutive memory addresses?</summary>
+<p>The memory system serves a warp's loads in wide aligned transactions (e.g., 32–128 bytes). Consecutive addresses coalesce into a few transactions; scattered addresses need one transaction each, multiplying traffic and latency.</p>
+</details>
+
+<details class="check">
+<summary>What did DeepEP add that standard collectives libraries lacked for MoE models?</summary>
+<p>All-to-all dispatch and combine kernels specialised for expert parallelism — routing each token's hidden state to the GPUs holding its selected experts and back — with low-latency modes for decode and overlap with computation, across NVLink and RDMA.</p>
+</details>
+
+## References
+
+| Source | Author / Org, Year | Link | What this chapter takes from it |
+|---|---|---|---|
+| CUDA C++ Programming Guide | NVIDIA | [docs.nvidia.com/cuda/cuda-c-programming-guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/) | Execution model, coalescing, occupancy |
+| Triton: An Intermediate Language and Compiler for Tiled Neural Network Computations | Tillet et al., 2019 | [doi.org/10.1145/3315508.3329973](https://doi.org/10.1145/3315508.3329973) | Triton |
+| Online normalizer calculation for softmax | Milakov & Gimelshein, 2018 | [arxiv.org/abs/1805.02867](https://arxiv.org/abs/1805.02867) | Online softmax |
+| FlashAttention / FlashAttention-3 | Dao et al., 2022; Shah et al., 2024 | [arxiv.org/abs/2205.14135](https://arxiv.org/abs/2205.14135) · [arxiv.org/abs/2407.08608](https://arxiv.org/abs/2407.08608) | Tiling, recomputation, warp specialisation |
+| ThunderKittens | Spector et al., 2024 | [arxiv.org/abs/2410.20399](https://arxiv.org/abs/2410.20399) | Tile-based kernel DSL |
+| FlashInfer | Ye et al., 2025 | [arxiv.org/abs/2501.01005](https://arxiv.org/abs/2501.01005) | Serving attention kernels |
+| DeepSeek open-source week (FlashMLA, DeepEP, DeepGEMM) | DeepSeek, 2025 | [github.com/deepseek-ai](https://github.com/deepseek-ai) | Production MoE/MLA kernels |
+| CUTLASS and CuTe DSL | NVIDIA, 2025 | [github.com/NVIDIA/cutlass](https://github.com/NVIDIA/cutlass) | Templates and Python DSL for tensor cores |
+| KernelBench | Ouyang et al., 2025 | [arxiv.org/abs/2502.10517](https://arxiv.org/abs/2502.10517) | Evaluating LLM-written kernels |
+| torch.compile tutorial | PyTorch | [docs.pytorch.org/tutorials](https://docs.pytorch.org/tutorials/intermediate/torch_compile_tutorial.html) | Inductor fusion, CUDA graphs |
+
+---
+
+**Next:** [Chapter 26 — Distributed Training](./26_distributed_training.md) — when one GPU is not enough, which is always.
+
+[← Back to Table of Contents](./README.md)
 
 ## What's Next
 

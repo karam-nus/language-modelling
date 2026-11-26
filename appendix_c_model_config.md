@@ -1,5 +1,9 @@
 ---
 title: "Appendix C — HuggingFace Model Config Field Reference"
+description: "Every config.json field that changes tensor shapes or numerics — with formulae, real values and kernel pitfalls — including 2025–26 fields for MLA, fine-grained MoE, layer types, multi-token prediction, linear-attention hybrids and quantized checkpoints, plus VLM and VLA configs."
+related:
+  - { id: models, why: "How these config fields changed across model generations." }
+  - { id: huggingface, why: "Loading and editing configs with Hugging Face." }
 ---
 
 [← Back to Table of Contents](./README.md)
@@ -23,7 +27,8 @@ Jump to a section:
 - [Mixture of Experts](#mixture-of-experts-parameters)
 - [Special Token IDs](#special-token-ids)
 - [Generation & Runtime](#generation--runtime-parameters)
-- [VLM Config — Qwen3-VL and LLaVA Style](#vlm-config--qwen3-vl-and-llava-style)
+- [VLM Config — Qwen2.5-VL and LLaVA Style](#vlm-config--qwen25-vl-and-llava-style)
+- [Newer Fields (2025–26)](#newer-fields-202526)
 - [VLA Config — Alpamayo and RT-2 Style](#vla-config--alpamayo-and-rt-2-style)
 - [Cross-Model Comparison Table](#cross-model-comparison-table)
 - [Kernel Development Pitfall Checklist](#kernel-development-pitfall-checklist)
@@ -60,12 +65,16 @@ Jump to a section:
 | `eos_token_id` | int or list | `2` | [Special Tokens](#special-token-ids) |
 | `pad_token_id` | int *(optional)* | `0` | [Special Tokens](#special-token-ids) |
 | `use_cache` | bool | `true` | [Generation & Runtime](#use_cache) |
-| `torch_dtype` | string | `"bfloat16"` | [Generation & Runtime](#torch_dtype) |
+| `torch_dtype` | string | `"bfloat16"` | [Generation & Runtime](#torch_dtype--dtype) |
 | `num_experts` / `num_local_experts` | int | `64` | [MoE](#mixture-of-experts-parameters) |
 | `num_experts_per_tok` | int | `2` | [MoE](#mixture-of-experts-parameters) |
 | `router_aux_loss_coef` | float | `0.001` | [MoE](#mixture-of-experts-parameters) |
 | `initializer_range` | float | `0.02` | [initializer\_range](#initializer_range) |
 | `transformers_version` | string | `"4.46.1"` | [Generation & Runtime](#transformers_version) |
+| `layer_types` | list[str] | `["sliding_attention", "full_attention", …]` | [2025–26 fields](#newer-fields-202526) |
+| `kv_lora_rank` / `qk_rope_head_dim` | int | `512` / `64` | [2025–26 fields](#newer-fields-202526) |
+| `n_routed_experts` / `moe_intermediate_size` | int | `256` / `2048` | [2025–26 fields](#newer-fields-202526) |
+| `quantization_config` | dict | `{"quant_method": "fp8", …}` | [2025–26 fields](#newer-fields-202526) |
 
 ---
 
@@ -101,12 +110,12 @@ Number of tokens in the vocabulary. Sets the size of:
 - The **embedding matrix**: $W_e \in \mathbb{R}^{V \times d}$
 - The **language-model head**: $W_{\text{lm}} \in \mathbb{R}^{d \times V}$ (or $W_e^\top$ when `tie_word_embeddings=true`)
 
-**Typical ranges:** 32K (older GPT-2 era) → 256K (Qwen2/3 family)
+**Typical ranges:** 32K (Llama 1/2) → 128K–152K (Llama 3, Qwen) → 200K–262K (o200k, Gemma 3)
 
 **Pitfalls:**
 - The tokenizer's vocabulary size and `vocab_size` in the config **must** agree. When you add special tokens to a tokenizer and call `model.resize_token_embeddings()`, update `config.vocab_size` too — otherwise `from_pretrained` will load correctly but saving/reloading may corrupt the lm head.
 - Many kernels pre-allocate logit buffers as `[B, T, vocab_size]`. With vocab sizes of 150K+ (Qwen3: 151,936), this dominates memory at long context. E.g. bfloat16, B=1, T=8192, V=151936 ≈ 2.3 GB just for logits.
-- `vocab_size` is sometimes padded to the nearest multiple of 64 or 128 for hardware efficiency (e.g. LLaMA pads to 32,064). The embedding matrix has that padded size, but tokens beyond the real vocabulary should never be produced. This padding breaks naive loop bounds in custom kernels.
+- `vocab_size` is sometimes padded to the nearest multiple of 64 or 128 for hardware efficiency (e.g. Phi-3-mini's 32,064; Qwen's 151,936). The embedding matrix has that padded size, but tokens beyond the real vocabulary should never be produced. This padding breaks naive loop bounds in custom kernels.
 
 ---
 
@@ -120,8 +129,9 @@ The residual stream dimension $d_{\text{model}}$. Every transformer layer reads 
 
 **Derived quantities:**
 $$d_{\text{model}} = \texttt{hidden\_size}$$
-$$W_Q, W_K, W_V \in \mathbb{R}^{d_{\text{model}} \times d_{\text{model}}}$$
-$$\text{KV cache per layer} = 2 \cdot B \cdot T \cdot d_{\text{model}} \cdot \text{bytes\_per\_element}$$
+For plain MHA with $d_{\text{head}} \cdot H = d_{\text{model}}$ (no GQA):
+$$W_Q, W_K, W_V \in \mathbb{R}^{d_{\text{model}} \times d_{\text{model}}}, \qquad \text{KV cache per layer} = 2 \cdot B \cdot T \cdot d_{\text{model}} \cdot \text{bytes}$$
+With GQA or an explicit `head_dim`, use $H_{KV} \cdot d_{\text{head}}$ instead of $d_{\text{model}}$ for K and V.
 
 **Pitfalls:**
 - `hidden_size` does **not** by itself determine head shapes — see [`head_dim`](#head_dim) below.
@@ -144,7 +154,7 @@ $$P_{\text{ffn}} = L \cdot (3 \cdot d \cdot d_{\text{ffn}})  \quad \text{(gate/u
 
 **Pitfalls:**
 - MoE models have the same `num_hidden_layers` but some layers are dense and some are MoE — controlled by `num_experts` and `mlp_type`. Do not assume every layer has the same FLOPs.
-- Some architectures (Gemma 2, Mistral) interleave sliding-window and global attention layers. The index of a layer determines which variant is used. Kernels that treat all layers identically will produce wrong outputs.
+- Some architectures (Gemma 2/3, gpt-oss) interleave sliding-window and global attention layers. The index of a layer determines which variant is used. Kernels that treat all layers identically will produce wrong outputs.
 
 ---
 
@@ -161,7 +171,7 @@ $$Q \in \mathbb{R}^{B \times H_Q \times T \times d_{\text{head}}}$$
 
 **Pitfalls:**
 - This is the **query head count**, not the KV head count (see `num_key_value_heads`). The KV cache is sized by the latter, not `num_attention_heads`.
-- In tensor-parallel setups, `num_attention_heads` must be divisible by `tp_degree`. An odd number of heads (e.g. `num_attention_heads=28` in Qwen3-7B) means `tp=4` is allowed but `tp=3` or `tp=7` is not. Always check divisibility before planning a TP configuration.
+- In tensor-parallel setups, `num_attention_heads` must be divisible by `tp_degree`. A head count such as `num_attention_heads=28` (Qwen2.5-7B) means `tp=4` is allowed but `tp=3` or `tp=7` is not. Always check divisibility before planning a TP configuration.
 - Do **not** use `num_attention_heads` alone to compute `head_dim`. See the dedicated section.
 
 ---
@@ -200,7 +210,7 @@ $d_{\text{head}}$ is the per-head dimension. It determines the shape of every Q/
 <div class="diagram">
 <div class="diagram-title">head_dim: Standard Convention vs Qwen3 Override</div>
 
-<img src="./assets/images/head_dim_comparison.svg" alt="head_dim comparison diagram" style="width:100%;max-width:860px"/>
+<img src="./assets/images/head_dim_comparison.svg" alt="head_dim comparison diagram"/>
 </div>
 
 #### Standard convention (no `head_dim` field in config)
@@ -213,24 +223,25 @@ This is implicit — the field is absent from `config.json` and frameworks compu
 |---|---|---|---|
 | LLaMA 3.1 8B | 4096 | 32 | **128** |
 | Mistral 7B | 4096 | 32 | **128** |
-| Gemma 2 9B | 3584 | 16 | **224** |
 | Phi-3 Mini | 3072 | 32 | **96** |
 
-#### Qwen3: explicit override
+#### Explicit overrides: Qwen3, Gemma, gpt-oss
 
-All Qwen3 models set `head_dim: 128` explicitly in `config.json`, regardless of `hidden_size / num_attention_heads`:
+All Qwen3 models set `head_dim: 128` explicitly in `config.json`, regardless of `hidden_size / num_attention_heads`; Gemma and gpt-oss also use explicit head sizes:
 
 | Model | `hidden_size` | `num_attn_heads` | Naïve formula | **Actual `head_dim`** |
 |---|---|---|---|---|
 | Qwen3-0.6B | 1024 | 16 | 64 | **128** |
 | Qwen3-1.7B | 2048 | 16 | 128 | **128** |
 | Qwen3-4B | 2560 | 32 | 80 | **128** |
-| Qwen3-8B | 4096 | 64 | 64 | **128** |
+| Qwen3-8B | 4096 | 32 | 128 | **128** (coincides) |
 | Qwen3-14B | 5120 | 40 | 128 | **128** |
 | Qwen3-32B | 5120 | 64 | 80 | **128** |
 | Qwen3-235B-A22B | 4096 | 64 | 64 | **128** |
+| Gemma 2 9B | 3584 | 16 | 224 | **256** |
+| gpt-oss-120b | 2880 | 64 | 45 | **64** |
 
-The implication: **hidden_size ≠ num_attention_heads × head_dim**. The output projection is still $W_O \in \mathbb{R}^{(H_Q \cdot d_\text{head}) \times d_\text{model}}$, which for Qwen3-8B is $(64 \times 128) \times 4096 = 8192 \times 4096$.
+The implication: **hidden_size ≠ num_attention_heads × head_dim**. The output projection is still $W_O \in \mathbb{R}^{(H_Q \cdot d_\text{head}) \times d_\text{model}}$, which for Qwen3-32B is $(64 \times 128) \times 5120$, i.e. a $8192 \to 5120$ projection.
 
 **Pitfalls:**
 1. **Kernel reshape bugs.** Flash Attention, custom CUDA, and Triton kernels frequently reshape $[B, T, H \cdot d_h]$ ↔ $[B, H, T, d_h]$. If your kernel assumes $d_h = d_\text{model} / H$, it produces wrong strides silently on Qwen3.
@@ -264,8 +275,8 @@ $$W_{\text{gate}}, W_{\text{up}} \in \mathbb{R}^{d \times d_{\text{ffn}}}, \quad
 | Model family | Ratio | Notes |
 |---|---|---|
 | LLaMA 3 | ~3.5× | 4096 → 14336 |
-| Qwen3 | ~5.3× | 4096 → 21888 (8B) |
-| Gemma 2 | ~3.8× | 3584 → 14336 |
+| Qwen3 | 3× | 4096 → 12288 (8B) |
+| Gemma 2 | 4× | 3584 → 14336 (GeGLU) |
 | GPT-4 style | 4× | Classic MLP, not SwiGLU |
 
 **Pitfalls:**
@@ -296,7 +307,7 @@ The activation function used in the FFN block.
 **Pitfalls:**
 - SwiGLU models (using `"silu"`) always have **three** FFN weight matrices (gate, up, down), not two. A kernel written for ReLU-style FFN (two matrices) will silently skip the gate projection.
 - `"gelu"` vs `"gelu_new"` produces numerically different outputs. This matters when comparing perplexity across implementations.
-- Vision encoders embedded inside VLMs (e.g., Qwen3-VL's ViT) often use `"quick_gelu"` while the language model uses `"silu"`. Make sure you apply the correct activation per sub-model.
+- Vision encoders embedded inside VLMs (e.g., Qwen2.5-VL's ViT) often use `"quick_gelu"` while the language model uses `"silu"`. Make sure you apply the correct activation per sub-model.
 
 ---
 
@@ -378,16 +389,18 @@ Optional dictionary controlling how RoPE frequencies are scaled to extend contex
 
 | `rope_type` / `type` | Algorithm | Used in |
 |---|---|---|
-| `"linear"` | Divide all frequencies by `factor` | Simple extension |
-| `"dynamic"` | Scale factor grows with input length | LongRoPE |
-| `"llama3"` | Interpolate low-freq, extrapolate high-freq | LLaMA 3 |
-| `"yarn"` | NTK + attention temperature correction | Mistral, DeepSeek |
-| `"longrope"` | Per-layer scaling factors | Phi-3 128K |
-| `"mrope"` | Multi-modal RoPE — splits head_dim into temporal/height/width sections | Qwen3-VL |
+| `"linear"` | Position interpolation: divide positions (equivalently frequencies) by `factor` | Early extensions |
+| `"dynamic"` | Dynamic NTK: raise the base on the fly as the sequence grows past the original length | Some community models |
+| `"llama3"` | Interpolate low-frequency pairs, keep high-frequency pairs, smooth ramp between | Llama 3.1+ |
+| `"yarn"` | NTK-by-parts + attention temperature (`mscale`) | Qwen2.5/3, DeepSeek-V3, Kimi K2, gpt-oss |
+| `"longrope"` | Separate rescale factors per frequency pair (`short_factor`, `long_factor` lists) | Phi-3 / Phi-4 long-context |
+| `"mrope"` (with `mrope_section`) | Multimodal RoPE: rotation pairs split into temporal / height / width sections | Qwen2-VL, Qwen2.5-VL (Qwen3-VL interleaves the sections) |
+
+Recent transformers releases normalise RoPE settings (theta, type, factors) into a single `rope_parameters` dictionary and convert older `rope_theta` + `rope_scaling` configs on load; read whichever the checkpoint has, but never both inconsistently.
 
 **Pitfalls:**
 - Every `rope_type` requires different code paths. A kernel that implements only `"linear"` scaling will silently apply wrong positional encodings to LLaMA 3 (`"llama3"`) weights.
-- `"mrope"` (Qwen3-VL) splits each head's frequencies into three sections: `mrope_section = [s_t, s_h, s_w]` where $s_t + s_h + s_w = d_{\text{head}}/2$. Applying scalar RoPE to these will corrupt the spatial position encoding of image patches.
+- `"mrope"` (Qwen2-VL / Qwen2.5-VL) splits each head's frequencies into three sections: `mrope_section = [s_t, s_h, s_w]` where $s_t + s_h + s_w = d_{\text{head}}/2$. Applying scalar RoPE to these will corrupt the spatial position encoding of image patches.
 - When `rope_scaling` is absent, no scaling is applied; positions beyond `max_position_embeddings` are out-of-distribution.
 - LLaMA 3 uses `"llama3"` type with two thresholds (`low_freq_factor`, `high_freq_factor`) that interpolate vs. extrapolate different frequency bands. The exact transition formula is not a simple linear interpolation.
 
@@ -485,36 +498,29 @@ Dropout probability applied to attention weights during **training**. At inferen
 
 ```json
 {
-  "use_sliding_window": true,
   "sliding_window": 4096,
-  "max_window_layers": 28
+  "layer_types": ["sliding_attention", "full_attention", "sliding_attention", "full_attention"]
 }
 ```
 
-Some models (Mistral, Qwen2/3, Gemma 2) use a mix of **local sliding-window attention** (SWA) and **global attention** layers.
+Many models mix **local sliding-window attention** (SWA) layers with **global** layers: Gemma 2 alternates 1:1 (window 4,096), Gemma 3 uses 5 local : 1 global (window 1,024), gpt-oss alternates 1:1 (window 128), Mistral 7B v0.1 used SWA in every layer.
 
 | Field | Meaning |
 |---|---|
-| `use_sliding_window` | Whether SWA is enabled at all |
-| `sliding_window` | Number of tokens in the local window ($w$) |
-| `max_window_layers` | Layers **above** this index use full global attention |
-
-**How it works:**
-
-```
-Layers 0 … max_window_layers-1 :  SWA, window = sliding_window
-Layers max_window_layers … L-1 :  Full attention
-```
+| `sliding_window` | Window size w in tokens |
+| `layer_types` | Explicit per-layer list (`"sliding_attention"` / `"full_attention"`; hybrids add values such as `"linear_attention"`) — the modern, unambiguous field |
+| `use_sliding_window`, `max_window_layers` | Older Qwen2-style switches; their documented meaning has changed between versions — check the modeling code for the checkpoint you load |
+| `sliding_window_pattern` | Older Gemma 3 field (every n-th layer global) |
 
 **Memory formula (SWA layers):**
 
-$$\text{KV cache (SWA)} = 2 \cdot L_{\text{SWA}} \cdot B \cdot w \cdot H_{KV} \cdot d_h \cdot \text{bytes}$$
+$$\text{KV cache (SWA)} = 2 \cdot L_{\text{SWA}} \cdot B \cdot \min(T, w) \cdot H_{KV} \cdot d_h \cdot \text{bytes}$$
 
 **Pitfalls:**
-- A kernel implementing only full attention and applied to an SWA model will produce **correct but suboptimal** outputs (the model still works because SWA is a subset of full attention, but memory usage explodes).
-- Applying SWA to a model without it (or vice versa) silently produces wrong outputs. Always gate on `use_sliding_window`.
-- **Gemma 2 interleaves**: every other layer alternates SWA/global. `max_window_layers` doesn't apply; check the model source for the interleaving logic.
-- During KV cache eviction/paging (PagedAttention), the eviction policy differs for SWA layers — you can evict tokens outside the window freely. A paging system unaware of `sliding_window` may under-evict.
+- Running full attention on a model trained with SWA is **only correct while the sequence fits in the window**; beyond it, tokens attend to positions the model never saw together in training and outputs diverge.
+- Running SWA on a model trained with full attention silently drops context.
+- Per-layer patterns differ by family — always derive them from `layer_types` (or the family's own rule), never from a single threshold you assume.
+- Paged KV caches should free blocks that fall out of an SWA layer's window; caches unaware of `sliding_window` waste memory.
 
 ---
 
@@ -546,9 +552,9 @@ $$\text{Active params per token} = P_{\text{dense}} + k \cdot P_{\text{expert}}$
 $$\text{Total params} = P_{\text{dense}} + N_e \cdot P_{\text{expert}}$$
 
 **Pitfalls:**
-- `num_experts_per_tok` * `num_local_experts` routing logits are computed for every token. Kernels that pre-allocate expert buffers assuming all experts are active will allocate $N_e / k$ times too much memory.
+- The router computes `num_local_experts` logits per token but only `num_experts_per_tok` experts run. Kernels that size buffers as if every token visits every expert allocate $N_e / k$ times too much memory.
 - Load balancing: if `router_aux_loss_coef` is absent or 0 at training, experts will not be balanced, causing inference throughput collapse on certain tokens.
-- `num_shared_experts` (DeepSeek-V3, Qwen2-MoE) refers to experts that are always active alongside the top-k selected experts. These must be summed into the active parameter count. Missing them underestimates FLOPs by ~20%.
+- Shared experts (`n_shared_experts` in DeepSeek, `shared_expert_intermediate_size` in Qwen2-MoE) are always active alongside the top-k routed experts and must be included in active-parameter and FLOP counts (for DeepSeek-V3, 1 of the 9 experts each token uses).
 - Expert weights are usually stored contiguously for efficient dispatch. Custom kernels must match the layout expected by the routing code.
 
 ---
@@ -572,7 +578,7 @@ $$\text{Total params} = P_{\text{dense}} + N_e \cdot P_{\text{expert}}$$
 **Pitfalls:**
 - `eos_token_id` can be a **list** (LLaMA 3: `[128001, 128008, 128009]`). A generation loop that only checks equality to a single integer will not stop on alternate EOS tokens, causing runaway generation.
 - When `pad_token_id` is unset (null/absent) and you run batched inference, HuggingFace defaults to `eos_token_id`. This means padded positions will receive the EOS token — which is often fine for inference but can corrupt training batches if not masked.
-- For Qwen3/ChatML models, the BOS token is the same as the `<|im_start|>` token. Omitting it causes the model to lose the chat template structure.
+- Qwen-family tokenizers add **no** BOS token at all; the chat template simply starts with `<|im_start|>`. Code that assumes every sequence begins with `bos_token_id` will mis-handle them.
 - KV cache implementations that detect EOS and stop early must check against the full list, not just index 0.
 
 ---
@@ -593,13 +599,13 @@ Whether to return and use past key-value states (the KV cache) during generation
 
 ---
 
-### `torch_dtype`
+### `torch_dtype` / `dtype`
 
 ```json
-{ "torch_dtype": "bfloat16" }
+{ "dtype": "bfloat16" }
 ```
 
-Preferred weight dtype. Informational — `from_pretrained` uses this as default but it can be overridden.
+The dtype the weights were saved in (configs written by recent transformers use `dtype`; older ones `torch_dtype`). Older versions loaded models in FP32 unless you passed `torch_dtype="auto"`; recent versions default to the checkpoint's dtype.
 
 | Value | Range | Notes |
 |---|---|---|
@@ -610,7 +616,7 @@ Preferred weight dtype. Informational — `from_pretrained` uses this as default
 
 **Pitfalls:**
 - FP16 overflows when logits or hidden states grow large. BF16 is strictly preferred for transformer training/inference. If you load a BF16 model in FP16 and the model has large embeddings (vocab_size > 100K), you may see NaNs in the logit layer.
-- `torch_dtype` in config does **not** enforce the dtype at `from_pretrained` time unless you pass `torch_dtype="auto"`.
+- Pass `dtype="auto"` (or an explicit dtype) if you need the same behaviour across versions.
 
 ---
 
@@ -639,31 +645,31 @@ When `true`, the input embedding matrix $W_e$ and the LM head $W_{\text{lm}}$ sh
 **Parameter savings:**  
 $$\text{saved} = V \times d_{\text{model}} \times \text{bytes}$$
 
-For LLaMA-3 8B: $128256 \times 4096 \times 2 \approx 1$ GB saved.
+At Llama 3.1 8B's shape this would save $128256 \times 4096 \times 2 \approx 1$ GB — but that model is untied (`false`); tying is typical of small models (Llama 3.2 1B/3B, Gemma, Qwen3 ≤ 4B).
 
 **Pitfalls:**
-- With `tie_word_embeddings=true`, optimizers maintain a single set of gradients for the shared matrix. If you apply separate learning rates to embeddings vs. head, the effective LR is the sum — usually unintentional.
+- With `tie_word_embeddings=true` there is a single parameter: it receives the sum of the embedding and output-head gradients, and it cannot be placed in two optimizer parameter groups (PyTorch raises an error), so "separate LRs for embedding and head" is impossible without untying.
 - When quantising, tying embeddings means quantising the embedding table also quantises the LM head. INT8 embeddings are fine; INT4 LM heads cause significant quality loss. Most quantisation libraries detect and skip tying for INT4.
 - If you `resize_token_embeddings()` but the config still has `tie_word_embeddings=true`, you must call it on the model (not just the weight), otherwise the two tensors fall out of sync.
 
 ---
 
-## VLM Config — Qwen3-VL and LLaVA Style
+## VLM Config — Qwen2.5-VL and LLaVA Style
 
 Vision-Language Models nest multiple sub-configs inside a single `config.json`. Understanding this structure is essential for both loading and kernel development.
 
 <div class="diagram">
-<div class="diagram-title">VLM Config Anatomy — Qwen3-VL Style</div>
+<div class="diagram-title">VLM Config Anatomy — Qwen2.5-VL Style</div>
 
-<img src="./assets/images/vlm_config_anatomy.svg" alt="VLM config anatomy diagram" style="width:100%;max-width:860px"/>
+<img src="./assets/images/vlm_config_anatomy.svg" alt="VLM config anatomy diagram"/>
 </div>
 
 ### General VLM Config Structure
 
 ```json
 {
-  "model_type": "qwen3_vl",
-  "architectures": ["Qwen3VLForConditionalGeneration"],
+  "model_type": "qwen2_5_vl",
+  "architectures": ["Qwen2_5_VLForConditionalGeneration"],
   "text_config": { ... },
   "vision_config": { ... },
   "image_token_id": 151655,
@@ -678,11 +684,11 @@ A VLM config has:
 2. **`text_config`** — the language model config (same fields as a standalone LLM)
 3. **`vision_config`** — the visual encoder config
 
-The `text_config.head_dim` caveat applies identically inside VLMs. Qwen3-VL-7B has `text_config.head_dim = 128` with `text_config.num_attention_heads = 28` and `text_config.hidden_size = 3584`, giving naïve head_dim = 128 ≈ correct only by coincidence for this size.
+The `head_dim` caveat applies identically inside VLMs: read it from `text_config` when present. For Qwen2.5-VL-7B the naïve formula happens to be right (3,584 / 28 = 128); for other families and sizes it is not.
 
 ---
 
-### Vision Config Fields (Qwen3-VL / ViT-style)
+### Vision Config Fields (Qwen2.5-VL / ViT-style)
 
 | Field | Typical value | Meaning | Pitfalls |
 |---|---|---|---|
@@ -710,17 +716,17 @@ where $p$ = `patch_size`, $m$ = `spatial_merge_size`.
 For a 448×448 image with $p=14$, $m=2$:
 $$N_\text{tokens} = \frac{448 \times 448}{14^2 \times 4} = \frac{200704}{784} = 256$$
 
-For a 1024×1024 image:
-$$N_\text{tokens} = \frac{1024 \times 1024}{784} \approx 1337$$
+For a 1024×1024 image the processor first resizes each side to a multiple of $p \cdot m = 28$ (1,036), so
+$$N_\text{tokens} = \frac{1036 \times 1036}{784} = 1369$$
 
 **Pitfalls (Vision Config):**
 
 1. **Dynamic resolution.** Unlike text (fixed vocabulary), image token count varies per image. Pre-allocating a fixed KV cache for image tokens will break when a large image produces more tokens than expected.
 2. **Connector shape mismatch.** The projection MLP connecting the ViT to the LLM takes `embed_dim` as input and outputs `text_config.hidden_size`. A shape error here is common when mixing different ViT and LLM sizes.
-3. **`fullatt_block_indexes` must be honoured.** ViT layers not in this list use window attention. Applying full attention everywhere is functionally correct but wastes memory; applying window attention to full-attention layers corrupts quality.
+3. **`fullatt_block_indexes` must be honoured.** ViT layers not in this list use window attention. Using full attention in a windowed layer changes what each patch attends to and therefore the features (it is *not* a harmless superset); using window attention in a full-attention layer loses global context.
 4. **Temporal patch size and video.** For video input, frames are grouped into pairs (`temporal_patch_size=2`). An odd number of frames must be handled (usually by duplicating the last frame). Missing this causes a shape error in the patching step.
 5. **`image_token_id` and `video_token_id` occupy specific positions in the vocabulary.** These IDs must not collide with BOS/EOS or pad tokens. When extending the vocabulary for a new language, verify there are no collisions.
-6. **`min_pixels` / `max_pixels`** constrain the dynamic resolution selection. The processor will resize/tile the image to satisfy these bounds. Setting `max_pixels` too low degrades OCR quality; too high inflates context length. These live at the root level, not inside `vision_config`.
+6. **`min_pixels` / `max_pixels`** constrain the dynamic resolution selection. The processor will resize/tile the image to satisfy these bounds. Setting `max_pixels` too low degrades OCR quality; too high inflates context length. These live in the processor's `preprocessor_config.json`, not in `config.json`.
 
 ---
 
@@ -768,7 +774,9 @@ Output: [text tokens | action tokens]
 
 Action tokens may be discrete (tokenised from the continuous action space via binning) or continuous (predicted via a regression head).
 
-### Alpamayo-Style Config Fields
+### An Illustrative VLA Config
+
+The block below is a **composite illustration** of the fields VLA configs need — the names are representative, not the schema of a specific released model (each VLA, from OpenVLA to π0, GR00T N1 or NVIDIA's Alpamayo-R1 for driving, defines its own). Read the actual checkpoint's config and processor code.
 
 ```json
 {
@@ -819,7 +827,7 @@ RT-2 (and OpenVLA which is based on LLaVA) discretises actions differently:
 }
 ```
 
-**Key distinction from Alpamayo:**
+**Key distinction from the illustrative config above:**
 - Actions are tokenised as text tokens (e.g. bin indices formatted as strings)
 - The action vocabulary is carved out from the **top** of the existing text vocabulary: `action_token_id[i] = vocab_size - (action_vocab_size * action_dim) + i`
 - No separate `action_config` block — actions are treated as structured text
@@ -828,29 +836,50 @@ RT-2 (and OpenVLA which is based on LLaVA) discretises actions differently:
 
 1. **Action normalisation stats are separate.** `config.json` does not store the per-dataset action mean/std. If you load a VLA for a different robot without updating normalisation stats, the predicted actions are physically wrong even if the model runs without error.
 2. **Control frequency vs. inference budget.** At 50 Hz you have 20 ms. Typical 7B VLMs take 30–100 ms on a single A100. VLAs run smaller LLM backbones (3B–7B) and quantise aggressively for real-time use.
-3. **Action chunking increases latency but reduces jitter.** `action_chunk_size=16` means you run inference every 16 timesteps at `1/(16 × control_frequency_hz)` call frequency. The robot executes pre-planned chunks; latency spikes between chunks cause jerky motion.
+3. **Action chunking increases latency but reduces jitter.** `action_chunk_size=16` at 50 Hz means one inference call every 16 control steps — 50/16 ≈ 3.1 calls per second, each with up to 320 ms budget. The robot executes pre-planned chunks; latency spikes between chunks cause jerky motion.
 4. **State dim normalisation must match the training distribution.** Reusing a VLA on a robot with different joint limits without renormalising will produce poor actions even if the policy is otherwise applicable.
 5. **Token collision.** If `action_token_offset + action_vocab_size * action_dim > vocab_size`, action tokens collide with the EOS/BOS region. This is not validated at load time.
 6. **Batch size must be 1 at inference** for real-robot deployment (each inference is tied to the current observation state). VLAs are not meant for batched generation.
 
 ---
 
+## Newer Fields (2025–26)
+
+Configs of recent architectures add fields that change tensor shapes. The most important:
+
+| Field(s) | Family | Meaning |
+|---|---|---|
+| `layer_types` | Gemma 3, gpt-oss, Qwen3-Next, many others | Per-layer attention kind (full, sliding, linear) |
+| `q_lora_rank`, `kv_lora_rank`, `qk_nope_head_dim`, `qk_rope_head_dim`, `v_head_dim` | DeepSeek-V2/V3, Kimi K2 (MLA) | Latent sizes and the split of each head into position-free and RoPE parts (V3: 1536, 512, 128, 64, 128) |
+| `n_routed_experts`, `n_shared_experts`, `moe_intermediate_size`, `num_experts_per_tok` | DeepSeek, Kimi, GLM | Fine-grained MoE shape |
+| `scoring_func`, `norm_topk_prob`, `routed_scaling_factor`, `topk_method`, `n_group`, `topk_group` | DeepSeek-V3 | Sigmoid routing, renormalisation, output scaling and node-limited group routing |
+| `first_k_dense_replace`, `moe_layer_freq` / `decoder_sparse_step` | DeepSeek, Qwen-MoE, Llama 4 | Which layers are dense vs MoE |
+| `num_nextn_predict_layers` | DeepSeek-V3/V4, GLM | Multi-token-prediction modules (usable as speculative drafters) |
+| `partial_rotary_factor` | GLM, Phi, others | Fraction of each head that is rotated by RoPE |
+| `use_qk_norm` / implicit in modeling code | Qwen3, OLMo 2, Gemma 3 | RMSNorm on q and k per head |
+| `attn_logit_softcapping`, `final_logit_softcapping`, `query_pre_attn_scalar` | Gemma 2 | Logit caps and non-standard attention scaling |
+| Linear-attention fields (head counts and dims for the recurrent layers, conv kernel size, full-attention interval) | Qwen3-Next / Qwen3.5, Kimi Linear | Shapes of Gated DeltaNet / KDA layers and how often full attention appears |
+| `quantization_config` | FP8 (DeepSeek-V3), MXFP4 (gpt-oss), compressed-tensors, GPTQ/AWQ | How stored weights map back to real values: method, block sizes, which modules are excluded |
+
+Hybrid and MLA models need cache classes that match these fields — a generic per-head KV cache is wrong for both.
+
+---
+
 ## Cross-Model Comparison Table
 
-| Param | LLaMA 3.1 8B | Mistral 7B v0.3 | Qwen3-8B | Gemma 2 9B | DeepSeek-V3 (MoE) | Qwen3-VL-7B (LLM part) |
+| Param | Llama 3.1 8B | Mistral 7B v0.3 | Qwen3-8B | Gemma 2 9B | DeepSeek-V3 (MoE) | Qwen2.5-VL-7B (LLM part) |
 |---|---|---|---|---|---|---|
 | `hidden_size` | 4096 | 4096 | 4096 | 3584 | 7168 | 3584 |
 | `num_hidden_layers` | 32 | 32 | 36 | 42 | 61 | 28 |
-| `num_attention_heads` | 32 | 32 | 64 | 16 | 128 | 28 |
-| `num_key_value_heads` | 8 | 8 | 8 | 8 | 128 | 4 |
-| `head_dim` | *(implicit 128)* | *(implicit 128)* | **128 ← override** | 256 | 128 | *(implicit 128)* |
-| `intermediate_size` | 14336 | 14336 | 22016 | 14336 | 18432 | 18944 |
-| `rope_theta` | 500,000 | 1,000,000 | 1,000,000 | 10,000 | 10,000 | 1,000,000 |
-| `vocab_size` | 128,256 | 32,768 | 151,936 | 256,000 | 129,280 | 151,936 |
+| `num_attention_heads` | 32 | 32 | 32 | 16 | 128 | 28 |
+| `num_key_value_heads` | 8 | 8 | 8 | 8 | 128 (MLA: one shared latent) | 4 |
+| `head_dim` | *(implicit 128)* | *(implicit 128)* | 128 (explicit) | 256 (explicit; 16 × 256 ≠ 3584) | MLA: q·k 192 (128 + 64 RoPE), v 128 | *(implicit 128)* |
+| `intermediate_size` | 14336 | 14336 | 12288 | 14336 | 18432 (dense layers; experts 2048) | 18944 |
+| `rope_theta` | 500,000 | 1,000,000 | 1,000,000 | 10,000 | 10,000 (+ YaRN) | 1,000,000 (+ M-RoPE) |
+| `vocab_size` | 128,256 | 32,768 | 151,936 | 256,000 | 129,280 | 152,064 |
 | `rms_norm_eps` | 1e-5 | 1e-5 | 1e-6 | 1e-6 | 1e-6 | 1e-6 |
-| `sliding_window` | — | 4096 | — | 4096 (odd) | — | — |
-| `num_local_experts` | — | — | — | — | 256 | — |
-| `num_experts_per_tok` | — | — | — | — | 8 | — |
+| `sliding_window` | — | — (v0.1 used 4096) | — | 4096 (alternate layers) | — | — |
+| Routed experts / top-k | — | — | — | — | 256 + 1 shared / 8 | — |
 | `tie_word_embeddings` | false | false | false | true | false | false |
 
 ---
@@ -863,7 +892,9 @@ Use this checklist when writing or porting a CUDA/Triton kernel for a new model 
 - [ ] **GQA reshape**: KV head expansion ($H_Q / H_{KV}$ repetitions) must use `num_key_value_heads`, not `num_attention_heads`.
 - [ ] **RoPE type**: Check `rope_scaling.type`/`rope_type` field. Implement all types your model family uses, or assert on unsupported types.
 - [ ] **mrope sections**: For VLMs with `rope_type = "mrope"`, frequencies are split per modality dimension — apply per-section frequencies, not a uniform vector.
-- [ ] **Sliding window**: Check `use_sliding_window` per layer index vs `max_window_layers`. Gemma 2 uses interleaved pattern (not threshold-based).
+- [ ] **Sliding window**: Derive per-layer attention type from `layer_types` where present; never assume a threshold rule across families.
+- [ ] **MLA**: Cache `kv_lora_rank + qk_rope_head_dim` values per token, not per-head K/V; apply RoPE only to the decoupled part.
+- [ ] **Hybrid layers**: Linear-attention layers need recurrent state caches, not KV caches; size them separately.
 - [ ] **Activation function**: SwiGLU uses three weight matrices. Check `hidden_act` before assuming two-matrix FFN.
 - [ ] **MoE layer type**: Not all layers are MoE. Use `first_k_dense_replace` / `moe_layer_freq` to determine which layers have expert routing.
 - [ ] **vocab_size padding**: Embedding tables may be padded beyond actual vocabulary. Mask logits beyond true vocab_size before sampling.
@@ -875,8 +906,33 @@ Use this checklist when writing or porting a CUDA/Triton kernel for a new model 
 
 ---
 
-[← Previous: Appendix B — Tokenization Deep Dive](./appendix_b_tokenization.md)
+## Check Yourself
+
+<details class="check">
+<summary>A config has hidden_size 2,880, num_attention_heads 64, head_dim 64. What is the shape of W_q?</summary>
+<p>[2,880 → 64 × 64 = 4,096]: the query projection maps 2,880 to 4,096 and the output projection maps 4,096 back to 2,880. Computing head_dim as hidden_size / heads (45) would be wrong — this is gpt-oss's shape.</p>
+</details>
+
+<details class="check">
+<summary>From DeepSeek-V3's config, how many KV-cache values per token per layer does MLA store?</summary>
+<p>kv_lora_rank + qk_rope_head_dim = 512 + 64 = 576 — not 2 × num_key_value_heads × head_dim = 32,768.</p>
+</details>
+
+<details class="check">
+<summary>eos_token_id is [128001, 128008, 128009]. What breaks if your loop checks only the first?</summary>
+<p>The instruct model ends turns with 128009 (<|eot_id|>) or 128008 (<|eom_id|> for tool calls), so generation never stops and the model starts writing the next turn itself.</p>
+</details>
+
+## References
+
+| Source | Author / Org, Year | Link | What this appendix takes from it |
+|---|---|---|---|
+| Transformers model configuration docs | Hugging Face | [huggingface.co/docs/transformers/main_classes/configuration](https://huggingface.co/docs/transformers/main_classes/configuration) | Config semantics |
+| Llama 3.1 8B config.json | Meta | [huggingface.co/meta-llama/Llama-3.1-8B](https://huggingface.co/meta-llama/Llama-3.1-8B) | Dense reference values |
+| DeepSeek-V3 config.json | DeepSeek | [huggingface.co/deepseek-ai/DeepSeek-V3](https://huggingface.co/deepseek-ai/DeepSeek-V3) | MLA and MoE fields |
+| Qwen3-8B config.json | Qwen | [huggingface.co/Qwen/Qwen3-8B](https://huggingface.co/Qwen/Qwen3-8B) | Explicit head_dim, QK-norm |
+| OpenVLA | Kim et al., 2024 | [arxiv.org/abs/2406.09246](https://arxiv.org/abs/2406.09246) | Action tokenisation |
 
 ---
 
-*Last updated: April 2026*
+[← Previous: Appendix B — Tokenization Deep Dive](./appendix_b_tokenization.md) · [Back to Table of Contents](./README.md)

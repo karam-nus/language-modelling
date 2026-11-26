@@ -1,0 +1,24 @@
+# Companion guides by the same author. A chapter lists the ones it relates to in its front matter:
+#   related:
+#     - { id: chips, why: "One sentence on what the reader will find there for this chapter." }
+# `site: true` → published GitHub Pages site; otherwise the link goes to the GitHub repository.
+chips:              { name: "Chips 101",              url: "https://karam-nus.github.io/chips/",              site: true,  about: "The complete guide to chips: transistors to accelerators, memory, interconnects and number formats" }
+quantization:       { name: "Quantization 101",       url: "https://karam-nus.github.io/quantization/",       site: true,  about: "The companion guide to quantization" }
+models:             { name: "Models",                 url: "https://karam-nus.github.io/models/",             site: true,  about: "Model architectures summarised across generations" }
+inference:          { name: "Inference",              url: "https://karam-nus.github.io/inference/",          site: true,  about: "Notes, techniques, examples and recommendations on HPC AI inference" }
+pytorch-essentials: { name: "PyTorch Essentials",     url: "https://karam-nus.github.io/pytorch-essentials/", site: true,  about: "PyTorch 101" }
+agents:             { name: "Agents",                 url: "https://karam-nus.github.io/agents/",             site: true,  about: "All things agents" }
+evals:              { name: "Evals 101",              url: "https://karam-nus.github.io/evals/",              site: true,  about: "Evaluating models" }
+metrics:            { name: "Metrics 101",            url: "https://karam-nus.github.io/metrics/",            site: true,  about: "The metrics used to measure models" }
+nvidia:             { name: "NVIDIA 101",             url: "https://karam-nus.github.io/nvidia/",             site: true,  about: "The NVIDIA stack" }
+vectorization:      { name: "Vectorization 101",      url: "https://karam-nus.github.io/vectorization/",      site: true,  about: "Vectorization" }
+math:               { name: "Math 101",               url: "https://karam-nus.github.io/math/",               site: true,  about: "The mathematics underneath machine learning" }
+vision:             { name: "Vision",                 url: "https://karam-nus.github.io/vision/",             site: true,  about: "Computer vision with machine learning" }
+code:               { name: "ML Coding 101",          url: "https://karam-nus.github.io/code/",               site: true,  about: "Machine-learning coding" }
+training:           { name: "Training 101",           url: "https://github.com/karam-nus/training",           site: false, about: "Training models" }
+huggingface:        { name: "Hugging Face 101",       url: "https://github.com/karam-nus/huggingface",        site: false, about: "The Hugging Face ecosystem" }
+jax-essentials:     { name: "JAX 101",                url: "https://github.com/karam-nus/jax-essentials",     site: false, about: "JAX essentials" }
+model-optimization: { name: "Model Optimization 101", url: "https://github.com/karam-nus/model-optimization", site: false, about: "Making models smaller and faster" }
+networking:         { name: "Networking 101",         url: "https://github.com/karam-nus/networking",         site: false, about: "Networking" }
+weight-analysis:    { name: "Weight Analysis",        url: "https://github.com/karam-nus/weight-analysis",    site: false, about: "Per-channel weight distributions and histograms for models with quantization issues" }
+machine-learning:   { name: "Machine Learning 101",   url: "https://github.com/karam-nus/machine-learning",   site: false, about: "Machine-learning foundations" }

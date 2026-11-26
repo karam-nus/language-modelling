@@ -1,0 +1,11 @@
+{%- comment -%} Companion guides for this page (front matter `related:`), shown at the end of the article. {%- endcomment -%}
+{%- if page.related and page.related.size > 0 %}
+<aside class="related" aria-label="Companion guides">
+  <div class="rel-head"><span class="rel-label">Go deeper in the companion guides</span><a class="rel-all" href="https://karam-nus.github.io/" rel="noopener">all guides at karam-nus.github.io ↗</a></div>
+  <div class="rel-grid">
+    {%- for r in page.related -%}{%- assign g = site.data.related[r.id] -%}{%- if g %}
+    <a class="rel-card" href="{{ g.url }}" rel="noopener"><span class="rel-k">{% if g.site %}guide{% else %}repository{% endif %}</span><span class="rel-n">{{ g.name }}</span><span class="rel-d">{{ r.why | default: g.about }}</span><span class="rel-u">{{ g.url | remove: "https://" | split: "/" | join: "/" }} ↗</span></a>
+    {%- endif -%}{%- endfor %}
+  </div>
+</aside>
+{%- endif %}

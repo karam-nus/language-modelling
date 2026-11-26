@@ -1,7 +1,9 @@
 title: "Language Modelling — The Complete Guide"
-description: "From Tokens to Frontier: Understanding, Building, and Deploying Large Language Models. A comprehensive learning path for ML practitioners."
+short_title: "Language Modelling"
+description: "From tokens to the frontier: a first-principles guide to how large language models are built, trained, aligned, compressed and served — updated for late 2026, with tensor shapes on every page, verified code, and 26 interactive labs."
 baseurl: "/language-modelling"
 url: "https://karam-nus.github.io"
+updated: "November 2026"
 
 markdown: kramdown
 highlighter: rouge
@@ -15,10 +17,18 @@ kramdown:
     span:
       line_numbers: false
     block:
-      line_numbers: true
+      line_numbers: false
 
 plugins:
   - jekyll-relative-links
+  - jekyll-readme-index
+
+# README.md (which has front matter) is the home page. Letting jekyll-readme-index
+# place it at / means the README needs no `permalink: /` line, so GitHub's
+# front-matter table shows the site address (`website`) instead.
+readme_index:
+  enabled: true
+  with_frontmatter: true
 
 relative_links:
   enabled: true
@@ -27,91 +37,86 @@ relative_links:
 include:
   - README.md
 
+exclude:
+  - tools/
+  - Gemfile
+  - Gemfile.lock
+  - vendor/
+  - .github/
+  - PROMPT.md
+  - node_modules/
+
+# Navigation. Entries with url "" are part headers; `part` is the short label shown in the
+# chapter eyebrow, `n` the number shown in the navigator.
 navigation:
   - title: "Home"
     url: "/"
-  - title: "01 — Introduction"
-    url: "/01_introduction"
-  - title: "02 — Embeddings"
-    url: "/02_embeddings"
-  - title: "03 — The Transformer"
-    url: "/03_the_transformer"
-  - title: "04 — SDPA & Multi-Head Attention"
-    url: "/04_attention_sdpa_and_mha"
-  - title: "05 — GQA, MQA & MLA"
-    url: "/05_attention_gqa_mqa_mla"
-  - title: "06 — Decoder-Only Models"
-    url: "/06_decoder_only_models"
-  - title: "07 — Encoder & Seq2Seq"
-    url: "/07_encoder_and_seq2seq_models"
-  - title: "08 — Multimodal Models"
-    url: "/08_multimodal_models"
-  - title: "09 — Data for LLMs & VLMs"
-    url: "/09_data_for_llms"
-  - title: "10 — Pre-Training at Scale"
-    url: "/10_pretraining_at_scale"
-  - title: "11 — Optimizers & Loss Functions"
-    url: "/11_optimizers_and_loss_functions"
-  - title: "12 — Mid-Training"
-    url: "/12_mid_training"
-  - title: "13 — Fine-Tuning & Adaptation"
-    url: "/13_finetuning_and_adaptation"
-  - title: "14 — PEFT: LoRA, QLoRA & Variants"
-    url: "/14_peft_lora_and_variants"
-  - title: "15 — Alignment & RLHF"
-    url: "/15_alignment_rlhf_and_beyond"
-  - title: "16 — Inference & Sampling"
-    url: "/16_inference_and_sampling"
-  - title: "17 — KV-Cache Mechanics"
-    url: "/17_kv_cache_mechanics"
-  - title: "18 — KV-Cache Optimization"
-    url: "/18_kv_cache_optimization"
-  - title: "19 — Data Types & Precision"
-    url: "/19_data_types_and_precision"
-  - title: "20 — Quantization Fundamentals"
-    url: "/20_quantization_fundamentals"
-  - title: "21 — Quantization Techniques"
-    url: "/21_quantization_techniques"
-  - title: "22 — Quantization Benchmarks"
-    url: "/22_quantization_benchmarks"
-  - title: "23 — Knowledge Distillation"
-    url: "/23_knowledge_distillation"
-  - title: "24 — GPU Architecture"
-    url: "/24_gpu_architecture"
-  - title: "25 — CUDA & Kernels"
-    url: "/25_cuda_and_kernel_development"
-  - title: "26 — Distributed Training"
-    url: "/26_distributed_training"
-  - title: "27 — ASICs & Accelerators"
-    url: "/27_asics_and_accelerators"
-  - title: "28 — Hugging Face Ecosystem"
-    url: "/28_huggingface_ecosystem"
-  - title: "29 — Transformers Library"
-    url: "/29_transformers_library"
-  - title: "30 — Evaluation & Benchmarks"
-    url: "/30_evaluation_and_benchmarks"
-  - title: "31 — Serving & Deployment"
-    url: "/31_serving_and_deployment"
-  - title: "32 — Scaling Laws"
-    url: "/32_scaling_laws"
-  - title: "33 — Mixture of Experts"
-    url: "/33_mixture_of_experts"
-  - title: "34 — SSMs & Alternatives"
-    url: "/34_ssms_and_alternatives"
-  - title: "35 — Reasoning Models"
-    url: "/35_reasoning_models"
-  - title: "36 — RAG"
-    url: "/36_rag"
-  - title: "37 — Agents & Tool Use"
-    url: "/37_agents_and_tool_use"
-  - title: "38 — The Frontier"
-    url: "/38_frontier"
-  - title: "Appendix A — History"
-    url: "/appendix_a_history"
-  - title: "Appendix B — Tokenization"
-    url: "/appendix_b_tokenization"
-  - title: "Appendix C — Model Config Reference"
-    url: "/appendix_c_model_config"
+    n: "∅"
+  - title: "I · Foundations"
+    url: ""
+  - { title: "Introduction", url: "/01_introduction", n: "01" }
+  - { title: "Embeddings & Positions", url: "/02_embeddings", n: "02" }
+  - { title: "The Transformer", url: "/03_the_transformer", n: "03" }
+  - { title: "Attention: SDPA & MHA", url: "/04_attention_sdpa_and_mha", n: "04" }
+  - title: "II · Architectures"
+    url: ""
+  - { title: "GQA, MQA, MLA & Sparse", url: "/05_attention_gqa_mqa_mla", n: "05" }
+  - { title: "Decoder-Only Models", url: "/06_decoder_only_models", n: "06" }
+  - { title: "Encoders & Seq2Seq", url: "/07_encoder_and_seq2seq_models", n: "07" }
+  - { title: "Multimodal Models", url: "/08_multimodal_models", n: "08" }
+  - title: "III · Training"
+    url: ""
+  - { title: "Data for LLMs & VLMs", url: "/09_data_for_llms", n: "09" }
+  - { title: "Pre-Training at Scale", url: "/10_pretraining_at_scale", n: "10" }
+  - { title: "Optimizers & Losses", url: "/11_optimizers_and_loss_functions", n: "11" }
+  - { title: "Mid-Training", url: "/12_mid_training", n: "12" }
+  - { title: "Fine-Tuning & Adaptation", url: "/13_finetuning_and_adaptation", n: "13" }
+  - { title: "PEFT: LoRA & Variants", url: "/14_peft_lora_and_variants", n: "14" }
+  - { title: "Alignment & RL", url: "/15_alignment_rlhf_and_beyond", n: "15" }
+  - title: "IV · Inference"
+    url: ""
+  - { title: "Sampling & Speculation", url: "/16_inference_and_sampling", n: "16" }
+  - { title: "KV Cache: Mechanics", url: "/17_kv_cache_mechanics", n: "17" }
+  - { title: "KV Cache: Optimization", url: "/18_kv_cache_optimization", n: "18" }
+  - title: "V · Precision & Compression"
+    url: ""
+  - { title: "Data Types & Precision", url: "/19_data_types_and_precision", n: "19" }
+  - { title: "Quantization Fundamentals", url: "/20_quantization_fundamentals", n: "20" }
+  - { title: "Quantization Techniques", url: "/21_quantization_techniques", n: "21" }
+  - { title: "Choosing a Quantization", url: "/22_quantization_benchmarks", n: "22" }
+  - { title: "Distillation & QAD", url: "/23_knowledge_distillation", n: "23" }
+  - title: "VI · Hardware & Systems"
+    url: ""
+  - { title: "GPU Architecture", url: "/24_gpu_architecture", n: "24" }
+  - { title: "CUDA & Kernels", url: "/25_cuda_and_kernel_development", n: "25" }
+  - { title: "Distributed Training", url: "/26_distributed_training", n: "26" }
+  - { title: "ASICs & Accelerators", url: "/27_asics_and_accelerators", n: "27" }
+  - title: "VII · Ecosystem & Serving"
+    url: ""
+  - { title: "Hugging Face Ecosystem", url: "/28_huggingface_ecosystem", n: "28" }
+  - { title: "transformers Internals", url: "/29_transformers_library", n: "29" }
+  - { title: "Evaluation & Benchmarks", url: "/30_evaluation_and_benchmarks", n: "30" }
+  - { title: "Serving & Deployment", url: "/31_serving_and_deployment", n: "31" }
+  - title: "VIII · Scale & New Architectures"
+    url: ""
+  - { title: "Scaling Laws", url: "/32_scaling_laws", n: "32" }
+  - { title: "Mixture of Experts", url: "/33_mixture_of_experts", n: "33" }
+  - { title: "SSMs & Hybrids", url: "/34_ssms_and_alternatives", n: "34" }
+  - { title: "Looped Transformers", url: "/looped_transformers", n: "↻" }
+  - title: "IX · Reasoning, Retrieval & Agents"
+    url: ""
+  - { title: "Reasoning Models", url: "/35_reasoning_models", n: "35" }
+  - { title: "Retrieval-Augmented Generation", url: "/36_rag", n: "36" }
+  - { title: "Agents & Tool Use", url: "/37_agents_and_tool_use", n: "37" }
+  - { title: "The Frontier", url: "/38_frontier", n: "38" }
+  - title: "Interactive"
+    url: ""
+  - { title: "The Lab Bench", url: "/labs", n: "⚗" }
+  - title: "Appendices"
+    url: ""
+  - { title: "History of Language Modelling", url: "/appendix_a_history", n: "A" }
+  - { title: "Tokenization Deep Dive", url: "/appendix_b_tokenization", n: "B" }
+  - { title: "Model Config Reference", url: "/appendix_c_model_config", n: "C" }
 
 defaults:
   - scope:

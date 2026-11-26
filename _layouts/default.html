@@ -1,266 +1,174 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="paper">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% if page.title %}{{ page.title }} — {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
-  <meta name="description" content="{{ page.description | default: site.description }}">
+  <title>{% if page.url == "/" %}{{ site.title }}{% else %}{{ page.title }} — {{ site.short_title }}{% endif %}</title>
+  <meta name="description" content="{{ page.description | default: site.description | strip_html | escape }}">
+  <meta name="theme-color" content="#f3efe6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#101114" media="(prefers-color-scheme: dark)">
+  <script>
+    /* Set the theme before first paint: stored choice, else the OS preference. */
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('lm-theme'); } catch (e) {}
+      if (t !== 'paper' && t !== 'night') {
+        t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'night' : 'paper';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&family=JetBrains+Mono:ital,wght@0,400..700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
   <script>
     window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']],
-        processEscapes: true
-      },
-      options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] },
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] },
       svg: { fontCache: 'global' }
     };
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" async></script>
 </head>
-<body>
-  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle navigation">
-    <span></span>
-    <span></span>
-    <span></span>
-  </button>
+{%- comment -%} Locate this page in the navigation: index, part, number, neighbours. {%- endcomment -%}
+{%- assign cur_part = "" -%}{%- assign page_part = "" -%}{%- assign page_n = "" -%}{%- assign page_nav_title = "" -%}{%- assign cur_idx = -1 -%}{%- assign k = 0 -%}
+{%- for item in site.navigation -%}
+  {%- if item.url == "" -%}{%- assign cur_part = item.title -%}{%- else -%}
+    {%- assign u1 = item.url | append: '/' -%}{%- assign u2 = item.url | append: '.html' -%}
+    {%- if page.url == item.url or page.url == u1 or page.url == u2 -%}{%- assign cur_idx = k -%}{%- assign page_part = cur_part -%}{%- assign page_n = item.n -%}{%- assign page_nav_title = item.title -%}{%- endif -%}
+    {%- assign k = k | plus: 1 -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- assign linear = site.navigation | where_exp: "i", "i.url != ''" -%}
+{%- assign is_home = false -%}{%- if page.url == "/" or page.url == "/index.html" -%}{%- assign is_home = true -%}{%- endif -%}
+{%- assign words = content | strip_html | number_of_words -%}
+{%- assign minutes = words | divided_by: 230 | plus: 1 -%}
+{%- assign tokens = words | times: 4 | divided_by: 3 -%}
+{%- assign n_labs = content | split: 'data-lab="' | size | minus: 1 -%}
+{%- assign n_checks = content | split: 'class="check"' | size | minus: 1 -%}
+<body class="{% if is_home %}is-home{% else %}is-page{% endif %}">
+  <a class="skip" href="#main">Skip to content</a>
 
-  <div class="layout" id="layout">
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <a href="{{ '/' | relative_url }}" class="logo">
-          <span class="logo-icon">🧠</span>
-          <span class="logo-text">LM Guide</span>
-        </a>
+  <header class="mast" id="mast">
+    <button class="mast-btn nav-btn" id="navToggle" aria-label="Open the chapter navigator" aria-controls="stream" aria-expanded="false">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
+    </button>
+    <a class="brand" href="{{ '/' | relative_url }}" aria-label="{{ site.title }} — home">
+      <svg class="brand-mark" viewBox="0 0 40 24" aria-hidden="true">
+        <rect x="1" y="3" width="17" height="18" rx="9" class="bm-a"/>
+        <rect x="14" y="3" width="25" height="18" rx="9" class="bm-b"/>
+        <text x="27" y="16.2" text-anchor="middle">LM</text>
+      </svg>
+      <span class="brand-word">Language <em>Modelling</em></span>
+    </a>
+    <div class="mast-seq" id="mastSeq" aria-hidden="true"></div>
+    <div class="mast-tools">
+      <a class="mast-home" href="https://karam-nus.github.io/" rel="noopener" title="All guides at karam-nus.github.io">
+        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5M6.5 10v9h4.2v-5h2.6v5h4.2v-9" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>
+        <span class="mh-t">karam-nus<span class="mh-dim">.github.io</span></span>
+      </a>
+      <span class="tokmeter" id="tokMeter" title="Approximate tokens read on this page (≈ 1.33 tokens per word)"><b id="tokRead">0</b><i>/</i><span>{{ tokens }}</span> tok</span>
+      <button class="mast-btn search-btn" id="searchOpen" aria-label="Search the guide (press / or Ctrl+K)">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <kbd>/</kbd>
+      </button>
+      <button class="mast-btn theme-btn" id="themeToggle" aria-label="Switch between paper and night themes">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>
+      </button>
+    </div>
+    <div class="kvstrip" id="kvStrip" aria-hidden="true"></div>
+  </header>
+
+  <nav class="stream" id="stream" aria-label="Chapters">
+    <div class="stream-head">
+      <span class="stream-label">The residual stream</span>
+      <label class="stream-filter"><span class="sr">Filter chapters</span><input type="search" id="navFilter" placeholder="filter chapters…" autocomplete="off"></label>
+    </div>
+    <ol class="stream-list" id="streamList">
+      {%- for item in site.navigation -%}
+        {%- if item.url == "" %}
+      <li class="sl-part" role="presentation"><span>{{ item.title }}</span></li>
+        {%- else -%}
+          {%- assign u1 = item.url | append: '/' -%}{%- assign u2 = item.url | append: '.html' -%}
+          {%- assign active = false -%}{%- if page.url == item.url or page.url == u1 or page.url == u2 -%}{%- assign active = true -%}{%- endif %}
+      <li class="sl-item{% if active %} is-here{% endif %}"><a href="{{ item.url | relative_url }}" data-path="{{ item.url }}"{% if active %} aria-current="page"{% endif %}><span class="sl-node" aria-hidden="true"></span><span class="sl-n">{{ item.n }}</span><span class="sl-t">{{ item.title }}</span></a></li>
+        {%- endif -%}
+      {%- endfor %}
+    </ol>
+    <div class="stream-foot">
+      <span class="sf-key"><i class="k-here"></i>here</span><span class="sf-key"><i class="k-read"></i>read</span><span class="sf-key"><i class="k-unread"></i>unread</span>
+      <a class="sf-gh" href="https://github.com/karam-nus/language-modelling" rel="noopener">Source on GitHub ↗</a>
+    </div>
+  </nav>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <main id="main" class="page" data-path="{{ page.url }}">
+    {%- unless is_home %}
+    <header class="hero">
+      <div class="hero-eyebrow">
+        <a class="crumb" href="{{ '/' | relative_url }}">← Contents</a>
+        {%- if page_part != "" %}<span class="hero-part">{{ page_part }}</span>{% endif %}
       </div>
+      {%- if page_n != "" and page_n != "∅" %}
+      <div class="hero-num" aria-hidden="true"><span class="hn-a">{{ page_n }}</span><span class="hn-b">{{ page_n }}</span></div>
+      {%- endif %}
+      <dl class="hero-meta">
+        <div><dt>read</dt><dd>~{{ minutes }} min</dd></div>
+        <div><dt>length</dt><dd>≈{{ tokens }} tok</dd></div>
+        {%- if n_labs > 0 %}<div><dt>labs</dt><dd>{{ n_labs }}</dd></div>{% endif %}
+        {%- if n_checks > 0 %}<div><dt>checks</dt><dd>{{ n_checks }}</dd></div>{% endif %}
+        <div><dt>updated</dt><dd>{{ site.updated }}</dd></div>
+        {%- if page.related and page.related.size > 0 %}
+        <div class="hm-rel"><dt>companion</dt><dd>{% for r in page.related limit: 2 %}{% assign g = site.data.related[r.id] %}{% if g %}<a href="{{ g.url }}" rel="noopener">{{ g.name }} ↗</a>{% unless forloop.last %} · {% endunless %}{% endif %}{% endfor %}</dd></div>
+        {%- endif %}
+      </dl>
+    </header>
+    {%- endunless %}
 
-      <nav class="sidebar-nav">
-        {% for item in site.navigation %}
-          <a href="{{ item.url | relative_url }}"
-             class="nav-item{% if page.url == item.url or page.url == item.url | append: '/' %} active{% elsif page.url contains item.url and item.url != '/' %} active{% endif %}">
-            {{ item.title }}
-          </a>
-        {% endfor %}
-      </nav>
+    <article class="content" id="content" data-n="{{ page_n }}">
+      {{ content }}
+      {%- include related.html %}
+    </article>
 
-      <div class="sidebar-footer">
-        <a href="https://github.com/karam-nus/language-modelling" target="_blank" rel="noopener" class="github-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-          </svg>
-          View on GitHub
-        </a>
+    {%- if cur_idx >= 0 and is_home == false %}
+    {%- assign prev_idx = cur_idx | minus: 1 -%}{%- assign next_idx = cur_idx | plus: 1 %}
+    <nav class="pager" aria-label="Previous and next">
+      {%- if prev_idx >= 0 %}{% assign p = linear[prev_idx] %}
+      <a class="pg pg-prev" href="{{ p.url | relative_url }}"><span class="pg-dir">← previous token</span><span class="pg-n">{{ p.n }}</span><span class="pg-t">{{ p.title }}</span></a>
+      {%- endif %}
+      {%- if next_idx < linear.size %}{% assign q = linear[next_idx] %}
+      <a class="pg pg-next" href="{{ q.url | relative_url }}"><span class="pg-dir">next token →</span><span class="pg-n">{{ q.n }}</span><span class="pg-t">{{ q.title }}</span></a>
+      {%- endif %}
+    </nav>
+    {%- endif %}
+
+    <footer class="colophon">
+      <p><strong>{{ site.title }}</strong> · Updated {{ site.updated }} · <a href="https://github.com/karam-nus/language-modelling" rel="noopener">GitHub</a> · Companion: <a href="https://karam-nus.github.io/chips/" rel="noopener">Chips 101</a> · <a class="colo-home" href="https://karam-nus.github.io/" rel="noopener">More guides at karam-nus.github.io ↗</a></p>
+      <p class="colo-type">Set in Fraunces, Source Serif 4 &amp; JetBrains Mono. Figures, labs and numbers are checked against primary sources; corrections welcome.</p>
+    </footer>
+  </main>
+
+  <aside class="margin-index" id="marginIndex" aria-label="On this page" hidden>
+    <div class="mi-label">On this page</div>
+    <ol class="mi-list" id="miList"></ol>
+  </aside>
+
+  <div class="palette" id="palette" role="dialog" aria-modal="true" aria-label="Search the guide" hidden>
+    <div class="pal-box">
+      <div class="pal-input">
+        <span class="pal-prompt" aria-hidden="true">›</span>
+        <input type="text" id="palInput" placeholder="Search chapters, sections and labs…" autocomplete="off" spellcheck="false" aria-label="Search">
+        <kbd>esc</kbd>
       </div>
-    </aside>
-
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <main class="main-content">
-      <article class="content">
-        {{ content }}
-      </article>
-
-      <footer class="content-footer">
-        <div class="footer-inner">
-          <a href="https://github.com/karam-nus/language-modelling" target="_blank" rel="noopener">GitHub</a>
-          <span class="footer-sep">·</span>
-          <span>{{ site.title }}</span>
-          <span class="footer-sep">·</span>
-          <span>Last updated April 2026</span>
-        </div>
-      </footer>
-    </main>
-
-    <aside class="toc-sidebar" id="tocSidebar" aria-label="On this page">
-      <div class="toc-header">
-        <span class="toc-title">On this page</span>
-        <button class="toc-collapse-btn" id="tocCollapseBtn" aria-label="Collapse table of contents">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="9 6 15 12 9 18"></polyline>
-          </svg>
-        </button>
-      </div>
-      <nav class="toc-nav" id="tocNav" aria-label="Page sections"></nav>
-    </aside>
+      <ol class="pal-results" id="palResults" role="listbox"></ol>
+      <div class="pal-foot"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span><span>scores are softmax over matches — just like attention</span></div>
+    </div>
   </div>
 
-  <button class="toc-open-btn" id="tocOpenBtn" aria-label="Open table of contents">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <line x1="21" y1="6" x2="3" y2="6"></line>
-      <line x1="21" y1="12" x2="9" y2="12"></line>
-      <line x1="21" y1="18" x2="3" y2="18"></line>
-    </svg>
-  </button>
-
-  <script>
-    /* ---- Left sidebar toggle ---- */
-    (function() {
-      var toggle = document.getElementById('sidebarToggle');
-      var sidebar = document.getElementById('sidebar');
-      var layout  = document.getElementById('layout');
-      var overlay = document.getElementById('sidebarOverlay');
-
-      var MOBILE_BREAKPOINT = 768;
-
-      function isMobile() {
-        return window.innerWidth <= MOBILE_BREAKPOINT;
-      }
-
-      /* Restore collapsed state from localStorage on page load */
-      if (!isMobile() && localStorage.getItem('sidebarCollapsed') === 'true') {
-        layout.classList.add('sidebar-collapsed');
-        toggle.classList.add('active');
-      }
-
-      function openSidebar() {
-        if (isMobile()) {
-          sidebar.classList.add('open');
-          overlay.classList.add('visible');
-        } else {
-          layout.classList.remove('sidebar-collapsed');
-          localStorage.setItem('sidebarCollapsed', 'false');
-        }
-        toggle.classList.add('active');
-      }
-
-      function closeSidebar() {
-        if (isMobile()) {
-          sidebar.classList.remove('open');
-          overlay.classList.remove('visible');
-        } else {
-          layout.classList.add('sidebar-collapsed');
-          localStorage.setItem('sidebarCollapsed', 'true');
-        }
-        toggle.classList.remove('active');
-      }
-
-      toggle.addEventListener('click', function() {
-        if (isMobile()) {
-          if (sidebar.classList.contains('open')) { closeSidebar(); } else { openSidebar(); }
-        } else {
-          if (layout.classList.contains('sidebar-collapsed')) { openSidebar(); } else { closeSidebar(); }
-        }
-      });
-
-      overlay.addEventListener('click', closeSidebar);
-
-      var activeLink = document.querySelector('.nav-item.active');
-      if (activeLink) {
-        activeLink.scrollIntoView({ block: 'nearest' });
-      }
-    })();
-
-    /* ---- Right-side page TOC ---- */
-    (function() {
-      var tocSidebar   = document.getElementById('tocSidebar');
-      var tocNav       = document.getElementById('tocNav');
-      var collapseBtn  = document.getElementById('tocCollapseBtn');
-      var openBtn      = document.getElementById('tocOpenBtn');
-      var layout       = document.getElementById('layout');
-
-      var TOC_BREAKPOINT = 1340;
-
-      function isTocSupported() {
-        return window.innerWidth > TOC_BREAKPOINT;
-      }
-
-      /* Build TOC from h2 / h3 headings inside .content */
-      var content  = document.querySelector('.content');
-      var headings = content ? Array.from(content.querySelectorAll('h2, h3')) : [];
-
-      /* Auto-assign IDs if kramdown didn't generate them */
-      headings.forEach(function(h, i) {
-        if (!h.id) {
-          h.id = 'section-' + i;
-        }
-      });
-
-      var tocItems = [];
-
-      if (headings.length > 0) {
-        headings.forEach(function(h) {
-          var a = document.createElement('a');
-          a.href    = '#' + h.id;
-          a.className = 'toc-item toc-' + h.tagName.toLowerCase();
-          a.textContent = h.textContent.replace(/^#+\s*/, '').trim();
-          a.dataset.id  = h.id;
-          tocItems.push(a);
-          tocNav.appendChild(a);
-        });
-      } else {
-        /* No headings — hide TOC entirely */
-        tocSidebar.style.display = 'none';
-        if (openBtn) openBtn.style.display = 'none';
-        return;
-      }
-
-      /* Restore or apply collapsed state */
-      function applyTocState() {
-        if (!isTocSupported()) {
-          tocSidebar.style.display = 'none';
-          openBtn.style.display    = 'none';
-          layout.classList.remove('toc-open');
-          return;
-        }
-        tocSidebar.style.display = '';
-        var isOpen = localStorage.getItem('tocCollapsed') !== 'true';
-        if (isOpen) {
-          layout.classList.add('toc-open');
-          openBtn.style.display = 'none';
-        } else {
-          layout.classList.remove('toc-open');
-          openBtn.style.display = 'flex';
-        }
-      }
-
-      applyTocState();
-      window.addEventListener('resize', applyTocState);
-
-      collapseBtn.addEventListener('click', function() {
-        layout.classList.remove('toc-open');
-        openBtn.style.display = 'flex';
-        localStorage.setItem('tocCollapsed', 'true');
-      });
-
-      openBtn.addEventListener('click', function() {
-        layout.classList.add('toc-open');
-        openBtn.style.display = 'none';
-        localStorage.setItem('tocCollapsed', 'false');
-      });
-
-      /* Scroll-spy: highlight current section */
-      if ('IntersectionObserver' in window) {
-        var activeId = null;
-        var observer = new IntersectionObserver(function(entries) {
-          entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-              activeId = entry.target.id;
-            }
-          });
-          tocItems.forEach(function(item) {
-            item.classList.toggle('active', item.dataset.id === activeId);
-          });
-        }, { rootMargin: '-5% 0px -80% 0px', threshold: 0 });
-
-        headings.forEach(function(h) { observer.observe(h); });
-      }
-
-      /* Smooth scroll on TOC link click */
-      tocItems.forEach(function(a) {
-        a.addEventListener('click', function(e) {
-          e.preventDefault();
-          var target = document.getElementById(a.dataset.id);
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            history.replaceState(null, '', '#' + a.dataset.id);
-          }
-        });
-      });
-    })();
-  </script>
+  <script>window.LM = { base: "{{ site.baseurl }}", path: "{{ page.url }}", n: "{{ page_n }}", part: {{ page_part | jsonify }}, title: {{ page_nav_title | jsonify }}, home: {{ is_home }} };</script>
+  <script src="{{ '/assets/js/lm-ui.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/lm-labs.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/lm-figs.js' | relative_url }}" defer></script>
 </body>
 </html>
