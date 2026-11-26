@@ -83,6 +83,20 @@ To add one: write and export the pure function, add assertions to `tools/test_la
 node tools/test_labs.js      # must print N/N lab checks passed
 ```
 
+## Figures
+
+Process diagrams are drawn by `assets/js/lm-figs.js` as theme-aware SVG (ink tokens such as `var(--blue)`, so they follow the paper/night theme). Put one inside a plate:
+
+```html
+<div class="diagram">
+<div class="diagram-title">Ring All-Reduce, Step by Step</div>
+<div class="fig" data-fig="ringallreduce" data-n="4"><noscript>Text description of the figure.</noscript></div>
+<div class="flow-caption">One-line caption.</div>
+</div>
+```
+
+Available: `heads` (MHA/GQA/MQA/MLA), `masks` (`data-set` of causal, bidirectional, prefix, sliding, chunked, sink, dilated, nsa, topk), `linstate`, `flash`, `gated`, `collectives`, `ringallreduce`, `ddp`, `zero`, `fsdp`, `tp` (`mlp`/`attn`), `sp`, `pipeline` (`gpipe`/`1f1b`/`interleaved`/`zb` with `data-p`, `data-m`, `data-v`), `ep`, `ring`, `ulysses`, `mesh`, `loopstack`. Figures that show a process get a ◀ ▷ ▶ stepper. Any arithmetic a figure shows (pipeline bubbles, ring all-reduce states, masks) comes from the tested pure functions in `lm-labs.js` (`window.LMPure`); add a test when you add one.
+
 ## Design system — "Latent Press"
 
 A riso-printed manuscript, not a dashboard.

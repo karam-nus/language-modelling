@@ -1,6 +1,6 @@
 ---
 title: "Home"
-description: "From tokens to the frontier: a first-principles guide to how large language models are built, trained, aligned, compressed and served — updated for late 2026, with tensor shapes on every page, verified code and 23 interactive labs."
+description: "From tokens to the frontier: a first-principles guide to how large language models are built, trained, aligned, compressed and served — updated for late 2026, with tensor shapes on every page, verified code and 26 interactive labs."
 permalink: /
 ---
 
@@ -19,7 +19,7 @@ permalink: /
 <div class="hh-stats">
 <div class="hh-stat"><b>38</b><span>chapters</span></div>
 <div class="hh-stat"><b>3</b><span>appendices</span></div>
-<div class="hh-stat"><b>23</b><span>live labs</span></div>
+<div class="hh-stat"><b>26</b><span>live labs</span></div>
 <div class="hh-stat"><b>192</b><span>check-yourself Qs</span></div>
 </div>
 </div>
@@ -47,7 +47,7 @@ permalink: /
 <div class="mm-block orange"><div class="mm-tag"><b>V</b><span>Precision</span></div><div class="mm-body"><div class="mm-name">Fewer bits, same answers</div><div class="mm-chips"><a href="19_data_types_and_precision.html" data-path="/19_data_types_and_precision"><b>19</b>Data types</a><a href="20_quantization_fundamentals.html" data-path="/20_quantization_fundamentals"><b>20</b>Quantization basics</a><a href="21_quantization_techniques.html" data-path="/21_quantization_techniques"><b>21</b>Techniques</a><a href="22_quantization_benchmarks.html" data-path="/22_quantization_benchmarks"><b>22</b>Choosing one</a><a href="23_knowledge_distillation.html" data-path="/23_knowledge_distillation"><b>23</b>Distillation</a></div></div></div>
 <div class="mm-block teal"><div class="mm-tag"><b>VI</b><span>Hardware</span></div><div class="mm-body"><div class="mm-name">The silicon and the cluster underneath</div><div class="mm-chips"><a href="24_gpu_architecture.html" data-path="/24_gpu_architecture"><b>24</b>GPU architecture</a><a href="25_cuda_and_kernel_development.html" data-path="/25_cuda_and_kernel_development"><b>25</b>CUDA &amp; kernels</a><a href="26_distributed_training.html" data-path="/26_distributed_training"><b>26</b>Distributed training</a><a href="27_asics_and_accelerators.html" data-path="/27_asics_and_accelerators"><b>27</b>ASICs &amp; accelerators</a></div></div></div>
 <div class="mm-block pink"><div class="mm-tag"><b>VII</b><span>Ecosystem</span></div><div class="mm-body"><div class="mm-name">Tools, evaluation and production</div><div class="mm-chips"><a href="28_huggingface_ecosystem.html" data-path="/28_huggingface_ecosystem"><b>28</b>Hugging Face</a><a href="29_transformers_library.html" data-path="/29_transformers_library"><b>29</b>transformers internals</a><a href="30_evaluation_and_benchmarks.html" data-path="/30_evaluation_and_benchmarks"><b>30</b>Evaluation</a><a href="31_serving_and_deployment.html" data-path="/31_serving_and_deployment"><b>31</b>Serving</a></div></div></div>
-<div class="mm-block yellow"><div class="mm-tag"><b>VIII</b><span>Scale</span></div><div class="mm-body"><div class="mm-name">How big, how sparse, how linear</div><div class="mm-chips"><a href="32_scaling_laws.html" data-path="/32_scaling_laws"><b>32</b>Scaling laws</a><a href="33_mixture_of_experts.html" data-path="/33_mixture_of_experts"><b>33</b>Mixture of experts</a><a href="34_ssms_and_alternatives.html" data-path="/34_ssms_and_alternatives"><b>34</b>SSMs &amp; hybrids</a></div></div></div>
+<div class="mm-block yellow"><div class="mm-tag"><b>VIII</b><span>Scale</span></div><div class="mm-body"><div class="mm-name">How big, how sparse, how linear</div><div class="mm-chips"><a href="32_scaling_laws.html" data-path="/32_scaling_laws"><b>32</b>Scaling laws</a><a href="33_mixture_of_experts.html" data-path="/33_mixture_of_experts"><b>33</b>Mixture of experts</a><a href="34_ssms_and_alternatives.html" data-path="/34_ssms_and_alternatives"><b>34</b>SSMs &amp; hybrids</a><a href="looped_transformers.html" data-path="/looped_transformers"><b>↻</b>Looped transformers</a></div></div></div>
 <div class="mm-block red"><div class="mm-tag"><b>IX</b><span>Reasoning</span></div><div class="mm-body"><div class="mm-name">Thinking, retrieving, acting</div><div class="mm-chips"><a href="35_reasoning_models.html" data-path="/35_reasoning_models"><b>35</b>Reasoning models</a><a href="36_rag.html" data-path="/36_rag"><b>36</b>RAG</a><a href="37_agents_and_tool_use.html" data-path="/37_agents_and_tool_use"><b>37</b>Agents &amp; tools</a><a href="38_frontier.html" data-path="/38_frontier"><b>38</b>The frontier</a></div></div></div>
 <div class="mm-block teal"><div class="mm-tag"><b>A–C</b><span>Appendices</span></div><div class="mm-body"><div class="mm-name">History, tokenizers and the config file</div><div class="mm-chips"><a href="appendix_a_history.html" data-path="/appendix_a_history"><b>A</b>History</a><a href="appendix_b_tokenization.html" data-path="/appendix_b_tokenization"><b>B</b>Tokenization</a><a href="appendix_c_model_config.html" data-path="/appendix_c_model_config"><b>C</b>Model config reference</a></div></div></div>
 <div class="mm-io"><span>output</span><div class="tokens-row"><span>p(next idea | everything you have read)</span></div></div>
@@ -55,7 +55,7 @@ permalink: /
 </div>
 
 <div class="home-section" markdown="0">
-<div class="hs-head"><h2 id="the-lab-bench">The lab bench</h2><p>23 instruments · arithmetic checked against the chapters by tools/test_labs.js</p></div>
+<div class="hs-head"><h2 id="the-lab-bench">The lab bench</h2><p>26 instruments · arithmetic checked against the chapters by tools/test_labs.js</p></div>
 {% include labgrid.html %}
 </div>
 
@@ -69,8 +69,16 @@ permalink: /
 <div><b>New optimizers at scale</b>Muon and its Newton–Schulz iteration, with the evidence on when it beats AdamW — <a href="11_optimizers_and_loss_functions.html">Ch 11</a>.</div>
 <div><b>Disaggregated serving</b>Prefill/decode split, KV-aware routing, llm-d and Dynamo, and the cost model behind $/M tokens — <a href="18_kv_cache_optimization.html">Ch 18</a>, <a href="31_serving_and_deployment.html">31</a>.</div>
 <div><b>Agents that work for hours</b>Tool calling, MCP, context engineering, coding agents and how they are evaluated — <a href="37_agents_and_tool_use.html">Ch 37</a>, <a href="30_evaluation_and_benchmarks.html">30</a>.</div>
+<div><b>Looped transformers</b>A new deep dive on buying depth without parameters — Universal Transformers to Huginn, Mixture-of-Recursions, TRM and Ouro — with an adaptive-depth lab — <a href="looped_transformers.html">Deep dive ↻</a>.</div>
+<div><b>Distributed training, step by step</b>Collectives, DDP, ZeRO/FSDP, tensor, sequence, pipeline, context and expert parallelism as step-through figures, plus a pipeline-schedule simulator — <a href="26_distributed_training.html">Ch 26</a>.</div>
+<div><b>An attention atlas</b>Head sharing (MHA/GQA/MQA/MLA), every mask pattern from causal to DeepSeek's top-k, FlashAttention tile by tile, sinks and gates — <a href="04_attention_sdpa_and_mha.html">Ch 4</a>, <a href="05_attention_gqa_mqa_mla.html">5</a>.</div>
 <div><b>Every page, the same spine</b>A one-sentence version, a "ponder" prompt, key takeaways, check-yourself questions with worked answers, and dated references.</div>
 </div>
+</div>
+
+<div class="home-section" markdown="0">
+<div class="hs-head"><h2 id="companion-guides">Companion guides</h2><p>the rest of the family · <a href="https://karam-nus.github.io/" rel="noopener">karam-nus.github.io ↗</a></p></div>
+{% include family.html %}
 </div>
 
 <div class="home-section" markdown="0">
@@ -129,13 +137,14 @@ permalink: /
 | 32 | [Scaling Laws](./32_scaling_laws.md) | Kaplan, Chinchilla and its refit, over-training, inference-aware scaling |
 | 33 | [Mixture of Experts](./33_mixture_of_experts.md) | Routing, balancing, fine-grained and shared experts, expert parallelism |
 | 34 | [SSMs & Hybrids](./34_ssms_and_alternatives.md) | Mamba, linear attention, the delta rule, the hybrid wave, diffusion LMs |
+| ↻ | [Deep Dive: Looped Transformers](./looped_transformers.md) | Depth without parameters: Universal Transformers to Huginn, Mixture-of-Recursions, TRM and Ouro; adaptive exits and real costs |
 | | **IX · Reasoning, Retrieval & Agents** | |
 | 35 | [Reasoning Models](./35_reasoning_models.md) | Chain of thought, RL-trained thinking, test-time compute, faithfulness |
 | 36 | [Retrieval-Augmented Generation](./36_rag.md) | Embeddings, hybrid search, reranking, long context vs retrieval |
 | 37 | [Agents & Tool Use](./37_agents_and_tool_use.md) | Tool calling, MCP, coding and computer-use agents, safety |
 | 38 | [The Frontier](./38_frontier.md) | Where the field stands in late 2026 and the open problems |
 | | **Interactive & Appendices** | |
-| ⚗ | [The Lab Bench](./labs.md) | All 23 interactive labs on one page |
+| ⚗ | [The Lab Bench](./labs.md) | All 26 interactive labs on one page |
 | A | [History of Language Modelling](./appendix_a_history.md) | From Shannon to 2026 |
 | B | [Tokenization Deep Dive](./appendix_b_tokenization.md) | BPE, byte-level BPE, Unigram, tokenizer quirks — with a trainer |
 | C | [Model Config Reference](./appendix_c_model_config.md) | Every field of a modern `config.json`, explained |
@@ -146,4 +155,4 @@ permalink: /
 - **Numbers are dense and dated**: parameter counts, byte counts and FLOPs are computed, not quoted from memory, and the code that produced them is on the page.
 - **Labs are instruments, not toys**: their arithmetic lives in small pure functions tested against the chapters' own numbers.
 - **Press <kbd>/</kbd> or <kbd>⌘K</kbd> anywhere** to search every chapter, section and lab. The left rail is the residual stream; chapters you finish are marked.
-- A companion guide, [Chips — The Complete Guide](https://karam-nus.github.io/chips/), goes below the CUDA line into the silicon itself; the accelerator data in the labs comes from it.
+- Companion guides go further in their own directions: [Chips 101](https://karam-nus.github.io/chips/) below the CUDA line into the silicon (the labs' accelerator data comes from it), [Quantization 101](https://karam-nus.github.io/quantization/), [Inference](https://karam-nus.github.io/inference/), [Agents](https://karam-nus.github.io/agents/), [Evals 101](https://karam-nus.github.io/evals/) and more — all at [karam-nus.github.io](https://karam-nus.github.io/). Each chapter links the ones that fit it.
