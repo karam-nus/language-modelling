@@ -1,7 +1,7 @@
 ---
 title: "Home"
 description: "From tokens to the frontier: a first-principles guide to how large language models are built, trained, aligned, compressed and served — updated for late 2026, with tensor shapes on every page, verified code and 26 interactive labs."
-permalink: /
+website: https://karam-nus.github.io/language-modelling/
 ---
 
 # Language Modelling — The Complete Guide

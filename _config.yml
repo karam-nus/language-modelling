@@ -21,6 +21,14 @@ kramdown:
 
 plugins:
   - jekyll-relative-links
+  - jekyll-readme-index
+
+# README.md (which has front matter) is the home page. Letting jekyll-readme-index
+# place it at / means the README needs no `permalink: /` line, so GitHub's
+# front-matter table shows the site address (`website`) instead.
+readme_index:
+  enabled: true
+  with_frontmatter: true
 
 relative_links:
   enabled: true
