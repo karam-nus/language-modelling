@@ -1,6 +1,9 @@
 ---
 title: "Chapter 35 — Reasoning Models"
 description: "From chain-of-thought prompting to RL-trained thinking: zero- and few-shot CoT, self-consistency, how o1 and DeepSeek-R1 changed training (RLVR, R1-Zero, cold starts), test-time compute strategies (parallel, sequential, search, Deep Think), thinking budgets and overthinking, interleaved thinking with tools, CoT faithfulness, and whether RL creates new abilities."
+related:
+  - { id: evals, why: "How reasoning gains are measured." }
+  - { id: agents, why: "Where reasoning models go to work." }
 ---
 
 [← Back to Table of Contents](./README.md)

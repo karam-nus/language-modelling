@@ -1,6 +1,9 @@
 ---
 title: "Chapter 25 — CUDA & Kernel Development"
 description: "The CUDA model from threads to grids, memory coalescing and occupancy, why fusion matters, tiled matmul, Triton, the online-softmax trick behind FlashAttention verified in NumPy, torch.compile, and the 2025–26 kernel ecosystem: CUTLASS/CuTe DSL, ThunderKittens, TileLang, DeepSeek's FlashMLA/DeepGEMM/DeepEP, Liger, and LLM-written kernels."
+related:
+  - { id: nvidia, why: "The NVIDIA stack: CUDA, libraries and tools." }
+  - { id: vectorization, why: "Vectorized code, from CPUs to GPU kernels." }
 ---
 
 [← Back to Table of Contents](./README.md)

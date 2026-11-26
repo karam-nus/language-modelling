@@ -1,6 +1,8 @@
 ---
 title: "Chapter 7 — Encoder & Encoder-Decoder Models"
 description: "BERT-style encoders and masked language modelling, the 2024–25 encoder revival (ModernBERT, EuroBERT, Ettin), T5 and BART encoder-decoders, cross-attention, embedding models, and when each architecture still wins."
+related:
+  - { id: models, why: "Encoders and encoder-decoders in the wider architecture history." }
 ---
 
 [← Back to Table of Contents](./README.md)

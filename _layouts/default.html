@@ -64,6 +64,10 @@
     </a>
     <div class="mast-seq" id="mastSeq" aria-hidden="true"></div>
     <div class="mast-tools">
+      <a class="mast-home" href="https://karam-nus.github.io/" rel="noopener" title="All guides at karam-nus.github.io">
+        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5M6.5 10v9h4.2v-5h2.6v5h4.2v-9" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>
+        <span class="mh-t">karam-nus<span class="mh-dim">.github.io</span></span>
+      </a>
       <span class="tokmeter" id="tokMeter" title="Approximate tokens read on this page (≈ 1.33 tokens per word)"><b id="tokRead">0</b><i>/</i><span>{{ tokens }}</span> tok</span>
       <button class="mast-btn search-btn" id="searchOpen" aria-label="Search the guide (press / or Ctrl+K)">
         <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -115,12 +119,16 @@
         {%- if n_labs > 0 %}<div><dt>labs</dt><dd>{{ n_labs }}</dd></div>{% endif %}
         {%- if n_checks > 0 %}<div><dt>checks</dt><dd>{{ n_checks }}</dd></div>{% endif %}
         <div><dt>updated</dt><dd>{{ site.updated }}</dd></div>
+        {%- if page.related and page.related.size > 0 %}
+        <div class="hm-rel"><dt>companion</dt><dd>{% for r in page.related limit: 2 %}{% assign g = site.data.related[r.id] %}{% if g %}<a href="{{ g.url }}" rel="noopener">{{ g.name }} ↗</a>{% unless forloop.last %} · {% endunless %}{% endif %}{% endfor %}</dd></div>
+        {%- endif %}
       </dl>
     </header>
     {%- endunless %}
 
     <article class="content" id="content" data-n="{{ page_n }}">
       {{ content }}
+      {%- include related.html %}
     </article>
 
     {%- if cur_idx >= 0 and is_home == false %}
@@ -136,7 +144,7 @@
     {%- endif %}
 
     <footer class="colophon">
-      <p><strong>{{ site.title }}</strong> · Updated {{ site.updated }} · <a href="https://github.com/karam-nus/language-modelling" rel="noopener">GitHub</a> · Companion: <a href="https://karam-nus.github.io/chips/" rel="noopener">Chips — The Complete Guide</a></p>
+      <p><strong>{{ site.title }}</strong> · Updated {{ site.updated }} · <a href="https://github.com/karam-nus/language-modelling" rel="noopener">GitHub</a> · Companion: <a href="https://karam-nus.github.io/chips/" rel="noopener">Chips 101</a> · <a class="colo-home" href="https://karam-nus.github.io/" rel="noopener">More guides at karam-nus.github.io ↗</a></p>
       <p class="colo-type">Set in Fraunces, Source Serif 4 &amp; JetBrains Mono. Figures, labs and numbers are checked against primary sources; corrections welcome.</p>
     </footer>
   </main>
@@ -161,5 +169,6 @@
   <script>window.LM = { base: "{{ site.baseurl }}", path: "{{ page.url }}", n: "{{ page_n }}", part: {{ page_part | jsonify }}, title: {{ page_nav_title | jsonify }}, home: {{ is_home }} };</script>
   <script src="{{ '/assets/js/lm-ui.js' | relative_url }}" defer></script>
   <script src="{{ '/assets/js/lm-labs.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/lm-figs.js' | relative_url }}" defer></script>
 </body>
 </html>

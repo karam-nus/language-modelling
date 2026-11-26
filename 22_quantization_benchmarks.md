@@ -1,6 +1,9 @@
 ---
 title: "Chapter 22 — Quantization Benchmarks & Selection Guide"
 description: "How to choose a quantization scheme: what large published studies found (FP8 ≈ lossless, INT4 weight-only competitive, reasoning models more sensitive), bandwidth-bound speed ceilings by GPU, what fits where, a decision guide for datacenter, local and fine-tuning use, and how to benchmark properly."
+related:
+  - { id: quantization, why: "The companion guide to quantization." }
+  - { id: evals, why: "Measuring what quantization costs in quality." }
 ---
 
 [← Back to Table of Contents](./README.md)

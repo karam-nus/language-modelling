@@ -1,6 +1,9 @@
 ---
 title: "Appendix C — HuggingFace Model Config Field Reference"
 description: "Every config.json field that changes tensor shapes or numerics — with formulae, real values and kernel pitfalls — including 2025–26 fields for MLA, fine-grained MoE, layer types, multi-token prediction, linear-attention hybrids and quantized checkpoints, plus VLM and VLA configs."
+related:
+  - { id: models, why: "How these config fields changed across model generations." }
+  - { id: huggingface, why: "Loading and editing configs with Hugging Face." }
 ---
 
 [← Back to Table of Contents](./README.md)
@@ -62,7 +65,7 @@ Jump to a section:
 | `eos_token_id` | int or list | `2` | [Special Tokens](#special-token-ids) |
 | `pad_token_id` | int *(optional)* | `0` | [Special Tokens](#special-token-ids) |
 | `use_cache` | bool | `true` | [Generation & Runtime](#use_cache) |
-| `torch_dtype` | string | `"bfloat16"` | [Generation & Runtime](#torch_dtype) |
+| `torch_dtype` | string | `"bfloat16"` | [Generation & Runtime](#torch_dtype--dtype) |
 | `num_experts` / `num_local_experts` | int | `64` | [MoE](#mixture-of-experts-parameters) |
 | `num_experts_per_tok` | int | `2` | [MoE](#mixture-of-experts-parameters) |
 | `router_aux_loss_coef` | float | `0.001` | [MoE](#mixture-of-experts-parameters) |

@@ -1,6 +1,8 @@
 ---
 title: "Chapter 37 — Agents & Tool Use"
 description: "From function calling to long-running agents: the agent loop, a complete tool-calling round trip, MCP and other 2025 standards (A2A, Agent Skills), coding agents, computer and browser use, deep research, context engineering for long horizons, multi-agent patterns, how agents are trained, evaluation, and the safety problems — prompt injection, permissions and sandboxing."
+related:
+  - { id: agents, why: "All things agents." }
 ---
 
 [← Back to Table of Contents](./README.md)

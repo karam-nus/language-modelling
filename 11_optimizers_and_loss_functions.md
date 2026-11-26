@@ -1,6 +1,9 @@
 ---
 title: "Chapter 11 — Optimizers & Loss Functions for LLMs/VLMs"
 description: "Cross-entropy, perplexity and bits-per-byte, z-loss, MoE balancing, distillation, reward-model, DPO-family and policy-gradient losses; AdamW and its memory bill, Adafactor, Adam-mini, SOAP and Muon — including what Muon actually computes and why it spread in 2025–26."
+related:
+  - { id: math, why: "Gradients, matrix norms and the maths behind Adam and Muon." }
+  - { id: training, why: "Optimizers in practical training runs." }
 ---
 
 [← Back to Table of Contents](./README.md)

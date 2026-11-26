@@ -1,6 +1,9 @@
 ---
 title: "Chapter 14 — PEFT: LoRA, QLoRA & Variants"
 description: "Low-rank adaptation from the maths up: shapes, initialisation, scaling, which layers to target and how many parameters that really is; QLoRA's NF4 and double quantization with an honest memory budget; DoRA, rsLoRA, LoRA+, PiSSA and other variants; adapters, prefix and prompt tuning; multi-LoRA serving."
+related:
+  - { id: huggingface, why: "PEFT and TRL in the Hugging Face ecosystem." }
+  - { id: quantization, why: "The quantization behind QLoRA's 4-bit base." }
 ---
 
 [← Back to Table of Contents](./README.md)

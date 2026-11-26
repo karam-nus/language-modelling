@@ -1,0 +1,5 @@
+<div class="rel-grid family">
+{%- for pair in site.data.related -%}{%- assign g = pair[1] %}
+<a class="rel-card" href="{{ g.url }}" rel="noopener"><span class="rel-k">{% if g.site %}guide{% else %}repository{% endif %}</span><span class="rel-n">{{ g.name }}</span><span class="rel-d">{{ g.about }}</span><span class="rel-u">{{ g.url | remove: "https://" | split: "/" | join: "/" }} ↗</span></a>
+{%- endfor %}
+</div>

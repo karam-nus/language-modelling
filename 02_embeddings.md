@@ -1,6 +1,8 @@
 ---
 title: "Chapter 2 — Embeddings & Representations"
 description: "Embedding tables, the road from one-hot to contextual vectors, and positional encodings: sinusoidal, learned, RoPE and its context-extension tricks, M-RoPE for images and video, ALiBi, NoPE and partial RoPE."
+related:
+  - { id: math, why: "Vectors, dot products and rotations behind embeddings and RoPE." }
 ---
 
 [← Back to Table of Contents](./README.md)

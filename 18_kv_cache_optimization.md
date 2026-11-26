@@ -1,6 +1,9 @@
 ---
 title: "Chapter 18 — KV-Cache Optimization Strategies"
 description: "Managing the KV cache like virtual memory: PagedAttention, continuous batching and chunked prefill, prefix caching and RadixAttention, FP8 and low-bit cache quantization, eviction and query-aware sparsity, offloading to CPU and SSD tiers, and disaggregated prefill/decode with KV transfer."
+related:
+  - { id: inference, why: "Serving-side optimizations in practice." }
+  - { id: chips, why: "Why memory capacity and bandwidth dominate decode." }
 ---
 
 [← Back to Table of Contents](./README.md)

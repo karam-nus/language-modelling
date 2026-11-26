@@ -1,6 +1,8 @@
 ---
 title: "Chapter 36 — Retrieval-Augmented Generation (RAG)"
 description: "Grounding generation in retrieved evidence: chunking, embeddings and the 2025–26 embedding models, vector indexes, hybrid search, reranking, contextual retrieval, late interaction and visual document retrieval, a framework-free pipeline, agentic RAG and deep research, long context vs retrieval, evaluation, and prompt-injection risks."
+related:
+  - { id: agents, why: "Retrieval as one tool among many." }
 ---
 
 [← Back to Table of Contents](./README.md)

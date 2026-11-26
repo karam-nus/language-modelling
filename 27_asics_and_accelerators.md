@@ -1,6 +1,9 @@
 ---
 title: "Chapter 27 — ASICs & Specialized Accelerators"
 description: "The non-NVIDIA-GPU world as of late 2026: Google TPUs through Ironwood and TPU 8, AMD Instinct, AWS Trainium, Groq's SRAM-only LPU (now licensed to NVIDIA), Cerebras wafer-scale, Microsoft Maia and other in-house chips, Apple Silicon for local inference, the software stacks that decide what is usable, and how to choose."
+related:
+  - { id: chips, why: "The complete guide to chips: TPUs, Trainium, wafer-scale and SRAM machines in depth." }
+  - { id: jax-essentials, why: "JAX, the native way to program TPUs." }
 ---
 
 [← Back to Table of Contents](./README.md)

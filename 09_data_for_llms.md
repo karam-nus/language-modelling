@@ -1,6 +1,8 @@
 ---
 title: "Chapter 9 — Data for LLMs & VLMs"
 description: "What the data looks like at every training phase — pre-training mixes and filtered web corpora, synthetic data, mid-training, SFT chat formats and loss masks, preference pairs, RL environments with verifiable rewards — with tensor shapes, datasets and the dedup and contamination checks around them."
+related:
+  - { id: training, why: "The training side of the data pipeline." }
 ---
 
 [← Back to Table of Contents](./README.md)

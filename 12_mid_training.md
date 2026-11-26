@@ -1,6 +1,8 @@
 ---
 title: "Chapter 12 — Mid-Training & Continued Pre-Training"
 description: "The stage between pre-training and post-training: annealing on high-quality data, long-context extension (what Llama 3.1 actually did), domain adaptation with replay, fill-in-the-middle, and the 2025–26 shift to reasoning and agentic mid-training that prepares a base model for RL."
+related:
+  - { id: training, why: "Training recipes beyond pre-training." }
 ---
 
 [← Back to Table of Contents](./README.md)

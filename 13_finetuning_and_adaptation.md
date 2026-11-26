@@ -1,6 +1,9 @@
 ---
 title: "Chapter 13 — Fine-Tuning & Adaptation"
 description: "Supervised fine-tuning that turns a base model into an assistant: chat templates and assistant-only loss, how much data you need, reasoning SFT by distillation, full fine-tuning vs LoRA/QLoRA with honest memory numbers, LoRA's 2025 'without regret' findings, model merging, and a working TRL recipe."
+related:
+  - { id: huggingface, why: "Fine-tuning with the Hugging Face stack." }
+  - { id: training, why: "Training loops and recipes." }
 ---
 
 [← Back to Table of Contents](./README.md)

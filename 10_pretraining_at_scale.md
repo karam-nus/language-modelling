@@ -1,6 +1,9 @@
 ---
 title: "Chapter 10 — Pre-Training at Scale"
 description: "The data pipeline, the loss and how to compute it without the off-by-one bug, warmup-stable-decay schedules, multi-token prediction, FP8 and FP4 training, the 6ND compute rule checked against published runs, MFU, and keeping a 16,000-GPU job alive."
+related:
+  - { id: training, why: "Training runs in practice." }
+  - { id: chips, why: "The hardware a pre-training run actually runs on." }
 ---
 
 [← Back to Table of Contents](./README.md)

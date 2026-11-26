@@ -1,6 +1,8 @@
 ---
 title: "Chapter 6 — Decoder-Only Models"
 description: "The causal LM objective, a full decoder pass with shapes, the GPT and Llama lineages, the late-2026 open-weight landscape (DeepSeek-V4, Qwen3.5/3.6, Kimi K3, GLM-5, Gemma 4, gpt-oss, Mistral 3), the closed frontier, and the generation loop."
+related:
+  - { id: models, why: "Architecture summaries across model generations." }
 ---
 
 [← Back to Table of Contents](./README.md)

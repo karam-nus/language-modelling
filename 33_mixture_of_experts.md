@@ -1,6 +1,8 @@
 ---
 title: "Chapter 33 — Mixture of Experts (MoE)"
 description: "Sparse models from Switch Transformer to Kimi K3: routers (softmax and sigmoid), top-k, shared and fine-grained experts, load balancing with auxiliary losses and DeepSeek's bias trick, capacity and dropless execution, MoE memory and bandwidth in serving, expert parallelism, the 2024–26 model table, and fine-tuning MoEs."
+related:
+  - { id: models, why: "MoE across model generations." }
 ---
 
 [← Back to Table of Contents](./README.md)

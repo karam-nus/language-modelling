@@ -1,6 +1,9 @@
 ---
 title: "Chapter 19 — Data Types & Numerical Precision"
 description: "How floating-point formats trade range for precision — FP32, TF32, BF16, FP16, FP8 (E4M3, E5M2), FP6 and FP4 — plus integer formats, block-scaled microscaling (MXFP8/MXFP4, NVFP4), which hardware supports what, mixed-precision training, and verified examples of rounding and overflow."
+related:
+  - { id: quantization, why: "The companion guide to quantization." }
+  - { id: chips, why: "How number formats are implemented in silicon." }
 ---
 
 [← Back to Table of Contents](./README.md)

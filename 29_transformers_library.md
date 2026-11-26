@@ -1,6 +1,9 @@
 ---
 title: "Chapter 29 — The transformers Library Internals"
 description: "How transformers is put together: config → Auto mapping → model classes, the Llama module tree as printed today, the forward pass and loss, the Cache API, attention back-ends and the attention interface, modular model files, tensor-parallel plans, registering a custom architecture correctly, and debugging a port."
+related:
+  - { id: huggingface, why: "The Hugging Face ecosystem." }
+  - { id: pytorch-essentials, why: "The PyTorch underneath transformers." }
 ---
 
 [← Back to Table of Contents](./README.md)

@@ -1,6 +1,9 @@
 ---
 title: "Chapter 24 — GPU Architecture for ML"
 description: "What an LLM practitioner needs to know about GPUs: SMs, warps and tensor cores, the memory hierarchy with real bandwidths, the roofline model and ridge points, why decode is memory-bound and prefill compute-bound, worked FLOP and byte counts for Llama 3.1 8B, and dense (not sparse) specs from A100 to Rubin, MI355X and TPU Ironwood."
+related:
+  - { id: chips, why: "The complete guide to the silicon: GPUs, memory and interconnects." }
+  - { id: nvidia, why: "The NVIDIA hardware and software stack." }
 ---
 
 [← Back to Table of Contents](./README.md)

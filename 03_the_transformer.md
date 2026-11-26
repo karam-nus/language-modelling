@@ -1,6 +1,9 @@
 ---
 title: "Chapter 3 — The Transformer"
 description: "The decoder block with tensor shapes at every step: residual stream, RMSNorm and where to put it, QK-norm, SwiGLU feed-forward layers, a parameter count that adds up, and how 2026 blocks differ from 2017's."
+related:
+  - { id: models, why: "The same block traced through every model generation." }
+  - { id: pytorch-essentials, why: "Writing modules like these in PyTorch." }
 ---
 
 [← Back to Table of Contents](./README.md)

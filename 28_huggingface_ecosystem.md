@@ -1,6 +1,8 @@
 ---
 title: "Chapter 28 — The Hugging Face Ecosystem"
 description: "The Hub (models, datasets, Spaces, safetensors, GGUF, Xet storage, gated repos, inference providers), transformers v5 as the PyTorch model-definition layer, tokenizers, datasets, PEFT, TRL, Accelerate, kernels, smolagents and lighteval — with current, working code."
+related:
+  - { id: huggingface, why: "The Hugging Face ecosystem." }
 ---
 
 [← Back to Table of Contents](./README.md)
@@ -235,7 +237,7 @@ for ex in web.take(3):
 | Transformers: State-of-the-Art Natural Language Processing | Wolf et al., 2020 | [aclanthology.org/2020.emnlp-demos.6](https://aclanthology.org/2020.emnlp-demos.6/) | The library's design |
 | Transformers documentation | Hugging Face | [huggingface.co/docs/transformers](https://huggingface.co/docs/transformers) | v5 APIs, chat templates, generation |
 | Hub documentation | Hugging Face | [huggingface.co/docs/hub](https://huggingface.co/docs/hub) | Model cards, gating, Xet storage |
-| safetensors | Hugging Face | [github.com/huggingface/safetensors](https://github.com/huggingface/safetensors) | Weight format |
+| safetensors | Hugging Face (now its own GitHub org) | [github.com/safetensors/safetensors](https://github.com/safetensors/safetensors) | Weight format |
 | PEFT · TRL · Accelerate · datasets docs | Hugging Face | [huggingface.co/docs](https://huggingface.co/docs) | Library APIs |
 | kernels | Hugging Face, 2025 | [github.com/huggingface/kernels](https://github.com/huggingface/kernels) | Hub-distributed kernels |
 

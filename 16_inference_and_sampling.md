@@ -1,6 +1,8 @@
 ---
 title: "Chapter 16 — Inference & Sampling Strategies"
 description: "Prefill and decode, latency metrics, greedy, temperature, top-k, top-p and min-p sampling, repetition penalties done correctly, beam search, parallel sampling, speculative decoding from rejection sampling to EAGLE-3 and MTP heads, thinking budgets, and grammar-constrained structured output."
+related:
+  - { id: inference, why: "Inference techniques, examples and recommendations." }
 ---
 
 [← Back to Table of Contents](./README.md)

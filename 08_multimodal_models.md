@@ -1,6 +1,8 @@
 ---
 title: "Chapter 8 — Multimodal Models"
 description: "How images, video and audio become tokens: ViT and SigLIP encoders, projectors and patch merging, unified-embedding vs cross-attention vs native early fusion, dynamic resolution and token budgets, Whisper and omni models, image generation inside LLMs, and vision-language-action models."
+related:
+  - { id: vision, why: "The computer-vision side: encoders, patches and detection." }
 ---
 
 [← Back to Table of Contents](./README.md)

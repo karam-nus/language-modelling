@@ -1,6 +1,9 @@
 ---
 title: "Chapter 38 — The Frontier: Open Problems & What's Next"
 description: "Where language modelling stands in late 2026 and what is unsolved: long context that works, continual learning, efficiency, multimodal and world models, diffusion and other non-autoregressive generators, interpretability, alignment and safety, evaluation, the open-weight ecosystem, and the economics of scale."
+related:
+  - { id: models, why: "The model generations so far." }
+  - { id: agents, why: "Agents, the fastest-moving frontier." }
 ---
 
 [← Back to Table of Contents](./README.md)

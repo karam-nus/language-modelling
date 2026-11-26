@@ -1,6 +1,8 @@
 ---
 title: "Appendix B — Tokenization Deep Dive"
 description: "What a tokenizer is and is not, byte-level BPE trained step by step (verified), pre-tokenization and why digits split, WordPiece and Unigram, vocabulary-size trade-offs, special tokens and chat formats including thinking and tool tokens, training your own tokenizer, gotchas, and tokenizer-free models."
+related:
+  - { id: huggingface, why: "Tokenizers in the Hugging Face ecosystem." }
 ---
 
 [← Back to Table of Contents](./README.md)

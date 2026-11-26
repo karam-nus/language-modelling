@@ -1,6 +1,9 @@
 ---
 title: "Chapter 15 — Alignment: RLHF & Beyond"
 description: "From preferences to rewards to reinforcement learning: reward models, PPO done properly, DPO and its family, GRPO and the 2025 refinements (DAPO, Dr. GRPO, GSPO), RL with verifiable rewards and rubrics, RL infrastructure, and the failure modes — reward hacking, sycophancy, emergent misalignment — that alignment work now targets."
+related:
+  - { id: training, why: "Post-training and RL runs in practice." }
+  - { id: evals, why: "How alignment and reasoning gains are measured." }
 ---
 
 [← Back to Table of Contents](./README.md)

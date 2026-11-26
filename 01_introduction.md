@@ -1,6 +1,9 @@
 ---
 title: "Chapter 1 — Introduction to Language Modelling"
 description: "What a language model is, the text-to-prediction pipeline with tensor shapes, a short history, tokenization essentials, and the 2026 model lifecycle from pre-training to test-time compute."
+related:
+  - { id: machine-learning, why: "The machine-learning foundations this guide assumes." }
+  - { id: pytorch-essentials, why: "The PyTorch you need to run every code block here." }
 ---
 
 [← Back to Table of Contents](./README.md)

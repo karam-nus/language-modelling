@@ -1,6 +1,9 @@
 ---
 title: "Chapter 23 — Knowledge Distillation & QAD"
 description: "Teaching small models from big ones: soft targets and temperature, forward vs reverse KL, logit vs feature vs sequence-level distillation, on-policy distillation, pre-training distillation (Gemma, Llama 3.2) and prune-then-distill (Minitron), reasoning distillation (R1-Distill), and quantization-aware distillation with fake quantization and the straight-through estimator."
+related:
+  - { id: model-optimization, why: "Distillation among the other model-optimization tools." }
+  - { id: quantization, why: "Quantization-aware training and distillation." }
 ---
 
 [← Back to Table of Contents](./README.md)

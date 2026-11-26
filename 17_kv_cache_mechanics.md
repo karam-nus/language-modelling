@@ -1,6 +1,8 @@
 ---
 title: "Chapter 17 — KV-Cache: Mechanics & Memory"
 description: "Why the KV cache exists and what it actually saves, its shapes per layer, the memory formula checked on Llama, Qwen3, DeepSeek-V3 and gpt-oss, why decode is bandwidth-bound, how cache size sets batch size and throughput, and how to inspect the cache in transformers."
+related:
+  - { id: inference, why: "KV caches on real inference deployments." }
 ---
 
 [← Back to Table of Contents](./README.md)

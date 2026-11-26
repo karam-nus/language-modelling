@@ -1,6 +1,9 @@
 ---
 title: "Chapter 30 — Evaluation & Benchmarks"
 description: "How LLMs are measured in 2026: perplexity done right, pass@k, the saturation of MMLU-era benchmarks, frontier reasoning evals (GPQA, HLE, FrontierMath, AIME, ARC-AGI), agentic evals (SWE-bench, Terminal-Bench, τ²-bench, OSWorld, GDPval, METR time horizons), long-context and multimodal evals, LMArena and its critiques, LLM-as-judge pitfalls, contamination, and a practical evaluation strategy."
+related:
+  - { id: evals, why: "The companion guide to evaluation." }
+  - { id: metrics, why: "The metrics themselves, defined and compared." }
 ---
 
 [← Back to Table of Contents](./README.md)

@@ -1,6 +1,9 @@
 ---
 title: "Chapter 32 — Scaling Laws & Emergent Abilities"
 description: "Kaplan vs Chinchilla and why they disagreed, the parametric loss L(N, D) with a verified compute-optimal calculation, why every 2025–26 model is trained far past 20 tokens per parameter, data-constrained and precision scaling, the data wall, test-time and RL scaling laws, and the emergence-vs-mirage debate."
+related:
+  - { id: training, why: "Compute budgets in real training runs." }
+  - { id: math, why: "Power laws and fitting, from first principles." }
 ---
 
 [← Back to Table of Contents](./README.md)

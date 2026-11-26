@@ -1,6 +1,9 @@
 ---
 title: "Chapter 21 — Quantization Techniques: The Full Landscape"
 description: "Every major LLM quantization method and what it is for: GPTQ and AWQ, GGUF k-quants and i-quants, bitsandbytes, codebook methods (QuIP#, AQLM), SmoothQuant and rotation methods (QuaRot, SpinQuant), FP8, MXFP4 and NVFP4, QServe, BitNet b1.58 — plus the 2025–26 tooling (llm-compressor, ModelOpt, GPTQModel) and a master comparison."
+related:
+  - { id: quantization, why: "The companion guide to quantization." }
+  - { id: model-optimization, why: "Pruning, distillation and other ways to shrink models." }
 ---
 
 [← Back to Table of Contents](./README.md)
@@ -66,7 +69,15 @@ tok.save_pretrained("Llama-3.1-8B-Instruct-W4A16")
 # then: vllm serve ./Llama-3.1-8B-Instruct-W4A16
 ```
 
-Swap the recipe for `QuantizationModifier(targets="Linear", scheme="FP8_DYNAMIC", ignore=["lm_head"])` to produce an FP8 W8A8 checkpoint (no calibration data needed), or an `NVFP4` scheme for Blackwell.
+Swap the recipe for `QuantizationModifier(targets="Linear", scheme="FP8_DYNAMIC", ignore=["lm_head"])` to produce an FP8 W8A8 checkpoint (no calibration data needed), or an `NVFP4` scheme for Blackwell. AWQ is a recipe in the same tool:
+
+```python
+from llmcompressor.modifiers.awq import AWQModifier
+
+recipe = [AWQModifier(targets=["Linear"], scheme="W4A16_ASYM", ignore=["lm_head"])]   # activation-aware scales, then INT4
+oneshot(model=model, dataset="open_platypus", recipe=recipe,
+        max_seq_length=2048, num_calibration_samples=256)
+```
 
 ### GGUF / llama.cpp
 
@@ -101,6 +112,18 @@ The library behind QLoRA, integrated into transformers:
 | **NF4 / FP4** | 4-bit with block-wise absmax scales, optional double quantization | 4 | QLoRA fine-tuning; quick experiments |
 
 bitsandbytes quantizes on load with no calibration, which makes it convenient — but its kernels are slower than GPTQ/AWQ/Marlin kernels for serving.
+
+```python
+import torch
+from transformers import AutoModelForCausalLM, BitsAndBytesConfig
+
+bnb = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
+                         bnb_4bit_use_double_quant=True,          # quantize the scales too (~0.13 bit/param)
+                         bnb_4bit_compute_dtype=torch.bfloat16)   # dequantize to BF16 for each matmul
+model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.1-8B-Instruct",
+                                             quantization_config=bnb, device_map="auto")
+model.get_memory_footprint()   # ≈ 5.7e9 bytes: NF4 linear layers + BF16 embedding and head (Chapter 13's arithmetic)
+```
 
 ### Other Weight-Only Methods
 

@@ -1,6 +1,9 @@
 ---
 title: "Chapter 31 — Serving & Deployment"
 description: "Running LLMs for real users in 2026: the engine landscape (vLLM, SGLang, TensorRT-LLM, llama.cpp, MLX, on-device runtimes), orchestration (Dynamo, llm-d), latency and throughput metrics and SLOs, cost per million tokens from first principles, MoE serving with wide expert parallelism, multi-LoRA, routing, benchmarking and a deployment checklist."
+related:
+  - { id: inference, why: "Serving and inference in practice." }
+  - { id: chips, why: "Which accelerators serve tokens cheapest." }
 ---
 
 [← Back to Table of Contents](./README.md)

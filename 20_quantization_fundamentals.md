@@ -1,6 +1,9 @@
 ---
 title: "Chapter 20 — Quantization Fundamentals"
 description: "The affine quantization map, symmetric vs asymmetric, granularity from per-tensor to per-group and microscaling blocks, a verified outlier experiment, PTQ vs QAT (now common for release checkpoints), calibration, weight-only vs weight-activation vs KV quantization, and why LLM activations have massive outliers."
+related:
+  - { id: quantization, why: "The companion guide to quantization." }
+  - { id: weight-analysis, why: "Per-channel weight plots of models with quantization trouble." }
 ---
 
 [← Back to Table of Contents](./README.md)

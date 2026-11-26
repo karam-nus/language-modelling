@@ -1,6 +1,8 @@
 ---
 title: "Appendix A — A Brief History of Language Modelling"
 description: "From Shannon's n-grams to 2026's reasoning agents: a timeline, the key papers, the n-gram era, and how each neural architecture fixed its predecessor's limitation."
+related:
+  - { id: models, why: "Architectures across generations." }
 ---
 
 [← Back to Table of Contents](./README.md)
